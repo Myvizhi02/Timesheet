@@ -10,17 +10,15 @@ const Header = () => {
         backgroundColor: 'white',
         width: '1442px',
         height: '70px',
-        textAlign: 'center',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-
+        dispaly: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
       <img src={navIcon} alt="Navigation Icon"
         style={
           {
             width: '26px',
-            marginLeft: '34px',
+            marginLeft: '20px',
             marginTop: '23px',
             marginBottom: '21px'
           }}></img>
@@ -37,19 +35,21 @@ const Header = () => {
         style={
           {
             fontSize: '1.2rem',
-            marginTop: '25px',
-            marginBottom: '23px',
-            marginRight: '999px',
+            paddingBottom: '20px',
+            marginLeft:'20px',
             width: '93px',
             height: '22px',
+            alignItems:'center'
+            
           }}>Dashboard</span>
+
       <span className="m-0"
         style={
           {
             fontSize: '1.2rem',
             width: '135.65px',
             height: '22px',
-            textAlign: 'right'
+            paddingLeft: '999px',
           }}>Pradeep Shiva</span>
       <img src={imgIcon} alt="Image Icon"
         style={
