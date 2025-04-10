@@ -7,9 +7,22 @@ import selectionIcon from '../selection.png';
 import shareIcon from '../share.png';
 import visibilityIcon from '../visibility.png';
 import visibility2Icon from '../visibility2.png';
+import View from './View'; // ✅ Make sure this path is correct
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('all');
+    const [showModal, setShowModal] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
+    const handleViewClick = (task) => {
+        setSelectedTask(task);
+        setShowModal(true);
+    };
+    
+      
+      const closeModal = () => {
+        setShowModal(false);
+      };
+      
 
     const employees = {
         all: [
@@ -56,6 +69,7 @@ const Dashboard = () => {
         ]
     };
 
+    
     return (
         <>
             {/* Header */}
@@ -74,14 +88,11 @@ const Dashboard = () => {
             {/* Button Row */}
             <div style={{
                 display: 'flex',
-                // justifyContent: 'flex-end',
                 gap: '10px',
                 margin: '10px 50px'
             }}>
 
-                <div style={{width:'40%',display:'flex'
-            }}>
-                    {/* Date Range Input */}
+                <div style={{ width: '40%', display: 'flex', gap: '12px' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -99,7 +110,6 @@ const Dashboard = () => {
                         />
                     </div>
 
-                    {/* Project Dropdown */}
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -119,8 +129,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div style={{width:'60'
-            }}>
+                <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                     <button style={{ backgroundColor: 'green', color: 'white', padding: '8px 12px', borderRadius: '6px' }}>
                         <img src={shareIcon} alt="Share Icon" style={{ marginRight: '6px' }} /> Export to Excel
                     </button>
@@ -134,17 +143,6 @@ const Dashboard = () => {
                         <img src={addIcon} alt="Add Icon" style={{ marginRight: '6px' }} /> Add Spent time
                     </button>
                 </div>
-
-            </div>
-
-            {/* Filters Row */}
-            <div style={{
-                display: 'flex',
-                gap: '20px',
-
-                margin: '10px 50px'
-            }}>
-
             </div>
 
             {/* Tabs */}
@@ -206,13 +204,28 @@ const Dashboard = () => {
                                     <td>{emp.subtask}</td>
                                     <td>{emp.date}</td>
                                     <td>{emp.hours}</td>
-                                    <td><img src={visibility2Icon} alt="Visibility2 Icon" /></td>
+                                    <td>
+                                    <img
+  src={visibility2Icon}
+  alt="View Icon"
+  style={{ cursor: 'pointer' }}
+  onClick={(e) => {
+    e.preventDefault();
+    handleViewClick(emp);
+  }}
+/>
+
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            {/* ✅ Modal Component */}
+            <View show={showModal} data={selectedTask} onClose={closeModal} />
+
         </>
     );
 };
