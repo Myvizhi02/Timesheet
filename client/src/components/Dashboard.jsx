@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import addIcon from '../add.png';
 import dateIcon from '../date.png';
 import foldereyeIcon from '../foldereye.png';
@@ -7,7 +8,7 @@ import selectionIcon from '../selection.png';
 import shareIcon from '../share.png';
 import visibilityIcon from '../visibility.png';
 import visibility2Icon from '../visibility2.png';
-import Spenttime from './Spenttime';
+import AddSpenttime from './AddSpenttime';
 import View from './View';
 
 
@@ -19,14 +20,14 @@ const Dashboard = () => {
         setSelectedTask(task);
         setShowModal(true);
     };
-      const closeModal = () => {
+    const closeModal = () => {
         setShowModal(false);
-      };
-      const [showSpentModal, setShowSpentModal] = useState(false);
+    };
+    const [showSpentModal, setShowSpentModal] = useState(false);
 
-      const handleOpenSpentModal = () => setShowSpentModal(true);
-      const handleCloseSpentModal = () => setShowSpentModal(false);
-      
+    const handleOpenSpentModal = () => setShowSpentModal(true);
+    const handleCloseSpentModal = () => setShowSpentModal(false);
+
 
     const employees = {
         all: [
@@ -72,8 +73,43 @@ const Dashboard = () => {
             }
         ]
     };
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
-    
+    const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
+        <div
+            onClick={onClick}
+            ref={ref}
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 12px',
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                backgroundColor: '#fff',
+                width: '191px',
+                height: '42px',
+                cursor: 'pointer',
+                marginLeft: '20px'
+            }}
+        >  <img src={dateIcon} alt="Date Icon" style={{ width: '20px', marginLeft: '8px' }} />
+            <input
+                type="text"
+                value={value}
+                placeholder={placeholder}
+                readOnly
+                style={{
+                    border: 'none',
+                    outline: 'none',
+                    width: '275px',
+                    backgroundColor: 'transparent',
+                    fontSize: '14px',
+                    color: value ? '#000' : '#888',
+                }}
+            />
+
+        </div>));
+
     return (
         <>
             {/* Header */}
@@ -96,22 +132,17 @@ const Dashboard = () => {
                 margin: '10px 50px'
             }}>
 
-                <div style={{ width: '40%', display: 'flex', gap: '12px' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '12px',
-                        border: '1px solid #ccc',
-                        borderRadius: '8px',
-                        backgroundColor: 'white',
-                        width: '200px'
-                    }}>
-                        <img src={dateIcon} alt="Date Icon" style={{ width: '20px', marginRight: '8px' }} />
-                        <input
-                            type="date"
-                            placeholder="6 Mar - 7 Mar"
-                            style={{ border: 'none', outline: 'none', width: '100%' }}
+                <div style={{ width: '40%', display: 'flex', gap: '10px' }}>
+                    <div>
+
+                        <DatePicker
+                            selected={startDate}
+                            onChange={(date) => setStartDate(date)}
+                            placeholderText="   6Mar - 7Mar"
+                            dateFormat="dd/MM/yyyy"
+                            customInput={<CustomInput placeholder="Select Start Date" />}
                         />
+
                     </div>
 
                     <div style={{
@@ -121,7 +152,8 @@ const Dashboard = () => {
                         border: '1px solid #ccc',
                         borderRadius: '8px',
                         backgroundColor: 'white',
-                        width: '200px'
+                        width: '191px',
+                        height: '42px'
                     }}>
                         <img src={selectionIcon} alt="Select Project" style={{ width: '20px', marginRight: '8px' }} />
                         <select style={{ border: 'none', outline: 'none', background: 'transparent', width: '100%' }}>
@@ -133,17 +165,29 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                    <button style={{ backgroundColor: 'green', color: 'white', padding: '8px 12px', borderRadius: '6px' }}>
+                <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', gap: '10px', }}>
+                    <button style={{
+                        backgroundColor: 'green', color: 'white', padding: '8px 12px', borderRadius: '6px', width: '175px',
+                        height: '42px'
+                    }}>
                         <img src={shareIcon} alt="Share Icon" style={{ marginRight: '6px' }} /> Export to Excel
                     </button>
-                    <button style={{ backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px' }}>
+                    <button style={{
+                        backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px', width: '175px',
+                        height: '42px'
+                    }}>
                         <img src={visibilityIcon} alt="Visibility Icon" style={{ marginRight: '6px' }} /> View Task
                     </button>
-                    <button style={{ backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px' }}>
+                    <button style={{
+                        backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px', width: '175px',
+                        height: '42px'
+                    }}>
                         <img src={foldereyeIcon} alt="Foldereye Icon" style={{ marginRight: '6px' }} /> View Project
                     </button>
-                    <button style={{ backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px' }} onClick={handleOpenSpentModal} className="add-button">
+                    <button style={{
+                        backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px', width: '175px',
+                        height: '42px'
+                    }} onClick={handleOpenSpentModal} className="add-button">
                         <img src={addIcon} alt="Add Icon" style={{ marginRight: '6px' }} /> Add Spent time
                     </button>
                 </div>
@@ -154,7 +198,7 @@ const Dashboard = () => {
                 borderRadius: '50px',
                 padding: '5px 10px',
                 width: 'fit-content',
-                margin: '40px auto 20px'
+                margin: '5px auto 20px'
             }}>
                 <div className="mb-3" style={{ backgroundColor: 'white', marginTop: '62px', marginLeft: '51px', width: '345px', borderRadius: '50px' }}>
                     <button
@@ -166,7 +210,7 @@ const Dashboard = () => {
                     <button
                         onClick={() => setActiveTab('emp1')}
                         className={`btn me-2 ${activeTab === 'emp1' ? 'btn-white text-dark border' : 'btn-light'}`}
-                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', marginRight: '5px',  backgroundColor: activeTab === 'emp1' ? '#ffffff' : '#CDCDCD80', }}>
+                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', marginRight: '5px', backgroundColor: activeTab === 'emp1' ? '#ffffff' : '#CDCDCD80', }}>
                         Employee 1
                     </button>
                     <button
@@ -209,15 +253,15 @@ const Dashboard = () => {
                                     <td>{emp.date}</td>
                                     <td>{emp.hours}</td>
                                     <td>
-                                    <img
-  src={visibility2Icon}
-  alt="View Icon"
-  style={{ cursor: 'pointer' }}
-  onClick={(e) => {
-    e.preventDefault();
-    handleViewClick(emp);
-  }}
-/>
+                                        <img
+                                            src={visibility2Icon}
+                                            alt="View Icon"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleViewClick(emp);
+                                            }}
+                                        />
 
                                     </td>
                                 </tr>
@@ -229,7 +273,7 @@ const Dashboard = () => {
 
             <View show={showModal} data={selectedTask} onClose={closeModal} />
             {showSpentModal && (
-                <Spenttime onClose={handleCloseSpentModal} />
+                <AddSpenttime onClose={handleCloseSpentModal} />
             )}
 
         </>

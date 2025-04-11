@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import dateIcon from '../date.png';
 
 const AddProject = ({ onClose, onSubmit }) => {
@@ -22,6 +24,41 @@ const AddProject = ({ onClose, onSubmit }) => {
         onSubmit(formData);
         onClose();
     };
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+
+    const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
+        <div
+            onClick={onClick}
+            ref={ref}
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 12px',
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                backgroundColor: '#fff',
+                width: '275px',
+                height: '42px',
+                cursor: 'pointer'
+            }}
+        >
+            <input
+                type="text"
+                value={value}
+                placeholder={placeholder}
+                readOnly
+                style={{
+                    border: 'none',
+                    outline: 'none',
+                    width: '275px',
+                    backgroundColor: 'transparent',
+                    fontSize: '14px',
+                    color: value ? '#000' : '#888',
+                }}
+            />
+            <img src={dateIcon} alt="Date Icon" style={{ width: '20px', marginLeft: '8px' }} />
+        </div>));
 
     return (
         <div style={{
@@ -67,7 +104,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 {/* Form */}
                 <form onSubmit={handleSubmit}><div>
                     <div style={{
-                        padding:'20px',
+                        padding: '20px',
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
                         gap: '16px',
@@ -105,105 +142,37 @@ const AddProject = ({ onClose, onSubmit }) => {
                             width: '100%',
                             boxSizing: 'border-box'
                         }} />
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            border: '1px solid #ccc',
-                            borderRadius: '6px',
-                            padding: '10px',
-                            backgroundColor: '#fdfdfd',
-                            width: '100%'
-                        }}>
-                            <input
-                                name="startDate"
-                                onChange={handleChange}
-                                required
-                                type="text"
-                                placeholder="Start Date"
-                                style={{
-                                    border: 'none',
-                                    outline: 'none',
-                                    fontSize: '14px',
-                                    flex: 1,
-                                    backgroundColor: 'transparent'
-                                }}
+                        <div>
+
+                            <DatePicker
+                                selected={startDate}
+                                onChange={(date) => setStartDate(date)}
+                                placeholderText="Start Date"
+                                dateFormat="dd/MM/yyyy"
+                                customInput={<CustomInput placeholder="Select Start Date" />}
                             />
-                            <img
-                                src={dateIcon}
-                                alt="Date Icon"
-                                style={{
-                                    width: '20px',
-                                    height: '20px',
-                                    marginLeft: '8px'
-                                }}
-                            />
+
                         </div>
 
 
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            border: '1px solid #ccc',
-                            borderRadius: '6px',
-                            padding: '10px',
-                            backgroundColor: '#fdfdfd',
-                            width: '100%'
-                        }}>
-                            <input
-                                name="endDate"
-                                onChange={handleChange}
-                                required
-                                type="text"
-                                placeholder="End  Date"
-                                style={{
-                                    border: 'none',
-                                    outline: 'none',
-                                    fontSize: '14px',
-                                    flex: 1,
-                                    backgroundColor: 'transparent'
-                                }}
+                        <div>
+
+                            <DatePicker
+                                selected={endDate}
+                                onChange={(date) => setEndDate(date)}
+                                placeholderText="End Date"
+                                dateFormat="dd/MM/yyyy"
+                                customInput={<CustomInput placeholder="Select End Date" />}
                             />
-                            <img
-                                src={dateIcon}
-                                alt="Date Icon"
-                                style={{
-                                    width: '20px',
-                                    height: '20px',
-                                    marginLeft: '8px'
-                                }}
-                            />
+
                         </div>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            border: '1px solid #ccc',
-                            borderRadius: '6px',
-                            padding: '10px',
-                            backgroundColor: '#fdfdfd',
-                            width: '100%'
-                        }}>
-                            <input
-                                name="endDate"
-                                onChange={handleChange}
-                                required
-                                type="text"
-                                placeholder="End Date"
-                                style={{
-                                    border: 'none',
-                                    outline: 'none',
-                                    fontSize: '14px',
-                                    flex: 1,
-                                    backgroundColor: 'transparent'
-                                }}
-                            />
-                            <img
-                                src={dateIcon}
-                                alt="Date Icon"
-                                style={{
-                                    width: '20px',
-                                    height: '20px',
-                                    marginLeft: '8px'
-                                }}
+                        <div >
+                            <DatePicker
+                                selected={endDate}
+                                onChange={(date) => setEndDate(date)}
+                                placeholderText="End Date"
+                                dateFormat="dd/MM/yyyy"
+                                customInput={<CustomInput placeholder="Select End Date" />}
                             />
                         </div>
 
