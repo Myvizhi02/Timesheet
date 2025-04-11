@@ -16,20 +16,36 @@ const View = ({ show, onClose, data }) => {
       <div style={{
         width: '500px',
         backgroundColor: 'white',
-        padding: '20px',
+        padding:'0px  ',
         height:'80vh',
-
         borderTopLeftRadius: '8px',
         borderBottomLeftRadius: '8px',
         boxShadow: '0 0 10px rgba(0,0,0,0.2)',
         overflowY: 'auto'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#b2ebf2', padding: '10px', borderRadius: '5px' }}>
-          <strong>{data?.name} ({data?.empId || 'K025689'})</strong>
-          <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: '20px', cursor: 'pointer' }}>✕</button>
-        </div>
+        <div style={{
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: '#A3EAFD',
+  padding: '12px 16px ',
+  borderTopLeftRadius: '8px',
+  borderTopRightRadius: '8px',
+  fontWeight: 'bold',
+  fontSize: '15px'
+}}>
+  <span>{data?.name || 'Employee 1'} ({data?.empId || 'K025689'})</span>
+  
 
-        <div style={{ marginTop: '20px' }}>
+          <button onClick={onClose} style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '20px',
+            cursor: 'pointer'
+          }}>✕</button>
+      </div>
+
+        <div style={{  padding:'20px'}}>
           <p><strong>Task Details</strong></p>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div>Start Time: <strong>{data?.startTime || '9.50 am'}</strong></div>

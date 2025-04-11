@@ -7,7 +7,9 @@ import selectionIcon from '../selection.png';
 import shareIcon from '../share.png';
 import visibilityIcon from '../visibility.png';
 import visibility2Icon from '../visibility2.png';
-import View from './View'; // ✅ Make sure this path is correct
+import Spenttime from './Spenttime';
+import View from './View';
+
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('all');
@@ -17,11 +19,13 @@ const Dashboard = () => {
         setSelectedTask(task);
         setShowModal(true);
     };
-    
-      
       const closeModal = () => {
         setShowModal(false);
       };
+      const [showSpentModal, setShowSpentModal] = useState(false);
+
+      const handleOpenSpentModal = () => setShowSpentModal(true);
+      const handleCloseSpentModal = () => setShowSpentModal(false);
       
 
     const employees = {
@@ -104,7 +108,7 @@ const Dashboard = () => {
                     }}>
                         <img src={dateIcon} alt="Date Icon" style={{ width: '20px', marginRight: '8px' }} />
                         <input
-                            type="text"
+                            type="date"
                             placeholder="6 Mar - 7 Mar"
                             style={{ border: 'none', outline: 'none', width: '100%' }}
                         />
@@ -139,7 +143,7 @@ const Dashboard = () => {
                     <button style={{ backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px' }}>
                         <img src={foldereyeIcon} alt="Foldereye Icon" style={{ marginRight: '6px' }} /> View Project
                     </button>
-                    <button style={{ backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px' }}>
+                    <button style={{ backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px' }} onClick={handleOpenSpentModal} className="add-button">
                         <img src={addIcon} alt="Add Icon" style={{ marginRight: '6px' }} /> Add Spent time
                     </button>
                 </div>
@@ -223,8 +227,10 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* ✅ Modal Component */}
             <View show={showModal} data={selectedTask} onClose={closeModal} />
+            {showSpentModal && (
+                <Spenttime onClose={handleCloseSpentModal} />
+            )}
 
         </>
     );
