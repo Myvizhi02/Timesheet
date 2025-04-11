@@ -54,13 +54,10 @@ const Project = () => {
         width: '100%',
         borderCollapse: 'collapse',
         backgroundColor: '#fff',
-<<<<<<< HEAD
         boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
-       
-        overflow: 'hidden'
-=======
+        overflow: 'hidden',
         boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
->>>>>>> 6a5aa0f3d881b687b73da848219a14e3d6174ba5
+
       }}>
         <thead style={{ backgroundColor: '#84E7F9' }}>
           <tr style={{ textAlign: 'center', fontWeight: 600 }}>

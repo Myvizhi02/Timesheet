@@ -7,8 +7,8 @@ const View = ({ show, onClose, data }) => {
     <div style={{
       position: 'fixed',
       top: 0, left: 0,
-      width: '602px', height: '641px',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      width: '1530px', height: '800px',
+      backgroundColor: 'rgba(14, 13, 13, 0.5)',
       display: 'flex',
       justifyContent: 'flex-end',
       zIndex: 999
@@ -17,6 +17,8 @@ const View = ({ show, onClose, data }) => {
         width: '500px',
         backgroundColor: 'white',
         padding: '20px',
+        height:'80vh',
+
         borderTopLeftRadius: '8px',
         borderBottomLeftRadius: '8px',
         boxShadow: '0 0 10px rgba(0,0,0,0.2)',
@@ -33,21 +35,22 @@ const View = ({ show, onClose, data }) => {
             <div>Start Time: <strong>{data?.startTime || '9.50 am'}</strong></div>
             <div>Start Date: <strong>{data?.startDate || '12/2/2025'}</strong></div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
             <div>End Time: <strong>{data?.endTime || '13.00 pm'}</strong></div>
             <div>End Date: <strong>{data?.endDate || '12/2/2025'}</strong></div>
           </div>
 
-          <p style={{ marginTop: '10px' }}>Task Status: <strong>{data?.status || 'Open'}</strong></p>
-          <p>People Worked: {data?.peopleWorked || 'Employee 1(K025689), Employee 3(K0123456)'}</p>
+          <p style={{ marginTop: '30px' }}>Task Status: <strong>{data?.status || 'Open'}</strong></p>
+          <p style={{ marginTop: '30px' }}>People Worked: {data?.peopleWorked || 'Employee 1(K025689), Employee 3(K0123456)'}</p>
 
-          <div style={{ marginTop: '10px' }}>
+          <div style={{ marginTop: '30px' }}>
             <label htmlFor="comments">Comments:</label>
             <textarea
               id="comments"
               style={{
+                marginTop: '20px',
                 width: '100%',
-                height: '100px',
+                height: '180px',
                 padding: '10px',
                 borderRadius: '5px',
                 border: '1px solid #ccc'
