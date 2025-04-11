@@ -76,7 +76,7 @@ const Project = () => {
               <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.lob}</td>
               <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.startDate}</td>
               <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.endDate}</td>
-              <td style={{ padding: '10px' }}>
+              <td style={{ padding: '10px', display:'flex', justifyContent:'center'}}>
                 <button
                   style={{
                     backgroundColor: '#FFF3CD',
