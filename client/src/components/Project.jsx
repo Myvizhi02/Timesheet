@@ -48,13 +48,16 @@ const Project = () => {
           Create Project
         </button>
       </div>
-
+<div>
       {/* Table */}
       <table style={{
         width: '100%',
         borderCollapse: 'collapse',
         backgroundColor: '#fff',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+        overflow: 'hidden',
         boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+
       }}>
         <thead style={{ backgroundColor: '#84E7F9' }}>
           <tr style={{ textAlign: 'center', fontWeight: 600 }}>
@@ -98,7 +101,7 @@ const Project = () => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </div>
   );
 };

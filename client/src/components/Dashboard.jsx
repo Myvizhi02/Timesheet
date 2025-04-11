@@ -156,19 +156,19 @@ const Dashboard = () => {
                     <button
                         onClick={() => setActiveTab('all')}
                         className={`btn me-2 ${activeTab === 'all' ? 'btn-white text-dark border' : 'btn-light'}`}
-                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', marginRight: '5px' }}>
+                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', marginRight: '5px', backgroundColor: activeTab === 'all' ? '#ffffff' : '#CDCDCD80', }}>
                         All Executive
                     </button>
                     <button
                         onClick={() => setActiveTab('emp1')}
                         className={`btn me-2 ${activeTab === 'emp1' ? 'btn-white text-dark border' : 'btn-light'}`}
-                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', marginRight: '5px' }}>
+                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', marginRight: '5px',  backgroundColor: activeTab === 'emp1' ? '#ffffff' : '#CDCDCD80', }}>
                         Employee 1
                     </button>
                     <button
                         onClick={() => setActiveTab('emp2')}
                         className={`btn me-2 ${activeTab === 'emp2' ? 'btn-white text-dark border' : 'btn-light'}`}
-                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px' }}>
+                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', backgroundColor: activeTab === 'emp2' ? '#ffffff' : '#CDCDCD80', }}>
                         Employee 2
                     </button>
                 </div>
