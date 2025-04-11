@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import addIcon from '../add.png';
 import borderIcon from '../border.png';
 
+      
+
 const Project = () => {
+    const [showModal, setShowModal] = useState(false);
+
   const projects = [
     {
       id: 1,
@@ -22,31 +26,33 @@ const Project = () => {
     }
   ];
 
-  return (
+  return (   <>
     <div style={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       {/* Header and Create Button */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-        <button
-          style={{
-            borderRadius: '12px',
-            backgroundColor: '#3D6BFA',
-            border: 'none',
-            color: 'white',
-            width: '160px',
-            height: '44px',
-            fontSize: '14px',
-            fontWeight: '600',
-            padding: '0 14px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            cursor: 'pointer'
-          }}>
-          <img src={addIcon} alt="Add Icon" style={{ width: '18px' }} />
-          Create Project
-        </button>
+      <button
+  onClick={() => setShowModal(true)} // <-- add this
+  style={{
+    borderRadius: '12px',
+    backgroundColor: '#3D6BFA',
+    border: 'none',
+    color: 'white',
+    width: '160px',
+    height: '44px',
+    fontSize: '14px',
+    fontWeight: '600',
+    padding: '0 14px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    cursor: 'pointer'
+  }}
+>
+  <img src={addIcon} alt="Add Icon" style={{ width: '18px' }} />
+  Create Project
+</button>
       </div>
 <div>
       {/* Table */}
@@ -103,6 +109,12 @@ const Project = () => {
         </tbody>
       </table></div>
     </div>
+
+<div>
+<button onClick={() => setShowModal(true)}>Create Project</button>
+{showModal && <AddProject onClose={() => setShowModal(false)} />}
+</div> </>
+
   );
 };
 
