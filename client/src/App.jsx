@@ -5,6 +5,7 @@ import './App.css';
 import Dashboard from './components/Dashboard';
 import Header from "./components/Header";
 import Login from "./components/Login";
+import Project from"./components/Project"
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
      <BrowserRouter> 
      <Routes>
      <Route path="/login" element={<Login />} />
+     <Route path="/project" element={<Project/>} />
      <Route
           path="/dashboard"
           element={
