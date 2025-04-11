@@ -31,7 +31,6 @@ const Project = () => {
             borderRadius: '12px',
             backgroundColor: '#3D6BFA',
             border: 'none',
-            borderColor: '#3D6BFA',
             color: 'white',
             width: '160px',
             height: '44px',
@@ -55,30 +54,28 @@ const Project = () => {
         width: '100%',
         borderCollapse: 'collapse',
         backgroundColor: '#fff',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
-        borderRadius: '8px',
-        overflow: 'hidden'
+        boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
       }}>
         <thead style={{ backgroundColor: '#84E7F9' }}>
           <tr style={{ textAlign: 'center', fontWeight: 600 }}>
-            <th style={{ padding: '12px' }}>SL No</th>
-            <th style={{ padding: '12px' }}>Name of the Project</th>
-            <th style={{ padding: '12px' }}>Domain</th>
-            <th style={{ padding: '12px' }}>LOB</th>
-            <th style={{ padding: '12px' }}>Start -Date</th>
-            <th style={{ padding: '12px' }}>End-Date</th>
+            <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>SL No</th>
+            <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Name of the Project</th>
+            <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Domain</th>
+            <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>LOB</th>
+            <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Start -Date</th>
+            <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>End-Date</th>
             <th style={{ padding: '12px' }}>Action</th>
           </tr>
         </thead>
         <tbody>
           {projects.map((proj, index) => (
             <tr key={proj.id} style={{ textAlign: 'center', borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '10px' }}>{index + 1}</td>
-              <td style={{ padding: '10px' }}>{proj.name}</td>
-              <td style={{ padding: '10px' }}>{proj.domain}</td>
-              <td style={{ padding: '10px' }}>{proj.lob}</td>
-              <td style={{ padding: '10px' }}>{proj.startDate}</td>
-              <td style={{ padding: '10px' }}>{proj.endDate}</td>
+              <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{index + 1}</td>
+              <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.name}</td>
+              <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.domain}</td>
+              <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.lob}</td>
+              <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.startDate}</td>
+              <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.endDate}</td>
               <td style={{ padding: '10px' }}>
                 <button
                   style={{
