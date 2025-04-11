@@ -8,61 +8,30 @@ const Header = () => {
     <div
       style={{
         backgroundColor: 'white',
-        width: '1442px',
+        width: '100%',
         height: '70px',
-        dispaly: 'flex',
+        display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-      <img src={navIcon} alt="Navigation Icon"
-        style={
-          {
-            width: '26px',
-            marginLeft: '20px',
-            marginTop: '23px',
-            marginBottom: '21px'
-          }}></img>
-      <img src={homeIcon} alt="Home Icon"
-        style={
-          {
-            width: '24px',
-            marginRight: '20px',
-            marginTop: '24px',
-            marginBottom: '22px',
-            marginLeft: '20px'
-          }}></img>
-      <span className="m-0"
-        style={
-          {
-            fontSize: '1.2rem',
-            paddingBottom: '20px',
-            marginLeft:'20px',
-            width: '93px',
-            height: '22px',
-            alignItems:'center'
-            
-          }}>Dashboard</span>
+        alignItems: 'center',
+        padding: '0 20px',
+        boxSizing: 'border-box',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+      }}
+    >
+      {/* Left Side: Navigation, Home, Dashboard */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img src={navIcon} alt="Navigation Icon" style={{ width: '26px' }} />
+        <img src={homeIcon} alt="Home Icon" style={{ width: '24px' }} />
+        <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Dashboard</span>
+      </div>
 
-      <span className="m-0"
-        style={
-          {
-            fontSize: '1.2rem',
-            width: '135.65px',
-            height: '22px',
-            paddingLeft: '999px',
-          }}>Pradeep Shiva</span>
-      <img src={imgIcon} alt="Image Icon"
-        style={
-          {
-            width: '36px',
-            height: '36px',
-            marginTop: '18px',
-            marginBottom: '17px',
-            marginLeft: '34px'
-
-          }}></img>
+      {/* Right Side: Name and Profile Image */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Pradeep Shiva</span>
+        <img src={imgIcon} alt="User Icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
