@@ -7,6 +7,9 @@ import Header from "./components/Header";
 import Login from "./components/Login";
 import Project from "./components/Project";
 import ProjectHeader from "./components/ProjectHeader";
+import Spenttime from "./components/Spenttime";
+import SpenttimeHeader from "./components/SpenttimeHeader";
+import Task from "./components/Task";
 
 
 function App() {
@@ -16,7 +19,15 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
-          
+            path="/spenttime"
+            element={
+              <>
+                <SpenttimeHeader />
+                <Spenttime />
+              </>
+            }
+          />
+          <Route
             path="/project"
             element={
               <>
@@ -32,6 +43,17 @@ function App() {
                 <Header />
                 <Dashboard />
               </>
+            }
+            />
+              <Route
+                path="/task"
+                element={
+                  <>
+                    <TaskHeader />
+                    <Task />
+                  </>
+      
+              
             }
           />
         </Routes>

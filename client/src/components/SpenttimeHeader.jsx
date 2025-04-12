@@ -1,10 +1,10 @@
 import React from 'react';
+import arrowIcon from '../arrow.png';
 import homeIcon from '../home.png';
 import imgIcon from '../img.png';
 import navIcon from '../navigation.png';
-import arrowIcon from '../arrow.png';
 
-const ProjectHeader = () => {
+const SpenttimeHeader = () => {
   return (
     <div
       style={{
@@ -19,12 +19,12 @@ const ProjectHeader = () => {
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
       }}
     >
-      {/* Left Side: Navigation, Home, Arrow, Project */}
+      {/* Left Side: Navigation, Home, Arrow, Spenttime */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <img src={navIcon} alt="Navigation Icon" style={{ width: '26px' }} />
         <img src={homeIcon} alt="Home Icon" style={{ width: '24px' }} />
         <img src={arrowIcon} alt="Arrow Icon" style={{ width: '26px' }} />
-        <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Project</span>
+        <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Spent Time</span>
       </div>
 
       {/* Right Side: Name and Profile Image */}
@@ -36,4 +36,4 @@ const ProjectHeader = () => {
   );
 };
 
-export default ProjectHeader;
+export default SpenttimeHeader;
