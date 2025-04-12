@@ -46,7 +46,7 @@ const Project = () => {
               height: '44px',
               fontSize: '14px',
               fontWeight: '600',
-              padding: '0 14px',
+              // padding: '0 14px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

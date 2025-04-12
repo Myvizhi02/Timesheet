@@ -20,7 +20,7 @@ const ProjectHeader = () => {
       }}
     >
       {/* Left Side: Navigation, Home, Arrow, Project */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <img src={navIcon} alt="Navigation Icon" style={{ width: '26px' }} />
         <img src={homeIcon} alt="Home Icon" style={{ width: '24px' }} />
         <img src={arrowIcon} alt="Arrow Icon" style={{ width: '26px' }} />
@@ -28,7 +28,7 @@ const ProjectHeader = () => {
       </div>
 
       {/* Right Side: Name and Profile Image */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Pradeep Shiva</span>
         <img src={imgIcon} alt="User Icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
       </div>

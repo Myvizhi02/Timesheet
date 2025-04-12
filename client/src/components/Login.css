@@ -17,15 +17,18 @@
   box-shadow: 0 8px 20px rgba(223, 220, 221, 0.2);
   max-width: 90px;
   width: 30%;
-  
+
   margin-top: 20rem;
   margin-right: 10rem;
   margin-bottom: 20rem;
   margin-left: 10rem;
 }
+
 .login-card {
-  margin: 300rem; /* Adds space outside the card */
+  margin: 300rem;
+  /* Adds space outside the card */
 }
+
 /* .login-form div {
   margin-bottom: 2rem;
 } */
@@ -33,6 +36,7 @@
   margin-bottom: 0.25rem;
   display: block;
 }
+
 /* .login-form {
   padding: 2rem; 
 } */
@@ -61,7 +65,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: flex-start; /* LEFT alignment */
+  align-items: flex-start;
+  /* LEFT alignment */
   text-align: left;
   gap: 1rem;
 }
@@ -93,26 +98,33 @@
 
 .login-form button:hover {
   background: #2c47c5;
+
   .login-right {
-    align-items: flex-start; /* aligns children to the left */
+    align-items: flex-start;
+    /* aligns children to the left */
     text-align: right;
   }
 }
-.login-center-div{
+
+.login-center-div {
   background-color: #fff;
   width: 850px;
 }
+
 /* Login.css */
 .login-container {
   background-image: url("../assets/bgimg.png");
   background-size: cover;
   background-position: center;
   display: flex;
-  justify-content: center;  /* horizontal center */
-  align-items: center;      /* vertical center */
+  justify-content: center;
+  /* horizontal center */
+  align-items: center;
+  /* vertical center */
   height: 100vh;
   
 }
+
 /* Button hover (only for buttons) */
 .login-form button:hover {
   background: #2c47c5;
@@ -120,13 +132,18 @@
 
 /* If you are using a separate right container */
 .login-left {
-  align-items: flex-start; /* aligns children to the left */
-  text-align: left; /* change this to left instead of right for form text */
+  align-items: flex-start;
+  /* aligns children to the left */
+  text-align: left;
+  /* change this to left instead of right for form text */
 }
+
 .icon-image img {
-  width: 100px; /* medium size */
+  width: 100px;
+  /* medium size */
   height: 1;
 }
+
 .image-section {
   background-image: url("../assets/time.png");
   background-size: contain;
@@ -135,7 +152,9 @@
   width: 200px;
   height: 200px;
 }
+
 .container {
   width: 100%;
-  max-width: 600px; /* or whatever fits */
+  max-width: 600px;
+  /* or whatever fits */
 }
