@@ -11,6 +11,7 @@ import ProjectHeader from "./components/ProjectHeader";
 import Spenttime from "./components/Spenttime";
 import SpenttimeHeader from "./components/SpenttimeHeader";
 import Task from "./components/Task";
+import TaskHeader from "./components/TaskHeader";
 
 
 function App() {
@@ -57,17 +58,11 @@ function App() {
               
             }
           />
-        </Routes>
-      </BrowserRouter>
-    </>
+        
 
-import Task from "./components/Task";
-import TaskHeader from "./components/TaskHeader";
+ 
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
+    
         <Route path="/login" element={<Login />} />
         
         <Route
@@ -101,8 +96,7 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
-
+</>
   );
-}
-
-export default App;
+  }
+  export default App;
