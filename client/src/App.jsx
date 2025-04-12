@@ -7,6 +7,8 @@ import Header from "./components/Header";
 import Login from "./components/Login";
 import Project from "./components/Project";
 import ProjectHeader from "./components/ProjectHeader";
+import Task from "./components/Task";
+import TaskHeader from "./components/TaskHeader";
 
 function App() {
   return (
@@ -14,6 +16,16 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         
+        <Route
+          path="/task"
+          element={
+            <>
+              <TaskHeader />
+              <Task />
+            </>
+          }
+        />
+
         <Route
           path="/project"
           element={
