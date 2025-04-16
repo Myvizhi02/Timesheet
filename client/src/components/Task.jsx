@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
-  Box, Button, Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, Typography, IconButton
+  Box, Button, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, Typography, IconButton
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddTask from './AddTask';
+import addIcon from '../add.png'; // Make sure this path is correct
 
 const Task = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -43,12 +43,20 @@ const Task = () => {
 
   return (
     <>
+      {/* Page Container */}
       <Box sx={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+        
         {/* Header Button */}
         <Box display="flex" justifyContent="flex-end" mb={3}>
           <Button
             variant="contained"
-            startIcon={<AddIcon />}
+            startIcon={
+              <img
+                src={addIcon}
+                alt="AddIcon"
+                style={{ width: 20, height: 20 }}
+              />
+            }
             sx={{
               backgroundColor: '#3D6BFA',
               borderRadius: '12px',
@@ -111,7 +119,7 @@ const Task = () => {
         </TableContainer>
       </Box>
 
-      {/* Modal */}
+      {/* Popup for Adding Task */}
       {showPopup && (
         <AddTask
           onClose={() => setShowPopup(false)}
