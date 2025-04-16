@@ -1,4 +1,13 @@
 import React from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  Typography,
+  Avatar,
+  IconButton
+} from '@mui/material';
+
 import arrowIcon from '../arrow.png';
 import homeIcon from '../home.png';
 import imgIcon from '../img.png';
@@ -6,42 +15,43 @@ import navIcon from '../navigation.png';
 
 const TaskHeader = () => {
   return (
-    <div
-      style={{
-        backgroundColor: 'white',
-        width: '100%',
+    <AppBar
+      position="static"
+      elevation={1}
+      sx={{
+        backgroundColor: '#ffffff',
         height: '70px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 20px',
-        boxSizing: 'border-box',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        justifyContent: 'center',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        px: 2,
       }}
     >
-      {/* Left Section */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <img src={navIcon} alt="Navigation Icon" width={26} height={26} />
-        <img src={homeIcon} alt="Home Icon" width={24} height={24} />
-        <img src={arrowIcon} alt="Arrow Icon" width={26} height={26} />
-        <span style={{ fontSize: '1.2rem', fontWeight: 500 }}>Task</span>
-      </div>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        {/* Left Side */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <img src={navIcon} alt="Navigation Icon" width={26} height={26} />
+          <img src={homeIcon} alt="Home Icon" width={24} height={24} />
+          <img src={arrowIcon} alt="Arrow Icon" width={26} height={26} />
+          <Typography variant="h6" sx={{ fontWeight: 500, fontSize: '1.2rem', color: '#000' }}>
+            Task
+          </Typography>
+        </Box>
 
-      {/* Right Section */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <span style={{ fontSize: '1.2rem', fontWeight: 500 }}>Pradeep Shiva</span>
-        <img
-          src={imgIcon}
-          alt="User Profile"
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            objectFit: 'cover',
-          }}
-        />
-      </div>
-    </div>
+        {/* Right Side */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 500, fontSize: '1.2rem', color: '#000' }}>
+            Pradeep Shiva
+          </Typography>
+          <IconButton>
+            <Avatar
+              alt="User Profile"
+              src={imgIcon}
+              sx={{ width: 36, height: 36 }}
+            />
+          </IconButton>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

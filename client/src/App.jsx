@@ -8,7 +8,7 @@ import Login from "./components/Login";
 import Project from "./components/Project";
 import ProjectHeader from "./components/ProjectHeader";
 
-import Spenttime from "./components/Spenttime";
+import AddSpenttime from "./components/AddSpenttime";
 import SpenttimeHeader from "./components/SpenttimeHeader";
 import Task from "./components/Task";
 import TaskHeader from "./components/TaskHeader";
@@ -25,7 +25,7 @@ function App() {
             element={
               <>
                 <SpenttimeHeader />
-                <Spenttime />
+                <AddSpenttime />
               </>
             }
           />

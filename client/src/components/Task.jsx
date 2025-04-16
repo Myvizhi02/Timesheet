@@ -1,126 +1,125 @@
 import React, { useState } from 'react';
-import addIcon from '../add.png';
-import visibility2Icon from '../visibility2.png';
-    import AddTask from './AddTask'; 
+import {
+  Box, Button, Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Paper, Typography, IconButton
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import AddTask from './AddTask';
 
 const Task = () => {
-    const [showPopup, setShowPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
-    const handleCreateTask = (data) => {
-        console.log('New Task:', data);  
-      };
-      
+  const handleCreateTask = (data) => {
+    console.log('New Task:', data);
+  };
 
-    const task = [
-        {
-            id: 1,
-            project: "Bridge Application",
-            taskname: "Merge Core and JD",
-            subtask: "Sub Task",
-            description: "Uniting the user of core and JD",
-            status: "Status"
-        },
-        {
-            id: 2,
-            project: "Winfast CRM",
-            taskname: "Setup Dashboard",
-            subtask: "UI Build",
-            description: "Uniting the user of core and JD",
-            status: "Status"
-        },
-        {
-            id: 3,
-            project: "Tata CRM",
-            taskname: "Setup Dashboard",
-            subtask: "UI Build",
-            description: "Uniting the user of core and JD",
-            status: "Status"
-        }
-    ];
+  const task = [
+    {
+      id: 1,
+      project: "Bridge Application",
+      taskname: "Merge Core and JD",
+      subtask: "Sub Task",
+      description: "Uniting the user of core and JD",
+      status: "Open"
+    },
+    {
+      id: 2,
+      project: "Winfast CRM",
+      taskname: "Setup Dashboard",
+      subtask: "UI Build",
+      description: "Designing dashboard UI",
+      status: "Open"
+    },
+    {
+      id: 3,
+      project: "Tata CRM",
+      taskname: "Setup Dashboard",
+      subtask: "UI Build",
+      description: "Creating initial dashboard",
+      status: "Closed"
+    }
+  ];
 
-    return (
-        <>
-            <div style={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-                {/* Header and Create Button */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-                    <button
-                        onClick={() => setShowPopup(true)}
-                        style={{
-                            borderRadius: '12px',
-                            backgroundColor: '#3D6BFA',
-                            border: 'none',
-                            color: 'white',
-                            width: '160px',
-                            height: '44px',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            cursor: 'pointer'
-                        }}>
-                        <img src={addIcon} alt="Add Icon" style={{ width: '18px' }} />
-                        Add Task
-                    </button>
-                </div>
+  return (
+    <>
+      <Box sx={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+        {/* Header Button */}
+        <Box display="flex" justifyContent="flex-end" mb={3}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{
+              backgroundColor: '#3D6BFA',
+              borderRadius: '12px',
+              fontWeight: 600,
+              width: '160px',
+              height: '44px',
+              fontSize: '14px',
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: '#3159d6'
+              }
+            }}
+            onClick={() => setShowPopup(true)}
+          >
+            Add Task
+          </Button>
+        </Box>
 
-                {/* Table */}
-                <div>
-                    <table style={{
-                        width: '100%',
-                        borderCollapse: 'collapse',
-                        backgroundColor: '#fff',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
-                    }}>
-                        <thead style={{ backgroundColor: '#84E7F9' }}>
-                            <tr style={{ textAlign: 'center', fontWeight: 600 }}>
-                                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>SL No</th>
-                                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Project</th>
-                                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Task Name</th>
-                                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Sub Task</th>
-                                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Description</th>
-                                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Status</th>
-                                <th style={{ padding: '12px' }}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {task.map((proj, index) => (
-                                <tr key={proj.id} style={{ textAlign: 'center', borderBottom: '1px solid #ddd' }}>
-                                    <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{index + 1}</td>
-                                    <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.project}</td>
-                                    <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.taskname}</td>
-                                    <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.subtask}</td>
-                                    <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.description}</td>
-                                    <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.status}</td>
-                                    <td style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
-                                        <button style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}>
-                                            <img src={visibility2Icon} alt="View" style={{ width: '16px' }} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        {/* Table */}
+        <TableContainer component={Paper} elevation={3}>
+          <Table>
+            <TableHead sx={{ backgroundColor: '#84E7F9' }}>
+              <TableRow>
+                <TableCell align="center"><strong>SL No</strong></TableCell>
+                <TableCell align="center"><strong>Project</strong></TableCell>
+                <TableCell align="center"><strong>Task Name</strong></TableCell>
+                <TableCell align="center"><strong>Sub Task</strong></TableCell>
+                <TableCell align="center"><strong>Description</strong></TableCell>
+                <TableCell align="center"><strong>Status</strong></TableCell>
+                <TableCell align="center"><strong>Action</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {task.map((proj, index) => (
+                <TableRow key={proj.id}>
+                  <TableCell align="center">{index + 1}</TableCell>
+                  <TableCell align="center">{proj.project}</TableCell>
+                  <TableCell align="center">{proj.taskname}</TableCell>
+                  <TableCell align="center">{proj.subtask}</TableCell>
+                  <TableCell align="center">{proj.description}</TableCell>
+                  <TableCell align="center">
+                    <Typography
+                      sx={{
+                        color: proj.status === 'Open' ? 'green' : 'red',
+                        fontWeight: 500
+                      }}
+                    >
+                      {proj.status}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <IconButton>
+                      <VisibilityIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
 
-            {/* Add Task Popup */}
-            {showPopup && (
-                <AddTask
-                    onClose={() => setShowPopup(false)}
-                    onSubmit={handleCreateTask}
-                />
-            )}
-        </>
-    );
+      {/* Modal */}
+      {showPopup && (
+        <AddTask
+          onClose={() => setShowPopup(false)}
+          onSubmit={handleCreateTask}
+        />
+      )}
+    </>
+  );
 };
 
 export default Task;
