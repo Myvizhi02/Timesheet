@@ -37,7 +37,7 @@ const Task = () => {
       taskname: "Setup Dashboard",
       subtask: "UI Build",
       description: "Creating initial dashboard",
-      status: "Closed"
+      status: "Open"
     }
   ];
 
