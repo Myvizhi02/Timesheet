@@ -1,53 +1,135 @@
 import React from "react";
-import "./Login.css";
-import timeIcon from "../assets/time.png";
-import image from "../assets/bgimg.png";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+  TextField,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import timeIcon from "../assets/time.png";  // Left side illustration
+import image from "../assets/bgimg.png";   // Full background
 
-function Login() {
+const CssTextField = styled(TextField)({
+  '& label.Mui-focused': {
+    color: '#A0AAB4',
+  },
+  '& .MuiInput-underline:after': {
+    borderBottomColor: '#B2BAC2',
+  },
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: '#E0E3E7',
+    },
+    '&:hover fieldset': {
+      borderColor: '#B2BAC2',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#6F7E8C',
+    },
+  },
+});
+
+const Login = () => {
   return (
-    // <div className="d-flex vh-100 align-items-center justify-content-center bg-light">
-    <div className="login-container d-flex shadow-lg rounded-4 overflow-hidden">
-      <div className="login-center-div row">
-        <div className="col-md-6">
-          <img src={timeIcon} alt="" srcset="" style={{ width: '100%' }} />
-        </div>
-        <div className="col-md-6">
-          <div className="login-form bg-white ">
-            <h2 className="mb-1 text-primary fw-bold text-nowrap">
-              Welcome to Timesheet
-            </h2>
+    <Box
+      sx={{
+        backgroundImage: `url(${image})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Paper
+        elevation={10}
+        sx={{
+          display: "flex",
+          borderRadius: 5,
+          overflow: "hidden",
+          maxWidth: 1000,
+          width: "90%",
+        }}
+      >
+        {/* Left Side - Illustration */}
+        <Box
+          sx={{
+            flex: 1,
+            
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            px: 2,
+          }}
+        >
+          <img
+            src={timeIcon}
+            alt="Time Icon"
+            style={{ width: "100%", maxWidth: 400 }}
+          />
+        </Box>
 
-            <div className="">
-              <label className="form-label">Employee ID</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter your Employee ID"
-              />
-            </div>
-            <div className="">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Enter your password"
-              />
-            </div>
-            <button className="btn btn-primary w-100">Login</button>
-          </div>
-        </div>
-      </div>
-      {/* <div className="login-image bg-white p-4"></div>
-        <div className="d-flex vh-100 align-items-center justify-content-center login-background"></div>
-        <div className="d-flex vh-100 align-items-center justify-content-center login-bgimg.png">
-          <div className="login-container d-flex shadow-lg rounded-4 overflow-hidden"></div>
-        </div> */}
+        {/* Right Side - Login Form */}
+        <Box
+          sx={{
+            flex: 1,
+            backgroundColor: "white",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: 6,
+            py: 8,
+          }}
+        >
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            color="#3758f9"
+            sx={{ mb: 4 }}
+          >
+            Welcome to Timesheet
+          </Typography>
 
-      {/* Right Side Form */}
-    </div>
-    // </div>
+          <CssTextField
+            label="Employee ID"
+            placeholder="Enter your Employee ID"
+            variant="standard"
+            fullWidth
+            sx={{ mb: 4 }}
+          />
+          <CssTextField
+            label="Password"
+            type="password"
+            placeholder="Enter your password"
+            variant="standard"
+            fullWidth
+            sx={{ mb: 4 }}
+          />
+
+          <Button
+            variant="contained"
+            sx={{
+              mt: 1,
+              backgroundColor: "#3758f9",
+              color: "#fff",
+              borderRadius: "8px",
+              fontSize: "1rem",
+              textTransform: "none",
+              padding: "0.75rem",
+              '&:hover': {
+                backgroundColor: "#2c47c5",
+              },
+            }}
+            fullWidth
+          >
+            Login
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
   );
-}
+};
 
 export default Login;
