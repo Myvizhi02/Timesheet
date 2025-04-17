@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Box, Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Typography, IconButton
+  TableHead, TableRow, Paper, Typography, IconButton, Dialog, DialogActions, DialogContent, DialogTitle
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddTask from './AddTask';
@@ -37,7 +37,7 @@ const Task = () => {
       taskname: "Setup Dashboard",
       subtask: "UI Build",
       description: "Creating initial dashboard",
-      status: "Closed"
+      status: "Open"
     }
   ];
 
@@ -45,7 +45,7 @@ const Task = () => {
     <>
       {/* Page Container */}
       <Box sx={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-        
+
         {/* Header Button */}
         <Box display="flex" justifyContent="flex-end" mb={3}>
           <Button
@@ -120,12 +120,20 @@ const Task = () => {
       </Box>
 
       {/* Popup for Adding Task */}
-      {showPopup && (
-        <AddTask
-          onClose={() => setShowPopup(false)}
-          onSubmit={handleCreateTask}
-        />
-      )}
+      <Dialog open={showPopup} onClose={() => setShowPopup(false)}>
+        <DialogTitle>Add Task</DialogTitle>
+        <DialogContent>
+          <AddTask onClose={() => setShowPopup(false)} onSubmit={handleCreateTask} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowPopup(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={() => setShowPopup(false)} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

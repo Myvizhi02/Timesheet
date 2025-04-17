@@ -1,13 +1,12 @@
 import React from 'react';
-import homeIcon from '../home.png';
+import { Box, Typography, IconButton } from '@mui/material';
+import { Home as HomeIcon, ArrowForward as ArrowIcon, Menu as NavIcon } from '@mui/icons-material';
 import imgIcon from '../img.png';
-import navIcon from '../navigation.png';
-import arrowIcon from '../arrow.png';
 
 const ProjectHeader = () => {
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         backgroundColor: 'white',
         width: '100%',
         height: '70px',
@@ -16,23 +15,29 @@ const ProjectHeader = () => {
         alignItems: 'center',
         padding: '0 20px',
         boxSizing: 'border-box',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
       }}
     >
       {/* Left Side: Navigation, Home, Arrow, Project */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <img src={navIcon} alt="Navigation Icon" style={{ width: '26px' }} />
-        <img src={homeIcon} alt="Home Icon" style={{ width: '24px' }} />
-        <img src={arrowIcon} alt="Arrow Icon" style={{ width: '26px' }} />
-        <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Project</span>
-      </div>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <IconButton>
+          <NavIcon sx={{ width: 26 }} />
+        </IconButton>
+        <IconButton>
+          <HomeIcon sx={{ width: 24 }} />
+        </IconButton>
+        <IconButton>
+          <ArrowIcon sx={{ width: 26 }} />
+        </IconButton>
+        <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Project</Typography>
+      </Box>
 
       {/* Right Side: Name and Profile Image */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Pradeep Shiva</span>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Pradeep Shiva</Typography>
         <img src={imgIcon} alt="User Icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

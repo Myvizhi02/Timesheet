@@ -1,36 +1,44 @@
 import React from 'react';
+import { AppBar, Toolbar, Box, Typography, Avatar, IconButton } from '@mui/material';
 import homeIcon from '../home.png';
 import imgIcon from '../img.png';
 import navIcon from '../navigation.png';
 
 const Header = () => {
   return (
-    <div
-      style={{
+    <AppBar
+      position="static"
+      elevation={1}
+      sx={{
         backgroundColor: 'white',
-        width: '100%',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         height: '70px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 20px',
-        boxSizing: 'border-box',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+        justifyContent: 'center',
       }}
     >
-      {/* Left Side: Navigation, Home, Dashboard */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <img src={navIcon} alt="Navigation Icon" style={{ width: '26px' }} />
-        <img src={homeIcon} alt="Home Icon" style={{ width: '24px' }} />
-        <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Dashboard</span>
-      </div>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        {/* Left Side */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton>
+            <img src={navIcon} alt="Navigation Icon" style={{ width: '26px' }} />
+          </IconButton>
+          <IconButton>
+            <img src={homeIcon} alt="Home Icon" style={{ width: '24px' }} />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ fontWeight: 500, color: 'black' }}>
+            Dashboard
+          </Typography>
+        </Box>
 
-      {/* Right Side: Name and Profile Image */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <span style={{ fontSize: '1.2rem', fontWeight: '500' }}>Pradeep Shiva</span>
-        <img src={imgIcon} alt="User Icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
-      </div>
-    </div>
+        {/* Right Side */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="h6" component="div" sx={{ fontWeight: 500, color: 'black' }}>
+            Pradeep Shiva
+          </Typography>
+          <Avatar alt="User" src={imgIcon} sx={{ width: 36, height: 36 }} />
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

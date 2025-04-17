@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import addIcon from '../add.png';
-import borderIcon from '../border.png';
+import { Box, Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Modal, Paper, IconButton } from '@mui/material';
+import { Add as AddIcon, BorderColor as BorderIcon } from '@mui/icons-material';
 import AddProject from './AddProject';
 
 const Project = () => {
@@ -31,96 +31,102 @@ const Project = () => {
   ];
 
   return (
-    <>
-      <div style={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-        {/* Header and Create Button */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-          <button
-            onClick={() => setShowModal(true)}
-            style={{
-              borderRadius: '12px',
-              backgroundColor: '#3D6BFA',
-              border: 'none',
-              color: 'white',
-              width: '160px',
-              height: '44px',
-              fontSize: '14px',
-              fontWeight: '600',
-              // padding: '0 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              cursor: 'pointer'
-            }}>
-            <img src={addIcon} alt="Add Icon" style={{ width: '18px' }} />
-            Create Project
-          </button>
-        </div>
+    <Box sx={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      {/* Header and Create Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+        <Button
+          onClick={() => setShowModal(true)}
+          sx={{
+            borderRadius: '12px',
+            backgroundColor: '#3D6BFA',
+            color: 'white',
+            width: '160px',
+            height: '44px',
+            fontSize: '14px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            '&:hover': {
+              backgroundColor: '#2c47c5',
+            }
+          }}
+        >
+          <AddIcon sx={{ width: '18px' }} />
+          Create Project
+        </Button>
+      </Box>
 
-        {/* Table */}
-        <div>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            backgroundColor: '#fff',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
-          }}>
-            <thead style={{ backgroundColor: '#84E7F9' }}>
-              <tr style={{ textAlign: 'center', fontWeight: 600 }}>
-                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>SL No</th>
-                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Name of the Project</th>
-                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Domain</th>
-                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>LOB</th>
-                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>Start -Date</th>
-                <th style={{ padding: '12px', borderRight: '1px solid #ccc' }}>End-Date</th>
-                <th style={{ padding: '12px' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((proj, index) => (
-                <tr key={proj.id} style={{ textAlign: 'center', borderBottom: '1px solid #ddd' }}>
-                  <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{index + 1}</td>
-                  <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.name}</td>
-                  <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.domain}</td>
-                  <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.lob}</td>
-                  <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.startDate}</td>
-                  <td style={{ padding: '10px', borderRight: '1px solid #eee' }}>{proj.endDate}</td>
-                  <td style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
-                    <button
-                      style={{
-                        backgroundColor: '#FFF3CD',
-                        border: '1px solid #ffeeba',
-                        color: '#856404',
-                        padding: '6px 12px',
-                        borderRadius: '4px',
-                        fontWeight: 500,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <img src={borderIcon} alt="Border Icon" style={{ width: '16px' }} />
-                      Edit Project
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Table */}
+      <TableContainer component={Paper} sx={{ boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: '#84E7F9' }}>
+            <TableRow>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>SL No</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>Name of the Project</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>Domain</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>LOB</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>Start Date</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>End Date</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {projects.map((proj, index) => (
+              <TableRow key={proj.id} sx={{ textAlign: 'center', borderBottom: '1px solid #ddd' }}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{proj.name}</TableCell>
+                <TableCell>{proj.domain}</TableCell>
+                <TableCell>{proj.lob}</TableCell>
+                <TableCell>{proj.startDate}</TableCell>
+                <TableCell>{proj.endDate}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="outlined"
+                    color="warning"
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontWeight: 500,
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    <BorderIcon sx={{ width: '16px' }} />
+                    Edit Project
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* Add Project Popup */}
-      {showModal && (
-        <AddProject
-          onClose={() => setShowModal(false)}
-          onSubmit={handleCreateProject}
-        />
-      )}
-    </>
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        aria-labelledby="add-project-modal"
+        aria-describedby="modal-to-add-a-new-project"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          backgroundColor: 'white',
+          borderRadius: 2,
+          padding: 3,
+          width: 400,
+          boxShadow: 24,
+        }}>
+          <AddProject onClose={() => setShowModal(false)} onSubmit={handleCreateProject} />
+        </Box>
+      </Modal>
+    </Box>
   );
 };
 
