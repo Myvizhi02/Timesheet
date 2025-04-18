@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Button, Typography, Paper, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import timeIcon from "../assets/time.png";  // Left side illustration
-import image from "../assets/bgimg.png";   // Full background
+import timeIcon from "../assets/time.png"; 
+import image from "../assets/bgimg.png"; 
+import axios from "axios";
+import { useNavigate } from "react-router-dom"; // 👈 to navigate to dashboard
 
 const CssTextField = styled(TextField)({
   '& label.Mui-focused': {
@@ -25,6 +27,28 @@ const CssTextField = styled(TextField)({
 });
 
 const Login = () => {
+  const [agentId, setAgentId] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate(); // 👈 Hook for navigation
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('http://localhost:3030/login', {
+        agent_id: agentId,
+        password: password,
+      });
+
+      console.log(response.data); // Should print { message: 'Login successful', redirectTo: '/dashboard' }
+
+      if (response.data.redirectTo) {
+        navigate(response.data.redirectTo); // 👈 Move to dashboard
+      }
+    } catch (error) {
+      console.error('Login failed:', error.response?.data || error.message);
+      alert('Login failed: ' + (error.response?.data || error.message));
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -55,7 +79,7 @@ const Login = () => {
             justifyContent: "center",
             alignItems: "center",
             px: 2,
-            backgroundColor: "#f5f7ff", // Light background to match your theme
+            backgroundColor: "#f5f7ff",
           }}
         >
           <img
@@ -91,6 +115,8 @@ const Login = () => {
             placeholder="Enter your Employee ID"
             variant="standard"
             fullWidth
+            value={agentId}
+            onChange={(e) => setAgentId(e.target.value)}
             sx={{ mb: 4 }}
           />
           <CssTextField
@@ -99,11 +125,14 @@ const Login = () => {
             placeholder="Enter your password"
             variant="standard"
             fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             sx={{ mb: 4 }}
           />
 
           <Button
             variant="contained"
+            onClick={handleLogin}
             sx={{
               mt: 1,
               backgroundColor: "#3758f9",
