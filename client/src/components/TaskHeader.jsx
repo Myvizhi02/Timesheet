@@ -22,12 +22,12 @@ const TaskHeader = () => {
         backgroundColor: '#ffffff',
         height: '70px',
         justifyContent: 'center',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         px: 2,
       }}
     >
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {/* Left Side */}
+        {/* Left Side: Navigation, Home, Arrow, Task */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <img src={navIcon} alt="Navigation Icon" width={26} height={26} />
           <img src={homeIcon} alt="Home Icon" width={24} height={24} />
@@ -37,7 +37,7 @@ const TaskHeader = () => {
           </Typography>
         </Box>
 
-        {/* Right Side */}
+        {/* Right Side: User's Name and Avatar */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 500, fontSize: '1.2rem', color: '#000' }}>
             Pradeep Shiva

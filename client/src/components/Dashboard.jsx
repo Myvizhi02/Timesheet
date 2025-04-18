@@ -1,3 +1,19 @@
+import {
+    Box,
+    Button,
+    Grid,
+    IconButton,
+    MenuItem,
+    Paper,
+    Select,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+} from '@mui/material';
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -11,88 +27,50 @@ import visibility2Icon from '../visibility2.png';
 import AddSpenttime from './AddSpenttime';
 import View from './View';
 
-
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('all');
     const [showModal, setShowModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
+    const [showSpentModal, setShowSpentModal] = useState(false);
+    const [startDate, setStartDate] = useState(null);
+    const [project, setProject] = useState('');
+
+    const employees = {
+        all: [
+            { id: 1, name: 'Employee 1', project: 'Bridge - Application', task: 'Offer Addition', subtask: 'Edit Page of User Details', date: '21-02-25', hours: '5hrs' },
+            { id: 2, name: 'Employee 2', project: 'Bridge - Application', task: 'Follow Up time slot', subtask: 'Edit Page of User Details', date: '21-02-25', hours: '5hrs' }
+        ],
+        emp1: [{ id: 1, name: 'Employee 1', project: 'Bridge - Application', task: 'Offer Addition', subtask: 'Edit Page of User Details', date: '21-02-25', hours: '5hrs' }],
+        emp2: [{ id: 2, name: 'Employee 2', project: 'Bridge - Application', task: 'Follow Up time slot', subtask: 'Edit Page of User Details', date: '21-02-25', hours: '5hrs' }]
+    };
+
     const handleViewClick = (task) => {
         setSelectedTask(task);
         setShowModal(true);
     };
-    const closeModal = () => {
-        setShowModal(false);
-    };
-    const [showSpentModal, setShowSpentModal] = useState(false);
 
+    const closeModal = () => setShowModal(false);
     const handleOpenSpentModal = () => setShowSpentModal(true);
     const handleCloseSpentModal = () => setShowSpentModal(false);
 
-
-    const employees = {
-        all: [
-            {
-                id: 1,
-                name: 'Employee 1',
-                project: 'Bridge - Application',
-                task: 'Offer Addition',
-                subtask: 'Edit Page of User Details',
-                date: '21-02-25',
-                hours: '5hrs'
-            },
-            {
-                id: 2,
-                name: 'Employee 2',
-                project: 'Bridge - Application',
-                task: 'Follow Up time slot',
-                subtask: 'Edit Page of User Details',
-                date: '21-02-25',
-                hours: '5hrs'
-            }
-        ],
-        emp1: [
-            {
-                id: 1,
-                name: 'Employee 1',
-                project: 'Bridge - Application',
-                task: 'Offer Addition',
-                subtask: 'Edit Page of User Details',
-                date: '21-02-25',
-                hours: '5hrs'
-            }
-        ],
-        emp2: [
-            {
-                id: 2,
-                name: 'Employee 2',
-                project: 'Bridge - Application',
-                task: 'Follow Up time slot',
-                subtask: 'Edit Page of User Details',
-                date: '21-02-25',
-                hours: '5hrs'
-            }
-        ]
-    };
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
-
     const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
-        <div
+        <Box
             onClick={onClick}
             ref={ref}
-            style={{
+            sx={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '10px 12px',
+                padding: '1px 12px',
                 border: '1px solid #ccc',
                 borderRadius: '8px',
                 backgroundColor: '#fff',
                 width: '191px',
                 height: '42px',
                 cursor: 'pointer',
-                marginLeft: '20px'
+                ml: 2,
             }}
-        >  <img src={dateIcon} alt="Date Icon" style={{ width: '20px', marginLeft: '8px' }} />
+        >
+            <img src={dateIcon} alt="Date Icon" style={{ width: 20, marginLeft: 8 }} />
             <input
                 type="text"
                 value={value}
@@ -103,179 +81,207 @@ const Dashboard = () => {
                     outline: 'none',
                     width: '275px',
                     backgroundColor: 'transparent',
-                    fontSize: '14px',
+                    fontSize: 14,
                     color: value ? '#000' : '#888',
                 }}
             />
-
-        </div>));
+        </Box>
+    ));
 
     return (
         <>
-            {/* Header */}
-            <div style={{
-                margin: '27px 50px 0 50px',
-                backgroundColor: 'white',
-                padding: '20px',
-                borderRadius: '8px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-            }}>
-                <h2 style={{ margin: 0 }}>Welcome to Pradeep Shiva.</h2>
-            </div>
+            {/* Top Welcome Section */}
+            <Box
+                sx={{
+                    margin: '40px 40px 40px 50px',
+                    backgroundColor: 'white',
+                    width: '1440px',
+                    height: '150px',
+                    padding: '20px',
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                }}
+            >
+                {/* Welcome Text */}
+                <Typography variant="h5" sx={{ pl: 2 }}>
+                    Welcome to Pradeep Shiva.
+                </Typography>
 
-            {/* Button Row */}
-            <div style={{
-                display: 'flex',
-                gap: '10px',
-                margin: '10px 50px'
-            }}>
+                {/* DatePicker + Select + Buttons */}
+                <Grid container spacing={25} alignItems="center">
+                    {/* Left Side */}
+                    <Grid item xs={12} md={5}>
+                        <Box sx={{ display: 'flex', gap: 6, }}>
+                            {/* Date Picker */}
+                            <Box sx={{ width: 191, height: 42 }}>
+                                <DatePicker
+                                    selected={startDate}
+                                    onChange={(date) => setStartDate(date)}
+                                    placeholderText="  6Mar - 7Mar"
+                                    dateFormat="dd/MM/yyyy"
+                                    customInput={<CustomInput placeholder="Select Start Date" />}
+                                />
+                            </Box>
 
-                <div style={{ width: '40%', display: 'flex', gap: '10px' }}>
-                    <div>
+                            {/* Select Project */}
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 2,
+                                    backgroundColor: 'white',
+                                    width: 191,
+                                    height: 42,
+                                    paddingLeft: 1,
+                                }}
+                            >
+                                <img src={selectionIcon} alt="Select Project" style={{ width: 20, marginRight: 8 }} />
+                                <Select
+                                    value={project}
+                                    onChange={(e) => setProject(e.target.value)}
+                                    displayEmpty
+                                    variant="standard"
+                                    sx={{
+                                        width: '100%',
+                                        borderBottom: 'none',
+                                        '&::before, &::after': { display: 'none' },
+                                        outline: 'none',
+                                    }}
+                                >
+                                    <MenuItem value=""><em>Select Project</em></MenuItem>
+                                    <MenuItem value="Bridge - Application">Bridge - Application</MenuItem>
+                                    <MenuItem value="CRM Dashboard">CRM Dashboard</MenuItem>
+                                    <MenuItem value="Admin Panel">Admin Panel</MenuItem>
+                                </Select>
+                            </Box>
+                        </Box>
+                    </Grid>
 
-                        <DatePicker
-                            selected={startDate}
-                            onChange={(date) => setStartDate(date)}
-                            placeholderText="   6Mar - 7Mar"
-                            dateFormat="dd/MM/yyyy"
-                            customInput={<CustomInput placeholder="Select Start Date" />}
-                        />
+                    {/* Right Side Buttons */}
+                    <Grid item xs={12} md={7}>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                            <Button
+                                variant="contained"
+                                color="success"
+                                sx={{ width: 180, height: 42 }}
+                                startIcon={<img src={shareIcon} alt="Share" width="20" />}
+                            >
+                                Export to Excel
+                            </Button>
 
-                    </div>
+                            <Button
+                                variant="contained"
+                                sx={{ bgcolor: '#213E9A', width: 175, height: 42 }}
+                                startIcon={<img src={visibilityIcon} alt="View" width="20" />}
+                            >
+                                View Task
+                            </Button>
 
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '12px',
-                        border: '1px solid #ccc',
-                        borderRadius: '8px',
-                        backgroundColor: 'white',
-                        width: '191px',
-                        height: '42px'
-                    }}>
-                        <img src={selectionIcon} alt="Select Project" style={{ width: '20px', marginRight: '8px' }} />
-                        <select style={{ border: 'none', outline: 'none', background: 'transparent', width: '100%' }}>
-                            <option>Select Project</option>
-                            <option>Bridge - Application</option>
-                            <option>CRM Dashboard</option>
-                            <option>Admin Panel</option>
-                        </select>
-                    </div>
-                </div>
+                            <Button
+                                variant="contained"
+                                sx={{ bgcolor: '#213E9A', width: 175, height: 42 }}
+                                startIcon={<img src={foldereyeIcon} alt="Project" width="20" />}
+                            >
+                                View Project
+                            </Button>
 
-                <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', gap: '10px', }}>
-                    <button style={{
-                        backgroundColor: 'green', color: 'white', padding: '8px 12px', borderRadius: '6px', width: '175px',
-                        height: '42px'
-                    }}>
-                        <img src={shareIcon} alt="Share Icon" style={{ marginRight: '6px' }} /> Export to Excel
-                    </button>
-                    <button style={{
-                        backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px', width: '175px',
-                        height: '42px'
-                    }}>
-                        <img src={visibilityIcon} alt="Visibility Icon" style={{ marginRight: '6px' }} /> View Task
-                    </button>
-                    <button style={{
-                        backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px', width: '175px',
-                        height: '42px'
-                    }}>
-                        <img src={foldereyeIcon} alt="Foldereye Icon" style={{ marginRight: '6px' }} /> View Project
-                    </button>
-                    <button style={{
-                        backgroundColor: '#213E9A', color: 'white', padding: '8px 12px', borderRadius: '6px', width: '175px',
-                        height: '42px'
-                    }} onClick={handleOpenSpentModal} className="add-button">
-                        <img src={addIcon} alt="Add Icon" style={{ marginRight: '6px' }} /> Add Spent time
-                    </button>
-                </div>
-            </div>
+                            <Button
+                                variant="contained"
+                                sx={{ bgcolor: '#213E9A', width: 175, height: 42 }}
+                                startIcon={<img src={addIcon} alt="Add" width="20" />}
+                                onClick={handleOpenSpentModal}
+                            >
+                                Add Spent Time
+                            </Button>
+                        </Box>
+                    </Grid>
+                </Grid>
+            </Box>
 
-            {/* Tabs */}
-            <div className="p-4" style={{
-                borderRadius: '50px',
-                padding: '5px 10px',
-                width: 'fit-content',
-                margin: '5px auto 20px'
-            }}>
-                <div className="mb-3" style={{ backgroundColor: 'white', marginTop: '62px', marginLeft: '51px', width: '345px', borderRadius: '50px' }}>
-                    <button
+            {/* Tabs Section */}
+            <Box sx={{ mt: 8, ml: 6 }}>
+                {/* Tabs */}
+                <Box sx={{ backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, display: 'flex', width: 400, p: 1, mb: 0 }}>
+                    <Button
                         onClick={() => setActiveTab('all')}
-                        className={`btn me-2 ${activeTab === 'all' ? 'btn-white text-dark border' : 'btn-light'}`}
-                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', marginRight: '5px', backgroundColor: activeTab === 'all' ? '#ffffff' : '#CDCDCD80', }}>
+                        sx={{
+                            flex: 1,
+                            bgcolor: activeTab === 'all' ? '#ffffff' : '#CDCDCD80',
+                            borderRadius: 2,
+                            p: 1,
+                        }}
+                    >
                         All Executive
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => setActiveTab('emp1')}
-                        className={`btn me-2 ${activeTab === 'emp1' ? 'btn-white text-dark border' : 'btn-light'}`}
-                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', marginRight: '5px', backgroundColor: activeTab === 'emp1' ? '#ffffff' : '#CDCDCD80', }}>
+                        sx={{
+                            flex: 1,
+                            bgcolor: activeTab === 'emp1' ? '#ffffff' : '#CDCDCD80',
+                            borderRadius: 2,
+                            p: 1,
+                        }}
+                    >
                         Employee 1
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => setActiveTab('emp2')}
-                        className={`btn me-2 ${activeTab === 'emp2' ? 'btn-white text-dark border' : 'btn-light'}`}
-                        style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', padding: '4px 10px', backgroundColor: activeTab === 'emp2' ? '#ffffff' : '#CDCDCD80', }}>
+                        sx={{
+                            flex: 1,
+                            bgcolor: activeTab === 'emp2' ? '#ffffff' : '#CDCDCD80',
+                            borderRadius: 2,
+                            p: 1,
+                        }}
+                    >
                         Employee 2
-                    </button>
-                </div>
+                    </Button>
+                </Box>
 
                 {/* Table */}
-                <div style={{
-                    backgroundColor: 'white',
-                    margin: '0 50px 62px',
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    boxShadow: '0px 2px 10px rgba(0,0,0,0.1)'
-                }}>
-                    <table className="table table-bordered text-center" style={{ width: '1339px' }}>
-                        <thead className="table-info">
-                            <tr style={{ backgroundColor: '#84E7F9' }}>
-                                <th>SL.no</th>
-                                <th>Name</th>
-                                <th>Project</th>
-                                <th>Task</th>
-                                <th>Sub-Task</th>
-                                <th>Date</th>
-                                <th>Worked-Hrs</th>
-                                <th>View</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <TableContainer component={Paper} sx={{ mb: 8, boxShadow: 3, borderRadius: 2, width: 1440 }}>
+                    <Table sx={{ width: 1440 }} aria-label="simple table">
+                        <TableHead>
+                            <TableRow sx={{ backgroundColor: '#84E7F9' }}>
+                                <TableCell align="center">SL.no</TableCell>
+                                <TableCell align="center">Name</TableCell>
+                                <TableCell align="center">Project</TableCell>
+                                <TableCell align="center">Task</TableCell>
+                                <TableCell align="center">Sub-Task</TableCell>
+                                <TableCell align="center">Date</TableCell>
+                                <TableCell align="center">Worked-Hrs</TableCell>
+                                <TableCell align="center">View</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
                             {employees[activeTab].map((emp) => (
-                                <tr key={emp.id}>
-                                    <td>{emp.id}</td>
-                                    <td>{emp.name}</td>
-                                    <td>{emp.project}</td>
-                                    <td>{emp.task}</td>
-                                    <td>{emp.subtask}</td>
-                                    <td>{emp.date}</td>
-                                    <td>{emp.hours}</td>
-                                    <td>
-                                        <img
-                                            src={visibility2Icon}
-                                            alt="View Icon"
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                handleViewClick(emp);
-                                            }}
-                                        />
-
-                                    </td>
-                                </tr>
+                                <TableRow key={emp.id}>
+                                    <TableCell align="center">{emp.id}</TableCell>
+                                    <TableCell align="center">{emp.name}</TableCell>
+                                    <TableCell align="center">{emp.project}</TableCell>
+                                    <TableCell align="center">{emp.task}</TableCell>
+                                    <TableCell align="center">{emp.subtask}</TableCell>
+                                    <TableCell align="center">{emp.date}</TableCell>
+                                    <TableCell align="center">{emp.hours}</TableCell>
+                                    <TableCell align="center">
+                                        <IconButton onClick={() => handleViewClick(emp)}>
+                                            <img src={visibility2Icon} alt="View" style={{ width: 24 }} />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
                             ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
 
+            {/* Modals */}
             <View show={showModal} data={selectedTask} onClose={closeModal} />
             {showSpentModal && (
                 <AddSpenttime onClose={handleCloseSpentModal} />
             )}
-
         </>
     );
 };

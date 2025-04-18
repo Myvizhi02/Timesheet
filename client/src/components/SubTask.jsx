@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Box, Button, TextField, Typography } from '@mui/material';
 
 const SubTask = () => {
   const [showNewInput, setShowNewInput] = useState(false);
@@ -18,10 +19,10 @@ const SubTask = () => {
   };
 
   return (
-    <div>
+    <Box>
       {/* Select SubTask Box */}
-      <div
-        style={{
+      <Box
+        sx={{
           backgroundColor: highlightSubTask ? '#ffdddd' : '#fff',
           border: '1px solid #ccc',
           borderRadius: '6px',
@@ -29,45 +30,42 @@ const SubTask = () => {
           marginBottom: '10px',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
         }}
       >
-        <span style={{ color: highlightSubTask ? 'red' : '#999' }}>Select SubTask</span>
-        <button
-          type="button"
-          onClick={handleAddSubTask}
-          style={{
+        <Typography sx={{ color: highlightSubTask ? 'red' : '#999' }}>
+          Select SubTask
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{
             backgroundColor: '#2264E5',
             color: '#fff',
-            border: 'none',
-            padding: '6px 12px',
             borderRadius: '4px',
-            cursor: 'pointer'
           }}
+          onClick={handleAddSubTask}
         >
           Add Sub Task
-        </button>
-      </div>
+        </Button>
+      </Box>
 
       {/* New Subtask Input Boxes */}
       {showNewInput &&
         subTasks.map((task, index) => (
-          <input
+          <TextField
             key={index}
             value={task}
             onChange={(e) => handleSubTaskChange(index, e.target.value)}
             placeholder={`Enter Sub Task ${index + 1}`}
-            style={{
-              padding: '10px',
+            variant="outlined"
+            fullWidth
+            sx={{
               marginBottom: '8px',
               borderRadius: '6px',
-              border: '1px solid #ccc',
-              width: '100%',
-              boxSizing: 'border-box'
             }}
           />
         ))}
-    </div>
+    </Box>
   );
 };
 

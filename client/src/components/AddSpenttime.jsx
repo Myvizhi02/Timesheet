@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, IconButton, Grid, Typography } from '@mui/material';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  IconButton,
+  Grid,
+  Typography,
+  Box,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import dateIcon from "../date.png";
+import dateIcon from '../date.png';
 
 const Spenttime = ({ onClose }) => {
   const [subTasks, setSubTasks] = useState([]);
@@ -19,9 +30,9 @@ const Spenttime = ({ onClose }) => {
         width: '100%',
         height: '42px',
         justifyContent: 'space-between',
-        padding: '0 12px',
+        padding: '0 40px',
         borderRadius: '8px',
-        textTransform: 'none'
+        textTransform: 'none',
       }}
     >
       <Typography sx={{ color: value ? 'text.primary' : 'text.secondary' }}>
@@ -32,13 +43,21 @@ const Spenttime = ({ onClose }) => {
   ));
 
   const handleAddSubTask = () => {
-    setSubTasks([...subTasks, ""]);
+    setSubTasks([...subTasks, '']);
   };
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       {/* Header */}
-      <DialogTitle sx={{ backgroundColor: '#A3EAFD', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <DialogTitle
+        sx={{
+          backgroundColor: '#A3EAFD',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '8px 20px',
+        }}
+      >
         <Typography variant="h6" fontWeight={600}>
           Add Spent Time
         </Typography>
@@ -48,33 +67,35 @@ const Spenttime = ({ onClose }) => {
       </DialogTitle>
 
       {/* Content */}
-      <DialogContent dividers sx={{ padding: 3 }}>
+      <DialogContent dividers sx={{ padding: 4}}>
         <Grid container spacing={2}>
           {/* Project and Task */}
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={8}>
             <TextField fullWidth label="Select Project" variant="outlined" size="small" />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={8}>
             <TextField fullWidth label="Select Task" variant="outlined" size="small" />
           </Grid>
 
-          {/* Subtask and Button */}
-          <Grid item xs={8}>
+          {/* Subtask */}
+          <Grid item xs={120}>
             <TextField
               fullWidth
               label="Select SubTask"
               variant="outlined"
               size="small"
-              sx={{ backgroundColor: subTasks.length > 0 ? '#f8d7da' : 'transparent' }}
+              sx={{
+                backgroundColor: subTasks.length > 0 ? '#f8d7da' : 'transparent',
+              }}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={12}>
             <Button
               fullWidth
               variant="contained"
               color="primary"
               onClick={handleAddSubTask}
-              sx={{ height: '42px' }}
+              sx={{ height: '40px' }}
             >
               Add Sub Task
             </Button>
@@ -88,12 +109,13 @@ const Spenttime = ({ onClose }) => {
                 label={`Enter Sub Task ${index + 1}`}
                 variant="outlined"
                 size="small"
+              
               />
             </Grid>
           ))}
 
           {/* Start and End Dates */}
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6}>
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
@@ -102,7 +124,7 @@ const Spenttime = ({ onClose }) => {
               customInput={<CustomInput placeholder="Select Start Date" />}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6}>
             <DatePicker
               selected={endDate}
               onChange={(date) => setEndDate(date)}
@@ -118,14 +140,14 @@ const Spenttime = ({ onClose }) => {
               fullWidth
               label="Enter Comments"
               multiline
-              rows={4}
+              rows={3}
               variant="outlined"
             />
           </Grid>
         </Grid>
       </DialogContent>
 
-      {/* Footer Actions */}
+      {/* Footer */}
       <DialogActions sx={{ justifyContent: 'center', paddingBottom: 3 }}>
         <Button
           variant="contained"

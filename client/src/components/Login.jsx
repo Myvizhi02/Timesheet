@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  Paper,
-  TextField,
-} from "@mui/material";
+import { Box, Button, Typography, Paper, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import timeIcon from "../assets/time.png";  // Left side illustration
 import image from "../assets/bgimg.png";   // Full background
@@ -57,11 +51,11 @@ const Login = () => {
         <Box
           sx={{
             flex: 1,
-            
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             px: 2,
+            backgroundColor: "#f5f7ff", // Light background to match your theme
           }}
         >
           <img
