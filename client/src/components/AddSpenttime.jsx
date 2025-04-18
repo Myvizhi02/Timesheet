@@ -9,7 +9,6 @@ import {
   IconButton,
   Grid,
   Typography,
-  Box,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DatePicker from 'react-datepicker';
@@ -27,18 +26,18 @@ const Spenttime = ({ onClose }) => {
       ref={ref}
       variant="outlined"
       sx={{
-        width: '100%',
-        height: '42px',
+        width: '15.5rem',
+        height: '2.5rem',
         justifyContent: 'space-between',
-        padding: '0 40px',
-        borderRadius: '8px',
+        paddingInline: '1rem',
+        borderRadius: '0.5rem',
         textTransform: 'none',
       }}
     >
       <Typography sx={{ color: value ? 'text.primary' : 'text.secondary' }}>
         {value || placeholder}
       </Typography>
-      <img src={dateIcon} alt="date-icon" style={{ width: '20px' }} />
+      <img src={dateIcon} alt="date-icon" style={{ width: '1.25rem' }} />
     </Button>
   ));
 
@@ -47,7 +46,19 @@ const Spenttime = ({ onClose }) => {
   };
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open
+      onClose={onClose}
+      fullWidth={false}
+      PaperProps={{
+        sx: {
+          width: '37.625rem',  // 602px
+          height: '37.5rem',   // 600px
+          m: 0,
+          p: 0,
+        },
+      }}
+    >
       {/* Header */}
       <DialogTitle
         sx={{
@@ -55,7 +66,8 @@ const Spenttime = ({ onClose }) => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '8px 20px',
+          height: '3rem',
+          px: 3,py:0
         }}
       >
         <Typography variant="h6" fontWeight={600}>
@@ -67,92 +79,137 @@ const Spenttime = ({ onClose }) => {
       </DialogTitle>
 
       {/* Content */}
-      <DialogContent dividers sx={{ padding: 4}}>
-        <Grid container spacing={2}>
-          {/* Project and Task */}
-          <Grid item xs={12} sm={8}>
-            <TextField fullWidth label="Select Project" variant="outlined" size="small" />
-          </Grid>
-          <Grid item xs={12} sm={8}>
-            <TextField fullWidth label="Select Task" variant="outlined" size="small" />
-          </Grid>
-
-          {/* Subtask */}
-          <Grid item xs={120}>
+      <DialogContent
+        dividers
+        sx={{
+          p: 2,
+          pt: 3,
+          height: 'calc(100% - 7rem)', // adjust based on title + footer height
+          overflowY: 'auto',
+        }}
+      >
+        <Grid container spacing={2} justifyContent="center">
+          {/* Project */}
+          <Grid item>
             <TextField
-              fullWidth
-              label="Select SubTask"
+              label="Select Project"
               variant="outlined"
               size="small"
-              sx={{
-                backgroundColor: subTasks.length > 0 ? '#f8d7da' : 'transparent',
-              }}
+              sx={{ width: '15.5rem', height: '2.5rem' }}
             />
           </Grid>
-          <Grid item xs={12}>
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={handleAddSubTask}
-              sx={{ height: '40px' }}
-            >
-              Add Sub Task
-            </Button>
+
+          {/* Task */}
+          <Grid item>
+            <TextField
+              label="Select Task"
+              variant="outlined"
+              size="small"
+              sx={{ width: '15.5rem', height: '2.5rem' }}
+            />
           </Grid>
 
-          {/* Dynamic Subtasks */}
-          {subTasks.map((_, index) => (
-            <Grid item xs={12} key={index}>
+          {/* Select SubTask and Button in same row */}
+          <Grid
+            item
+            container
+            spacing={1}
+            alignItems="center"
+            justifyContent="center"
+            sx={{ flexWrap: 'nowrap' }}
+          >
+            <Grid item>
               <TextField
-                fullWidth
+                label="Select SubTask"
+                variant="outlined"
+                size="small"
+                sx={{
+                  width: '27rem', // 433px
+                  height: '2.5rem',
+                  backgroundColor: subTasks.length > 0 ? '#f8d7da' : 'transparent',
+                }}
+              />
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAddSubTask}
+                sx={{
+                  width: '5rem', // 79px
+                  height: '2.5rem',
+                  textTransform: 'none',
+                  minWidth: 0,
+                }}
+              >
+                Add
+              </Button>
+            </Grid>
+          </Grid>
+
+          {/* Dynamic SubTasks */}
+          {subTasks.map((_, index) => (
+            <Grid item key={index}>
+              <TextField
                 label={`Enter Sub Task ${index + 1}`}
                 variant="outlined"
                 size="small"
-              
+                sx={{ width: '32rem', height: '2.5rem' }}
               />
             </Grid>
           ))}
 
-          {/* Start and End Dates */}
-          <Grid item xs={12} sm={6}>
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              placeholderText="Select Start Date"
-              dateFormat="dd/MM/yyyy"
-              customInput={<CustomInput placeholder="Select Start Date" />}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              placeholderText="Select End Date"
-              dateFormat="dd/MM/yyyy"
-              customInput={<CustomInput placeholder="Select End Date" />}
-            />
+          {/* Start Date & End Date */}
+          <Grid item container spacing={2} justifyContent="center">
+            <Grid item>
+              <DatePicker
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                placeholderText="Select Start Date"
+                dateFormat="dd/MM/yyyy"
+                customInput={<CustomInput placeholder="Start Date" />}
+              />
+            </Grid>
+            <Grid item>
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                placeholderText="Select End Date"
+                dateFormat="dd/MM/yyyy"
+                customInput={<CustomInput placeholder="End Date" />}
+              />
+            </Grid>
           </Grid>
 
           {/* Comments */}
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
             <TextField
-              fullWidth
               label="Enter Comments"
               multiline
-              rows={3}
               variant="outlined"
+              sx={{
+                width: '32.6rem', // 522px
+                '& .MuiInputBase-root': {
+                  minHeight: '6.25rem', // 100px
+                },
+              }}
             />
           </Grid>
         </Grid>
       </DialogContent>
 
       {/* Footer */}
-      <DialogActions sx={{ justifyContent: 'center', paddingBottom: 3 }}>
+      <DialogActions sx={{ justifyContent: 'center', paddingBottom: 2 }}>
         <Button
           variant="contained"
           color="primary"
-          sx={{ padding: '10px 40px', borderRadius: '8px', fontWeight: 600 }}
+          sx={{
+            py: 1,
+            px: 4,
+            borderRadius: '0.5rem',
+            fontWeight: 600,
+            textTransform: 'none',
+          }}
         >
           Submit
         </Button>
