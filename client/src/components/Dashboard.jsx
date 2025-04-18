@@ -67,10 +67,9 @@ const Dashboard = () => {
                 width: '191px',
                 height: '42px',
                 cursor: 'pointer',
-                ml: 2,
             }}
         >
-            <img src={dateIcon} alt="Date Icon" style={{ width: 20, marginLeft: 8 }} />
+            <img src={dateIcon} alt="Date Icon" style={{ width: 20, marginRight: 8 }} />
             <input
                 type="text"
                 value={value}
@@ -79,7 +78,7 @@ const Dashboard = () => {
                 style={{
                     border: 'none',
                     outline: 'none',
-                    width: '275px',
+                    width: '100%',
                     backgroundColor: 'transparent',
                     fontSize: 14,
                     color: value ? '#000' : '#888',
@@ -93,118 +92,133 @@ const Dashboard = () => {
             {/* Top Welcome Section */}
             <Box
                 sx={{
-                    margin: '40px 40px 40px 50px',
+                    margin: { xs: 2, md: 4 },
                     backgroundColor: 'white',
-                    width: '1440px',
-                    height: '150px',
-                    padding: '20px',
+                    padding: { xs: 2, md: 4 },
                     boxSizing: 'border-box',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between',
+                    gap: 2,
+                    borderRadius: 2,
+                
                 }}
             >
-                {/* Welcome Text */}
                 <Typography variant="h5" sx={{ pl: 2 }}>
                     Welcome to Pradeep Shiva.
                 </Typography>
 
                 {/* DatePicker + Select + Buttons */}
-                <Grid container spacing={25} alignItems="center">
-                    {/* Left Side */}
-                    <Grid item xs={12} md={5}>
-                        <Box sx={{ display: 'flex', gap: 6, }}>
-                            {/* Date Picker */}
-                            <Box sx={{ width: 191, height: 42 }}>
-                                <DatePicker
-                                    selected={startDate}
-                                    onChange={(date) => setStartDate(date)}
-                                    placeholderText="  6Mar - 7Mar"
-                                    dateFormat="dd/MM/yyyy"
-                                    customInput={<CustomInput placeholder="Select Start Date" />}
-                                />
-                            </Box>
+                <Grid container size={12} spacing={3} alignItems="center">
+    {/* Left Side */}
+    <Grid size={{ xs: 12, md: 3 }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: 'center',
+                gap: 2,
+            }}
+        >
+            {/* Date Picker */}
+            <DatePicker
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                placeholderText="6Mar - 7Mar"
+                dateFormat="dd/MM/yyyy"
+                customInput={<CustomInput placeholder="Select Start Date" />}
+            />
 
-                            {/* Select Project */}
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    border: '1px solid #ccc',
-                                    borderRadius: 2,
-                                    backgroundColor: 'white',
-                                    width: 191,
-                                    height: 42,
-                                    paddingLeft: 1,
-                                }}
-                            >
-                                <img src={selectionIcon} alt="Select Project" style={{ width: 20, marginRight: 8 }} />
-                                <Select
-                                    value={project}
-                                    onChange={(e) => setProject(e.target.value)}
-                                    displayEmpty
-                                    variant="standard"
-                                    sx={{
-                                        width: '100%',
-                                        borderBottom: 'none',
-                                        '&::before, &::after': { display: 'none' },
-                                        outline: 'none',
-                                    }}
-                                >
-                                    <MenuItem value=""><em>Select Project</em></MenuItem>
-                                    <MenuItem value="Bridge - Application">Bridge - Application</MenuItem>
-                                    <MenuItem value="CRM Dashboard">CRM Dashboard</MenuItem>
-                                    <MenuItem value="Admin Panel">Admin Panel</MenuItem>
-                                </Select>
-                            </Box>
-                        </Box>
-                    </Grid>
+            {/* Select Project */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    border: '1px solid #ccc',
+                    borderRadius: 2,
+                    backgroundColor: 'white',
+                    width: 191,
+                    height: 42,
+                    paddingLeft: 1,
+                }}
+            >
+                <img src={selectionIcon} alt="Select Project" style={{ width: 20, marginRight: 8 }} />
+                <Select
+                    value={project}
+                    onChange={(e) => setProject(e.target.value)}
+                    displayEmpty
+                    variant="standard"
+                    sx={{
+                        width: '100%',
+                        borderBottom: 'none',
+                        '&::before, &::after': { display: 'none' },
+                        outline: 'none',
+                    }}
+                >
+                    <MenuItem value=""><em>Select Project</em></MenuItem>
+                    <MenuItem value="Bridge - Application">Bridge - Application</MenuItem>
+                    <MenuItem value="CRM Dashboard">CRM Dashboard</MenuItem>
+                    <MenuItem value="Admin Panel">Admin Panel</MenuItem>
+                </Select>
+            </Box>
+        </Box>
+    </Grid>
 
-                    {/* Right Side Buttons */}
-                    <Grid item xs={12} md={7}>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                            <Button
-                                variant="contained"
-                                color="success"
-                                sx={{ width: 180, height: 42 }}
-                                startIcon={<img src={shareIcon} alt="Share" width="20" />}
-                            >
-                                Export to Excel
-                            </Button>
+    {/* Right Side - Buttons */}
+    
+    <Grid size={{ xs: 12, md: 8 }}>
+        <Box
+            sx={{
+                display: 'flex',
+                 // flexWrap: 'wrap',
+                gap: 2,
+                justifyContent: { xs: 'center', md: 'flex-end' }, // <-- IMPORTANT LINE
+                ml: { xs: 0, md: '90px' }, // Space between left and right side
+            }}
+        >
+            <Button
+                variant="contained"
+                color="success"
+                sx={{ minWidth: 150, maxWidth: 180, height: 42, textTransform:'none' }}
+                startIcon={<img src={shareIcon} alt="Share" width="20" />}
+            >
+                Export to Excel
+            </Button>
 
-                            <Button
-                                variant="contained"
-                                sx={{ bgcolor: '#213E9A', width: 175, height: 42 }}
-                                startIcon={<img src={visibilityIcon} alt="View" width="20" />}
-                            >
-                                View Task
-                            </Button>
+            <Button
+                variant="contained"
+                sx={{ bgcolor: '#213E9A', minWidth: 150, maxWidth: 180, height: 42,  textTransform:'none' }}
+                startIcon={<img src={visibilityIcon} alt="View" width="20" />}
+            >
+                View Task
+            </Button>
 
-                            <Button
-                                variant="contained"
-                                sx={{ bgcolor: '#213E9A', width: 175, height: 42 }}
-                                startIcon={<img src={foldereyeIcon} alt="Project" width="20" />}
-                            >
-                                View Project
-                            </Button>
+            <Button
+                variant="contained"
+                sx={{ bgcolor: '#213E9A', minWidth: 150, maxWidth: 180, height: 42, textTransform:'none' }}
+                startIcon={<img src={foldereyeIcon} alt="Project" width="20" />}
+            >
+                View Project
+            </Button>
 
-                            <Button
-                                variant="contained"
-                                sx={{ bgcolor: '#213E9A', width: 175, height: 42 }}
-                                startIcon={<img src={addIcon} alt="Add" width="20" />}
-                                onClick={handleOpenSpentModal}
-                            >
-                                Add Spent Time
-                            </Button>
-                        </Box>
-                    </Grid>
-                </Grid>
+            <Button
+                variant="contained"
+                sx={{ bgcolor: '#213E9A', minWidth: 150, maxWidth: 180, height: 42, textTransform:'none' }}
+                startIcon={<img src={addIcon} alt="Add" width="20" />}
+                onClick={handleOpenSpentModal}
+            >
+                Add Spent Time
+            </Button>
+        </Box>
+    </Grid>
+</Grid>
+
+
             </Box>
 
             {/* Tabs Section */}
-            <Box sx={{ mt: 8, ml: 6 }}>
+            <Box sx={{ mt: 8, mx: { xs: 2, md: 6 } }}>
                 {/* Tabs */}
-                <Box sx={{ backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, display: 'flex', width: 400, p: 1, mb: 0 }}>
+                <Box sx={{ backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, display: 'flex', width: { xs: '100%', md: 400 }, p: 1 }}>
                     <Button
                         onClick={() => setActiveTab('all')}
                         sx={{
@@ -241,8 +255,8 @@ const Dashboard = () => {
                 </Box>
 
                 {/* Table */}
-                <TableContainer component={Paper} sx={{ mb: 8, boxShadow: 3, borderRadius: 2, width: 1440 }}>
-                    <Table sx={{ width: 1440 }} aria-label="simple table">
+                <TableContainer component={Paper} sx={{ mb: 8, boxShadow: 3, borderRadius: 2 }}>
+                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
                         <TableHead>
                             <TableRow sx={{ backgroundColor: '#84E7F9' }}>
                                 <TableCell align="center">SL.no</TableCell>
@@ -279,9 +293,7 @@ const Dashboard = () => {
 
             {/* Modals */}
             <View show={showModal} data={selectedTask} onClose={closeModal} />
-            {showSpentModal && (
-                <AddSpenttime onClose={handleCloseSpentModal} />
-            )}
+            {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
         </>
     );
 };

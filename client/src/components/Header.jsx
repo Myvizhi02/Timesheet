@@ -12,30 +12,75 @@ const Header = () => {
       sx={{
         backgroundColor: 'white',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        height: '70px',
-        justifyContent: 'center',
       }}
     >
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Toolbar
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          minHeight: { xs: '60px', sm: '70px' },
+          px: { xs: 2, sm: 4 },
+        }}
+      >
         {/* Left Side */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton>
-            <img src={navIcon} alt="Navigation Icon" style={{ width: '26px' }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+          <IconButton sx={{ p: 0 }}>
+            <img
+              src={navIcon}
+              alt="Navigation"
+              style={{
+                width: '22px',
+                height: '22px',
+                objectFit: 'contain',
+              }}
+            />
           </IconButton>
-          <IconButton>
-            <img src={homeIcon} alt="Home Icon" style={{ width: '24px' }} />
+          <IconButton sx={{ p: 0 }}>
+            <img
+              src={homeIcon}
+              alt="Home"
+              style={{
+                width: '20px',
+                height: '20px',
+                objectFit: 'contain',
+              }}
+            />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 500, color: 'black' }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 500,
+              fontSize: { xs: '16px', sm: '18px' },
+              color: 'black',
+              display: { xs: 'none', sm: 'block' }, // Hide "Dashboard" on extra small screens
+            }}
+          >
             Dashboard
           </Typography>
         </Box>
 
         {/* Right Side */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 500, color: 'black' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 500,
+              fontSize: { xs: '14px', sm: '16px' },
+              color: 'black',
+              display: { xs: 'none', sm: 'block' }, // Hide name on small mobile
+            }}
+          >
             Pradeep Shiva
           </Typography>
-          <Avatar alt="User" src={imgIcon} sx={{ width: 36, height: 36 }} />
+          <Avatar
+            alt="User"
+            src={imgIcon}
+            sx={{
+              width: { xs: 30, sm: 36 },
+              height: { xs: 30, sm: 36 },
+            }}
+          />
         </Box>
       </Toolbar>
     </AppBar>
