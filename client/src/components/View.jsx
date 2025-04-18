@@ -1,63 +1,78 @@
-import React from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
+  Backdrop,
+  Box,
   Button,
-  Typography,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   TextField,
-  Box
+  Typography
 } from '@mui/material';
 import { Grid } from '@mui/system';
+import React from 'react';
 
 const View = ({ show, onClose, data }) => {
   if (!show) return null;
 
   return (
     <Grid container>
+      {/* Light gray background manually */}
+      {show && (
+        <Backdrop
+          open={true}
+          sx={{
+            backgroundColor: 'rgba(220, 220, 220, 0.5)', // light gray
+            zIndex: (theme) => theme.zIndex.modal - 1,
+          }}
+        />
+      )}
+
       <Dialog
         open={show}
         onClose={onClose}
+        hideBackdrop
         PaperProps={{
           sx: {
-            mt: { xs: -5, sm: -10, md: -15 },
-            ml: { xs: 0, sm: 0, md: 'auto' },
-            mr: { xs: 0, sm: 0, md: 'auto' },
-            width: { xs: '90%', sm: '80%', md: '602px' },
-            height: { xs: 'auto', sm: 'auto', md: '641px' },
-            borderRadius: '8px',
-            overflow: 'hidden',
-            boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
-            backgroundColor: 'white',
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            m: 2,
+            width: { xs: '90%', sm: '90%', md: '602px' }, // Responsive width
+            height: { xs: 'auto', sm: 'auto', md: '641px' }, // Responsive height
+            maxWidth: '602px',
+            maxHeight: '90vh', // restrict in small screens
+            borderRadius: '0.5rem',
+            overflowY: 'auto',
+            boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.25)',
+            backgroundColor: '#ffffff',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'flex-end',
+            zIndex: (theme) => theme.zIndex.modal,
           }
         }}
       >
         {/* Dialog Header */}
-        <DialogTitle sx={{
-          backgroundColor: '#A3EAFD',
-          fontWeight: 'bold',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: { xs: '12px 16px', sm: '16px 20px', md: '12px 16px' },
-          borderTopLeftRadius: '8px',
-          borderTopRightRadius: '8px',
-          marginBottom: 4
-        }}>
-          <Typography variant="h6" sx={{ fontSize: { xs: '14px', sm: '16px', md: '18px' } }}>
+        <DialogTitle
+          sx={{
+            backgroundColor: '#A3EAFD',
+            fontWeight: 'bold',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: 1,
+          }}
+        >
+          <Typography variant="h6" fontSize="1.125rem">
             {data?.name || 'Employee 1'} ({data?.empId || 'K025689'})
           </Typography>
           <Button
             onClick={onClose}
             sx={{
               minWidth: 'auto',
-              padding: 0,
+              p: 0,
               background: 'none',
               border: 'none',
-              fontSize: '24px',
+              fontSize: '1.5rem',
               color: 'black',
               cursor: 'pointer',
               '&:hover': {
@@ -71,49 +86,49 @@ const View = ({ show, onClose, data }) => {
         </DialogTitle>
 
         {/* Dialog Content */}
-        <DialogContent sx={{ padding: { xs: '20px', sm: '30px' }, overflow: 'hidden' }}>
-          <Typography variant="body1" sx={{ fontSize: { xs: '14px', sm: '16px' } }}>
-            <strong>Task Details</strong>
+        <DialogContent sx={{ p: 3, mt:5 }}>
+          <Typography variant="body1" fontSize="1rem" fontWeight="bold" mb={2}>
+            Task Details
           </Typography>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-            <Typography sx={{ fontSize: { xs: '12px', sm: '14px' } }}>
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography fontSize="0.9rem">
               Start Time: <strong>{data?.startTime || '9:50 am'}</strong>
             </Typography>
-            <Typography sx={{ fontSize: { xs: '12px', sm: '14px' } }}>
+            <Typography fontSize="0.9rem">
               Start Date: <strong>{data?.startDate || '12/2/2025'}</strong>
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-            <Typography sx={{ fontSize: { xs: '12px', sm: '14px' } }}>
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography fontSize="0.9rem">
               End Time: <strong>{data?.endTime || '13:00 pm'}</strong>
             </Typography>
-            <Typography sx={{ fontSize: { xs: '12px', sm: '14px' } }}>
+            <Typography fontSize="0.9rem">
               End Date: <strong>{data?.endDate || '12/2/2025'}</strong>
             </Typography>
           </Box>
 
-          <Typography sx={{ mt: 4, fontSize: { xs: '12px', sm: '14px' } }}>
+          <Typography fontSize="0.9rem" mb={2}>
             Task Status: <strong>{data?.status || 'Open'}</strong>
           </Typography>
 
-          <Typography sx={{ mt: 4, fontSize: { xs: '12px', sm: '14px' } }}>
+          <Typography fontSize="0.9rem" mb={2}>
             People Worked: {data?.peopleWorked || 'Employee 1(K025689), Employee 3(K0123456)'}
           </Typography>
 
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="body1" htmlFor="comments" sx={{ fontSize: { xs: '12px', sm: '14px' } }}>
+          <Box>
+            <Typography fontSize="0.9rem" mb={1}>
               Comments:
             </Typography>
             <TextField
               id="comments"
               multiline
-              rows={6}
+              rows={5}
               fullWidth
               variant="outlined"
-              sx={{ mt: 2 }}
               placeholder="Enter comments..."
+              sx={{ backgroundColor: '#ffffff' }}
             />
           </Box>
         </DialogContent>
