@@ -1,17 +1,29 @@
 import React, { useState } from 'react';
 import {
-  Box, Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Typography, IconButton, Dialog, DialogActions, DialogContent, DialogTitle
+  Box,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  IconButton,
+  Dialog,
+  DialogContent,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddTask from './AddTask';
-import addIcon from '../add.png'; // Make sure this path is correct
+import addIcon from '../add.png'; // Check your image path!
 
 const Task = () => {
   const [showPopup, setShowPopup] = useState(false);
 
   const handleCreateTask = (data) => {
     console.log('New Task:', data);
+    setShowPopup(false);
   };
 
   const task = [
@@ -44,7 +56,7 @@ const Task = () => {
   return (
     <>
       {/* Page Container */}
-      <Box sx={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      <Box sx={{ padding: { xs: 2, sm: 4 }, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
 
         {/* Header Button */}
         <Box display="flex" justifyContent="flex-end" mb={3}>
@@ -53,7 +65,7 @@ const Task = () => {
             startIcon={
               <img
                 src={addIcon}
-                alt="AddIcon"
+                alt="Add Icon"
                 style={{ width: 20, height: 20 }}
               />
             }
@@ -61,7 +73,7 @@ const Task = () => {
               backgroundColor: '#3D6BFA',
               borderRadius: '12px',
               fontWeight: 600,
-              width: '160px',
+              width: { xs: '140px', sm: '160px' },
               height: '44px',
               fontSize: '14px',
               textTransform: 'none',
@@ -77,7 +89,7 @@ const Task = () => {
 
         {/* Table */}
         <TableContainer component={Paper} elevation={3}>
-          <Table>
+          <Table size="small">
             <TableHead sx={{ backgroundColor: '#84E7F9' }}>
               <TableRow>
                 <TableCell align="center"><strong>SL No</strong></TableCell>
@@ -120,19 +132,18 @@ const Task = () => {
       </Box>
 
       {/* Popup for Adding Task */}
-      <Dialog open={showPopup} onClose={() => setShowPopup(false)}>
-        <DialogTitle>Add Task</DialogTitle>
-        <DialogContent>
+      <Dialog
+        open={showPopup}
+        onClose={() => setShowPopup(false)}
+        fullWidth
+        maxWidth="sm" // sm = 600px max width
+        PaperProps={{
+          sx: { borderRadius: '12px' }
+        }}
+      >
+        <DialogContent sx={{ padding: 0 }}>
           <AddTask onClose={() => setShowPopup(false)} onSubmit={handleCreateTask} />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowPopup(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={() => setShowPopup(false)} color="primary">
-            Save
-          </Button>
-        </DialogActions>
       </Dialog>
     </>
   );
