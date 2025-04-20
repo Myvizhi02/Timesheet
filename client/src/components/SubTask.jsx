@@ -41,7 +41,7 @@ const SubTask = () => {
           sx={{
             backgroundColor: '#2264E5',
             color: '#fff',
-            borderRadius: '4px',
+            borderRadius: '4px',textTransform: 'none',
           }}
           onClick={handleAddSubTask}
         >

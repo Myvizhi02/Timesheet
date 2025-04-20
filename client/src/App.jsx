@@ -1,14 +1,13 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-
+import SpenttimeHeader from "./components/SpenttimeHeader";
 import AddSpenttime from "./components/AddSpenttime";
 import Dashboard from './components/Dashboard';
 import Header from "./components/Header";
 import Login from "./components/Login";
 import Project from "./components/Project";
 import ProjectHeader from "./components/ProjectHeader";
-import SpenttimeHeader from "./components/SpenttimeHeader";
 import Task from "./components/Task";
 import TaskHeader from "./components/TaskHeader";
 
@@ -53,15 +52,15 @@ function App() {
         />
 
         {/* Spent Time Route */}
-        <Route
+        { <Route
           path="/spenttime"
           element={
             <>
-              <SpenttimeHeader />
+              <SpenttimeHeader/>
               <AddSpenttime />
             </>
           }
-        />
+        /> }
       </Routes>
     </BrowserRouter>
   );

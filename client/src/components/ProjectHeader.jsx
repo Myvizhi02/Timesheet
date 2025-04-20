@@ -21,14 +21,14 @@ const ProjectHeader = () => {
       {/* Left Side: Navigation, Home, Arrow, Project */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <IconButton>
-          <NavIcon sx={{ width: 26 }} />
-        </IconButton>
-        <IconButton>
-          <HomeIcon sx={{ width: 24 }} />
-        </IconButton>
-        <IconButton>
-          <ArrowIcon sx={{ width: 26 }} />
-        </IconButton>
+                  <NavIcon sx={{ width: 26 }} />
+                </IconButton>
+                <IconButton>
+                  <HomeIcon sx={{ width: 24 }} />
+                </IconButton>
+                <IconButton>
+                  <ArrowIcon sx={{ width: 26 }} />
+                </IconButton>
         <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Project</Typography>
       </Box>
 

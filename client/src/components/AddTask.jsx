@@ -168,7 +168,7 @@ const AddTask = ({ onClose, onSubmit }) => {
                 backgroundColor: "#3758f9",
                 paddingX: 4,
                 paddingY: 1,
-                width: { xs: '100%', sm: 'auto' },
+                width: { xs: '100%', sm: 'auto' },textTransform: 'none',
                 '&:hover': {
                   backgroundColor: "#2c47c5",
                 }
@@ -183,7 +183,7 @@ const AddTask = ({ onClose, onSubmit }) => {
                 backgroundColor: "#3758f9",
                 paddingX: 4,
                 paddingY: 1,
-                width: { xs: '100%', sm: 'auto' },
+                width: { xs: '100%', sm: 'auto' },textTransform: 'none',
                 '&:hover': {
                   backgroundColor: "#2c47c5",
                 }

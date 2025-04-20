@@ -15,6 +15,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import dateIcon from '../date.png';
 
+// Custom Date Input
 const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
   <Box
     onClick={onClick}
@@ -22,12 +23,12 @@ const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
     sx={{
       display: 'flex',
       alignItems: 'center',
-      padding: '10px 12px',
+      padding: '0.625em 0.75em',
       border: '1px solid #ccc',
-      borderRadius: '8px',
+      borderRadius: '0.5em',
       backgroundColor: '#fff',
       width: '100%',
-      height: '42px',
+      height: '2.625em',
       cursor: 'pointer',
     }}
   >
@@ -41,11 +42,11 @@ const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
         outline: 'none',
         width: '100%',
         backgroundColor: 'transparent',
-        fontSize: '14px',
+        fontSize: '1rem',
         color: value ? '#000' : '#888',
       }}
     />
-    <img src={dateIcon} alt="Date Icon" style={{ width: '20px', marginLeft: '8px' }} />
+    <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em' }} />
   </Box>
 ));
 
@@ -75,13 +76,13 @@ const AddProject = ({ onClose, onSubmit }) => {
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       {/* Header */}
-      <Box sx={{ backgroundColor: '#A3EAFD', borderTopLeftRadius: 1, borderTopRightRadius: 1 }}>
+      <Box sx={{ backgroundColor: '#A3EAFD', borderTopLeftRadius: '0.625em', borderTopRightRadius: '0.625em' }}>
         <DialogTitle
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '10px 20px',
+            padding: '0em 1em',
           }}
         >
           <Typography variant="h6" fontWeight="600">
@@ -93,11 +94,12 @@ const AddProject = ({ onClose, onSubmit }) => {
         </DialogTitle>
       </Box>
 
-      <DialogContent sx={{ padding: 3 }}>
+      <DialogContent sx={{ padding: '2em' }}>
         {/* Form */}
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            {/* Row 1: Project ID & Project Name */}
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="projectId"
                 label="Project ID"
@@ -107,7 +109,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 required
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="projectName"
                 label="Project Name"
@@ -117,7 +119,9 @@ const AddProject = ({ onClose, onSubmit }) => {
                 required
               />
             </Grid>
-            <Grid item xs={6}>
+
+            {/* Row 2: Domain & LOB */}
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="domain"
                 label="Domain"
@@ -127,7 +131,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 required
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="lob"
                 label="LOB"
@@ -137,7 +141,9 @@ const AddProject = ({ onClose, onSubmit }) => {
                 required
               />
             </Grid>
-            <Grid item xs={6}>
+
+            {/* Row 3: Start Date & End Date */}
+            <Grid item xs={12} sm={6}>
               <DatePicker
                 selected={startDate}
                 onChange={(date) => setStartDate(date)}
@@ -146,7 +152,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 customInput={<CustomInput placeholder="Select Start Date" />}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <DatePicker
                 selected={endDate}
                 onChange={(date) => setEndDate(date)}
@@ -155,7 +161,18 @@ const AddProject = ({ onClose, onSubmit }) => {
                 customInput={<CustomInput placeholder="Select End Date" />}
               />
             </Grid>
-            <Grid item xs={6}>
+
+            {/* Row 4: End Date & Budget */}
+            <Grid item xs={12} sm={6}>
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                placeholderText="Select End Date"
+                dateFormat="dd/MM/yyyy"
+                customInput={<CustomInput placeholder="Select End Date" />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="budget"
                 label="Budget"
@@ -164,7 +181,9 @@ const AddProject = ({ onClose, onSubmit }) => {
                 onChange={handleChange}
               />
             </Grid>
-            <Grid item xs={6}>
+
+            {/* Row 5: Add People */}
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="people"
                 label="Add People"
@@ -176,15 +195,15 @@ const AddProject = ({ onClose, onSubmit }) => {
           </Grid>
 
           {/* Submit Button */}
-          <Box textAlign="center" mt={6}>
+          <Box textAlign="center" mt={4}>
             <Button
               type="submit"
               variant="contained"
               sx={{
                 backgroundColor: '#3D6BFA',
                 color: '#fff',
-                padding: '10px 30px',
-                borderRadius: '6px',
+                padding: '0.625em 1.875em',
+                borderRadius: '0.375em',
                 fontWeight: 600,
                 textTransform: 'none',
                 '&:hover': {

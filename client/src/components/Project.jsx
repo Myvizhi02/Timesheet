@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Modal, Paper, IconButton } from '@mui/material';
 import { Add as AddIcon, BorderColor as BorderIcon } from '@mui/icons-material';
 import AddProject from './AddProject';
+import addIcon from '../add.png';
 
 const Project = () => {
   const [showModal, setShowModal] = useState(false);
@@ -35,7 +36,7 @@ const Project = () => {
       {/* Header and Create Button */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
         <Button
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowModal(true)} 
           sx={{
             borderRadius: '12px',
             backgroundColor: '#3D6BFA',
@@ -47,14 +48,14 @@ const Project = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            gap: '1px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',textTransform: 'none',
             '&:hover': {
               backgroundColor: '#2c47c5',
             }
           }}
-        >
-          <AddIcon sx={{ width: '18px' }} />
+        > <img src={addIcon} alt="Add" width="18" sx={{ width: '12px',display:'flex', justifyContent:'center' }}/>
+          
           Create Project
         </Button>
       </Box>

@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Button,
-  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
+  IconButton,
+  TextField,
   Typography,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import dateIcon from '../date.png';
 
-const Spenttime = ({ onClose }) => {
+const AddSpenttime = ({ onClose }) => {
   const [subTasks, setSubTasks] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -52,8 +52,8 @@ const Spenttime = ({ onClose }) => {
       fullWidth={false}
       PaperProps={{
         sx: {
-          width: '37.625rem',  // 602px
-          height: '37.5rem',   // 600px
+          width: '37.625rem', // 602px
+          height: '37.5rem',  // 600px
           m: 0,
           p: 0,
         },
@@ -67,7 +67,8 @@ const Spenttime = ({ onClose }) => {
           justifyContent: 'space-between',
           alignItems: 'center',
           height: '3rem',
-          px: 3,py:0
+          px: 3,
+          py: 0,
         }}
       >
         <Typography variant="h6" fontWeight={600}>
@@ -109,7 +110,7 @@ const Spenttime = ({ onClose }) => {
             />
           </Grid>
 
-          {/* Select SubTask and Button in same row */}
+          {/* Select SubTask and Add Button */}
           <Grid
             item
             container
@@ -124,7 +125,7 @@ const Spenttime = ({ onClose }) => {
                 variant="outlined"
                 size="small"
                 sx={{
-                  width: '27rem', // 433px
+                  width: '27rem',
                   height: '2.5rem',
                   backgroundColor: subTasks.length > 0 ? '#f8d7da' : 'transparent',
                 }}
@@ -136,13 +137,13 @@ const Spenttime = ({ onClose }) => {
                 color="primary"
                 onClick={handleAddSubTask}
                 sx={{
-                  width: '5rem', // 79px
+                  width: '5rem',
                   height: '2.5rem',
                   textTransform: 'none',
-                  minWidth: 0,
+                  minWidth: 0,fontSize:'0.5rem'
                 }}
               >
-                Add
+                Add Subtask
               </Button>
             </Grid>
           </Grid>
@@ -218,4 +219,4 @@ const Spenttime = ({ onClose }) => {
   );
 };
 
-export default Spenttime;
+export default AddSpenttime;
