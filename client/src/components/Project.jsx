@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Modal, Paper, IconButton } from '@mui/material';
-import { Add as AddIcon, BorderColor as BorderIcon } from '@mui/icons-material';
+// import { Add as AddIcon, BorderColor as BorderIcon } from '@mui/icons-material';
 import AddProject from './AddProject';
-import addIcon from '../add.png';
+import addIcon from '../add.png';import editIcon from '../edit.png';
 
 const Project = () => {
   const [showModal, setShowModal] = useState(false);
@@ -77,26 +77,27 @@ const Project = () => {
           <TableBody>
             {projects.map((proj, index) => (
               <TableRow key={proj.id} sx={{ textAlign: 'center', borderBottom: '1px solid #ddd' }}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{proj.name}</TableCell>
-                <TableCell>{proj.domain}</TableCell>
-                <TableCell>{proj.lob}</TableCell>
-                <TableCell>{proj.startDate}</TableCell>
-                <TableCell>{proj.endDate}</TableCell>
-                <TableCell>
+                <TableCell sx={{ textAlign: 'center'}}>{index + 1}</TableCell>
+                <TableCell sx={{ textAlign: 'center'}} >{proj.name}</TableCell>
+                <TableCell sx={{ textAlign: 'center'}}>{proj.domain}</TableCell>
+                <TableCell sx={{ textAlign: 'center'}}>{proj.lob}</TableCell>
+                <TableCell sx={{ textAlign: 'center'}}>{proj.startDate}</TableCell>
+                <TableCell sx={{ textAlign: 'center'}}>{proj.endDate}</TableCell>
+                <TableCell sx={{ display: 'flex', justifyContent:'center'}}>
                   <Button
                     variant="outlined"
-                    color="warning"
+                    color="black"
+                   
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
                       fontWeight: 500,
                       padding: '6px 12px',
-                      borderRadius: '4px',
+                      borderRadius: '4px', backgroundColor:"#F9E49261", borderColor:"#F9E49261"
                     }}
                   >
-                    <BorderIcon sx={{ width: '16px' }} />
+                    <img src={editIcon} alt="Edit" sx={{ width: '16px',height:'16px' }} />
                     Edit Project
                   </Button>
                 </TableCell>

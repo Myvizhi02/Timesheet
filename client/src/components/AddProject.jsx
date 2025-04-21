@@ -23,7 +23,7 @@ const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
     sx={{
       display: 'flex',
       alignItems: 'center',
-      padding: '0.625em 0.75em',
+      padding: '0.1em 0.2em',
       border: '1px solid #ccc',
       borderRadius: '0.5em',
       backgroundColor: '#fff',
@@ -43,7 +43,7 @@ const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
         width: '100%',
         backgroundColor: 'transparent',
         fontSize: '1rem',
-        color: value ? '#000' : '#888',
+        color: value ? '#000' : '#888',padding: '0.1em 0.4em'
       }}
     />
     <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em' }} />
@@ -97,7 +97,7 @@ const AddProject = ({ onClose, onSubmit }) => {
       <DialogContent sx={{ padding: '2em' }}>
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
             {/* Row 1: Project ID & Project Name */}
             <Grid item xs={12} sm={6}>
               <TextField
