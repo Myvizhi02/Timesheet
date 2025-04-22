@@ -113,17 +113,18 @@ const AddSubTask = ({ onClose, onSubmit }) => {
         <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
           <TextField
             label="Enter SubTask"
-            fullWidth
+            width= '50%'
             value={subtask}
             onChange={(e) => setSubtask(e.target.value)}
             sx={{
               '& .MuiOutlinedInput-root': {
-                height: '40px',
+                height: '40px', width: '260px',
               },
             }}
           />
 
           <TextField
+
             label="Status"
             variant="outlined"
             value={status ? 'Open' : 'Closed'}
@@ -141,7 +142,7 @@ const AddSubTask = ({ onClose, onSubmit }) => {
                       position: 'relative',
                       cursor: 'pointer',
                       transition: 'background-color 0.3s',
-                      ml: 1,
+                     mr: 4
                     }}
                   >
                     <Box
@@ -161,9 +162,9 @@ const AddSubTask = ({ onClose, onSubmit }) => {
               ),
             }}
             sx={{
-              width: { xs: '100%', sm: '247px' },
+              width: { xs: '100%', sm: '247px', },
               '& .MuiOutlinedInput-root': {
-                height: '40px',
+                height: '40px', width: '260px',
               },
             }}
           />
@@ -187,7 +188,7 @@ const AddSubTask = ({ onClose, onSubmit }) => {
             sx={{
               backgroundColor: "#3758f9",
               paddingX: 5,
-              paddingY: 1,
+              paddingY: 1, textTransform: 'none',
               width: { xs: '100%', sm: 'auto' },
               '&:hover': {
                 backgroundColor: "#2c47c5",

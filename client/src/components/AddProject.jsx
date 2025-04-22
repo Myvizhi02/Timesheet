@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   Button,
@@ -10,11 +10,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import dateIcon from '../date.png';
 
+// Custom Date Input
 const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
   <Box
     onClick={onClick}
@@ -22,13 +23,13 @@ const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
     sx={{
       display: 'flex',
       alignItems: 'center',
-      padding: '10px 12px',
+      padding: '0.1em 0.3em',
       border: '1px solid #ccc',
-      borderRadius: '8px',
+      borderRadius: '0.5em',
       backgroundColor: '#fff',
       width: '100%',
-      height: '42px',
-      cursor: 'pointer',
+      height: '2.625em',
+      cursor: 'pointer',marginBottom: '1em',
     }}
   >
     <input
@@ -41,11 +42,11 @@ const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
         outline: 'none',
         width: '100%',
         backgroundColor: 'transparent',
-        fontSize: '14px',
-        color: value ? '#000' : '#888',
+        fontSize: '1rem',
+        color: value ? '#000' : '#888',padding: '1em 0.4em'
       }}
     />
-    <img src={dateIcon} alt="Date Icon" style={{ width: '20px', marginLeft: '8px' }} />
+    <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em' }} />
   </Box>
 ));
 
@@ -75,13 +76,13 @@ const AddProject = ({ onClose, onSubmit }) => {
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       {/* Header */}
-      <Box sx={{ backgroundColor: '#A3EAFD', borderTopLeftRadius: 1, borderTopRightRadius: 1 }}>
+      <Box sx={{ backgroundColor: '#A3EAFD', borderTopLeftRadius: '0.625em', borderTopRightRadius: '0.625em' }}>
         <DialogTitle
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '10px 20px',
+            padding: '0em 1em',
           }}
         >
           <Typography variant="h6" fontWeight="600">
@@ -93,11 +94,12 @@ const AddProject = ({ onClose, onSubmit }) => {
         </DialogTitle>
       </Box>
 
-      <DialogContent sx={{ padding: 3 }}>
+      <DialogContent sx={{ padding: '1.5em' }}>
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
+          <Grid container spacing={3}>
+            {/* Row 1: Project ID & Project Name */}
+            <Grid item xs={12} sm={6} mb={0}>
               <TextField
                 name="projectId"
                 label="Project ID"
@@ -105,9 +107,19 @@ const AddProject = ({ onClose, onSubmit }) => {
                 fullWidth
                 onChange={handleChange}
                 required
+                sx={{
+                  height: '60px', // height of the container
+                  '& .MuiInputBase-root': {
+                    height: '80%', // make the input take full height
+                  },
+                  '& input': {
+                    height: '100%',
+                    padding: '0 2.3em', // optional: adjust padding
+                  },
+                }}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6} mb={0}>
               <TextField
                 name="projectName"
                 label="Project Name"
@@ -115,19 +127,41 @@ const AddProject = ({ onClose, onSubmit }) => {
                 fullWidth
                 onChange={handleChange}
                 required
+                sx={{
+                  height: '60px', // height of the container
+                  '& .MuiInputBase-root': {
+                    height: '80%', // make the input take full height
+                  },
+                  '& input': {
+                    height: '100%',
+                    padding: '0 2.3em', // optional: adjust padding
+                  },
+                }}
               />
             </Grid>
-            <Grid item xs={6}>
+
+            {/* Row 2: Domain & LOB */}
+            <Grid item xs={12} sm={6} mb={0}>
               <TextField
                 name="domain"
                 label="Domain"
                 variant="outlined"
                 fullWidth
                 onChange={handleChange}
-                required
+                required 
+                sx={{
+                  height: '60px', // height of the container
+                  '& .MuiInputBase-root': {
+                    height: '80%', // make the input take full height
+                  },
+                  '& input': {
+                    height: '100%',
+                    padding: '0 2.3em', // optional: adjust padding
+                  },
+                }}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6} mb={0}>
               <TextField
                 name="lob"
                 label="LOB"
@@ -135,9 +169,21 @@ const AddProject = ({ onClose, onSubmit }) => {
                 fullWidth
                 onChange={handleChange}
                 required
+                sx={{
+                  height: '60px', // height of the container
+                  '& .MuiInputBase-root': {
+                    height: '80%', // make the input take full height
+                  },
+                  '& input': {
+                    height: '100%',
+                    padding: '0 2.3em', // optional: adjust padding
+                  },
+                }}
               />
             </Grid>
-            <Grid item xs={6}>
+
+            {/* Row 3: Start Date & End Date */}
+            <Grid item xs={12} sm={6} mb={0} >
               <DatePicker
                 selected={startDate}
                 onChange={(date) => setStartDate(date)}
@@ -146,7 +192,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 customInput={<CustomInput placeholder="Select Start Date" />}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6} mb={0}>
               <DatePicker
                 selected={endDate}
                 onChange={(date) => setEndDate(date)}
@@ -155,36 +201,69 @@ const AddProject = ({ onClose, onSubmit }) => {
                 customInput={<CustomInput placeholder="Select End Date" />}
               />
             </Grid>
-            <Grid item xs={6}>
+
+            {/* Row 4: End Date & Budget */}
+            <Grid item xs={12} sm={6} mb={0}>
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                placeholderText="Select End Date"
+                dateFormat="dd/MM/yyyy"
+                customInput={<CustomInput placeholder="Select End Date" />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} mb={0}>
               <TextField
                 name="budget"
                 label="Budget"
                 variant="outlined"
                 fullWidth
                 onChange={handleChange}
+                sx={{
+                  height: '60px', // height of the container
+                  '& .MuiInputBase-root': {
+                    height: '80%', // make the input take full height
+                  },
+                  '& input': {
+                    height: '100%',
+                    padding: '0 2.3em', // optional: adjust padding
+                  },
+                }}
               />
             </Grid>
-            <Grid item xs={6}>
+
+            {/* Row 5: Add People */}
+            <Grid item xs={12} sm={6} mb={0}>
               <TextField
                 name="people"
                 label="Add People"
                 variant="outlined"
                 fullWidth
                 onChange={handleChange}
+                sx={{
+                  height: '60px', // height of the container
+                  '& .MuiInputBase-root': {
+                    height: '80%', // make the input take full height
+                  },
+                  '& input': {
+                    height: '100%',
+                    padding: '0 2.3em', // optional: adjust padding
+                  },
+                }}
               />
             </Grid>
           </Grid>
 
           {/* Submit Button */}
-          <Box textAlign="center" mt={6}>
+          <Box textAlign="center" mt={4}>
             <Button
               type="submit"
               variant="contained"
               sx={{
                 backgroundColor: '#3D6BFA',
                 color: '#fff',
-                padding: '10px 30px',
-                borderRadius: '6px',
+                padding: '0.625em 1.875em',
+                borderRadius: '0.375em',
                 fontWeight: 600,
                 textTransform: 'none',
                 '&:hover': {

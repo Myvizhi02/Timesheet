@@ -11,7 +11,8 @@
     "express": "^5.1.0",
     "mysql": "^2.18.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^6.30.0"
   },
   "name": "timestampp",
   "version": "1.0.0",
