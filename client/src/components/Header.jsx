@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Box, Typography, Avatar, IconButton } from '@mui/material';
-import homeIcon from '../home.png';
-import imgIcon from '../img.png';
-import navIcon from '../navigation.png';
+import { AppBar, Avatar, Box, IconButton, Toolbar, Typography } from '@mui/material';
 import axios from 'axios'; // Axios for API call
+import React, { useEffect, useState } from 'react';
+import DimgIcon from '../Dimg.png';
+import homeIcon from '../home.png';
+import navIcon from '../navigation.png';
 
 const Header = () => {
   
@@ -96,7 +96,7 @@ const Header = () => {
           </Typography>
           <Avatar
             alt="User"
-            src={imgIcon}
+            src={DimgIcon}
             sx={{
               width: { xs: 30, sm: 36 },
               height: { xs: 30, sm: 36 },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import { Home as HomeIcon, ArrowForward as ArrowIcon, Menu as NavIcon } from '@mui/icons-material';
-import imgIcon from '../img.png';
+import DimgIcon from '../Dimg.png';
 
 const SpenttimeHeader = () => {
   return (
@@ -35,7 +35,7 @@ const SpenttimeHeader = () => {
       {/* Right Side: Name and Profile Image */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Pradeep Shiva</Typography>
-        <img src={imgIcon} alt="User Icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+        <img src={DimgIcon} alt="User Icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
       </Box>
     </Box>
   );
