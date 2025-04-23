@@ -16,14 +16,27 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddTask from './AddTask';
+import EditView from './EditView';
 import addIcon from '../add.png'; // Check your image path!
 
 const Task = () => {
   const [showPopup, setShowPopup] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [openEditView, setOpenEditView] = useState(false);
 
   const handleCreateTask = (data) => {
     console.log('New Task:', data);
     setShowPopup(false);
+  };
+
+  const handleOpenEditView = (task) => {
+    setSelectedTask(task);
+    setOpenEditView(true);
+  };
+
+  const handleCloseEditView = () => {
+    setSelectedTask(null);
+    setOpenEditView(false);
   };
 
   const task = [
@@ -55,10 +68,7 @@ const Task = () => {
 
   return (
     <>
-      {/* Page Container */}
       <Box sx={{ padding: { xs: 2, sm: 4 }, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-
-        {/* Header Button */}
         <Box display="flex" justifyContent="flex-end" mb={3}>
           <Button
             variant="contained"
@@ -87,7 +97,6 @@ const Task = () => {
           </Button>
         </Box>
 
-        {/* Table */}
         <TableContainer component={Paper} elevation={3}>
           <Table size="small">
             <TableHead sx={{ backgroundColor: '#84E7F9' }}>
@@ -120,7 +129,7 @@ const Task = () => {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton>
+                    <IconButton onClick={() => handleOpenEditView(proj)}>
                       <VisibilityIcon />
                     </IconButton>
                   </TableCell>
@@ -131,18 +140,28 @@ const Task = () => {
         </TableContainer>
       </Box>
 
-      {/* Popup for Adding Task */}
+      {/* Add Task Dialog */}
       <Dialog
         open={showPopup}
         onClose={() => setShowPopup(false)}
         fullWidth
-        maxWidth="sm" // sm = 600px max width
-        PaperProps={{
-          sx: { borderRadius: '12px' }
-        }}
+        maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: '12px' } }}
       >
         <DialogContent sx={{ padding: 0 }}>
           <AddTask onClose={() => setShowPopup(false)} onSubmit={handleCreateTask} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Action View Dialog */}
+      <Dialog
+        open={openEditView}
+        onClose={handleCloseEditView}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogContent>
+          <EditView task={selectedTask} onClose={handleCloseEditView} />
         </DialogContent>
       </Dialog>
     </>
