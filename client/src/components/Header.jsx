@@ -1,10 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppBar, Toolbar, Box, Typography, Avatar, IconButton } from '@mui/material';
 import homeIcon from '../home.png';
 import imgIcon from '../img.png';
 import navIcon from '../navigation.png';
+import axios from 'axios'; // Axios for API call
 
 const Header = () => {
+  
+  const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
+
+  useEffect(() => {
+    const fetchAgentName = async () => {
+      try {
+        const agentId = localStorage.getItem('agentId'); // Get agentId from localStorage
+        if (agentId) {
+          const response = await axios.get(`http://localhost:5000/api/agents/${agentId}`);
+          setAgentName(response.data.name); // ✅ Update UI immediately
+        localStorage.setItem('name', response.data.name);
+        }
+      } catch (error) {
+        console.error('Error fetching agent name:', error);
+      }
+    };
+
+    fetchAgentName();
+  }, []);
+
   return (
     <AppBar
       position="static"
@@ -23,7 +44,7 @@ const Header = () => {
           px: { xs: 2, sm: 4 },
         }}
       >
-        {/* Left Side */}
+        {/* Left Side: Navigation + Home */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
           <IconButton sx={{ p: 0 }}>
             <img
@@ -53,14 +74,14 @@ const Header = () => {
               fontWeight: 500,
               fontSize: { xs: '16px', sm: '18px' },
               color: 'black',
-              display: { xs: 'none', sm: 'block' }, // Hide "Dashboard" on extra small screens
+              display: { xs: 'none', sm: 'block' },
             }}
           >
             Dashboard
           </Typography>
         </Box>
 
-        {/* Right Side */}
+        {/* Right Side: Agent Name + Profile Image */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
           <Typography
             variant="subtitle1"
@@ -68,10 +89,10 @@ const Header = () => {
               fontWeight: 500,
               fontSize: { xs: '14px', sm: '16px' },
               color: 'black',
-              display: { xs: 'none', sm: 'block' }, // Hide name on small mobile
+              display: { xs: 'none', sm: 'block' },
             }}
           >
-            Pradeep Shiva
+             {agentName}
           </Typography>
           <Avatar
             alt="User"

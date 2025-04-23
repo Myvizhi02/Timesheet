@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Box, Button, Typography, Paper, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import timeIcon from "../assets/time.png"; 
-import image from "../assets/bgimg.png"; 
+import timeIcon from "../assets/time.png";
+import image from "../assets/bgimg.png";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // 👈 to navigate to dashboard
+import { useNavigate } from "react-router-dom";
 
+// Styling the TextField
 const CssTextField = styled(TextField)({
   '& label.Mui-focused': {
     color: '#A0AAB4',
@@ -29,23 +30,38 @@ const CssTextField = styled(TextField)({
 const Login = () => {
   const [agentId, setAgentId] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // 👈 Hook for navigation
+  const [loading, setLoading] = useState(false); // New loading state
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if (!agentId.trim() || !password.trim()) {
+      alert('Please fill in both Agent ID and Password.');
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const response = await axios.post('http://localhost:3030/login', {
-        agent_id: agentId,
-        password: password,
+        agent_id: agentId.trim(),
+        password: password.trim(),
       });
 
-      console.log(response.data); // Should print { message: 'Login successful', redirectTo: '/dashboard' }
+      console.log(response.data);
+
+      if (response.data.name) {
+        localStorage.setItem('name', response.data.name); // Save agent's name
+      }
 
       if (response.data.redirectTo) {
-        navigate(response.data.redirectTo); // 👈 Move to dashboard
+        navigate(response.data.redirectTo); // Navigate to dashboard
       }
     } catch (error) {
       console.error('Login failed:', error.response?.data || error.message);
-      alert('Login failed: ' + (error.response?.data || error.message));
+      alert('Login failed: ' + (error.response?.data || 'Unknown error'));
+      setPassword(''); // Clear password after failed login
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -133,6 +149,7 @@ const Login = () => {
           <Button
             variant="contained"
             onClick={handleLogin}
+            disabled={loading}
             sx={{
               mt: 1,
               backgroundColor: "#3758f9",
@@ -147,7 +164,7 @@ const Login = () => {
             }}
             fullWidth
           >
-            Login
+            {loading ? 'Logging in...' : 'Login'}
           </Button>
         </Box>
       </Paper>
