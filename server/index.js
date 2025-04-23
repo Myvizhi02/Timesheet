@@ -1,10 +1,10 @@
 const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
-const cors = require('cors'); // Allow frontend to connect
+const cors = require('cors');
 
 const app = express();
-const port = 3030; // Server runs on 3030
+const port = 3030;
 
 // Middleware
 app.use(cors());
@@ -14,13 +14,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // MySQL Connection
 const db = mysql.createConnection({
   host: 'localhost',
-  port: 3306, // Default MySQL port
-  user: 'root', // Your DB username
-  password: '', // Your DB password
-  database: 'timesheet', // Your DB name
+  port: 3306,
+  user: 'root',
+  password: '',
+  database: 'timesheet',
 });
 
-// Connect to MySQL
 db.connect((err) => {
   if (err) {
     console.error('MySQL connection error:', err);
@@ -33,7 +32,6 @@ db.connect((err) => {
 app.post('/login', (req, res) => {
   const { agent_id, password } = req.body;
 
-  // Query to find user by agent_id
   const sql = 'SELECT * FROM crm_admin WHERE agent_id = ?';
   db.query(sql, [agent_id], (err, results) => {
     if (err) {
@@ -47,13 +45,36 @@ app.post('/login', (req, res) => {
 
     const user = results[0];
 
-    // Compare the provided password with the stored password directly (no hashing)
     if (user.password === password) {
       console.log(`✅ Employee ${agent_id} logged in successfully.`);
-      return res.json({ message: 'Login successful', redirectTo: '/dashboard' });
+      return res.json({
+        message: 'Login successful',
+        name: user.name,
+        redirectTo: '/dashboard',
+      });
     } else {
       return res.status(401).send('Incorrect password.');
     }
+  });
+});
+
+// FETCH agent's name by agent_id
+app.get('/api/agents/:agentId', (req, res) => {
+  const { agentId } = req.params;
+
+  const sql = 'SELECT name FROM crm_admin WHERE agent_id = ?';
+  db.query(sql, [agentId], (err, results) => {
+    if (err) {
+      console.error('Error fetching agent:', err);
+      return res.status(500).send('Server error.');
+    }
+
+    if (results.length === 0) {
+      return res.status(404).send('Agent not found.');
+    }
+
+    const agent = results[0];
+    res.json({ name: agent.name });
   });
 });
 

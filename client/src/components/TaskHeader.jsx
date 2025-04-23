@@ -1,16 +1,16 @@
-import React from 'react';
 import {
   AppBar,
-  Toolbar,
-  Box,
-  Typography,
   Avatar,
-  IconButton
+  Box,
+  IconButton,
+  Toolbar,
+  Typography
 } from '@mui/material';
+import React from 'react';
 
 import arrowIcon from '../arrow.png';
+import DimgIcon from '../Dimg.png';
 import homeIcon from '../home.png';
-import imgIcon from '../img.png';
 import navIcon from '../navigation.png';
 
 const TaskHeader = () => {
@@ -45,7 +45,7 @@ const TaskHeader = () => {
           <IconButton>
             <Avatar
               alt="User Profile"
-              src={imgIcon}
+              src={DimgIcon}
               sx={{ width: 36, height: 36 }}
             />
           </IconButton>

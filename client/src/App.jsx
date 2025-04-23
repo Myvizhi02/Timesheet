@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import "./App.css";
 import SpenttimeHeader from "./components/SpenttimeHeader";
 import AddSpenttime from "./components/AddSpenttime";
@@ -11,56 +11,89 @@ import ProjectHeader from "./components/ProjectHeader";
 import Task from "./components/Task";
 import TaskHeader from "./components/TaskHeader";
 
+// Session handling function to check if user is logged in
+const ProtectedRoute = ({ element }) => {
+  const isLoggedIn = localStorage.getItem('agentId') && localStorage.getItem('name');
+  
+  return isLoggedIn ? element : <Navigate to="/" />;
+};
+
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check if the user is logged in on initial load
+  useEffect(() => {
+    const agentId = localStorage.getItem('agentId');
+    const name = localStorage.getItem('name');
+    if (agentId && name) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Login Route */}
         <Route path="/" element={<Login />} />
 
-        {/* Dashboard Route */}
+        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
-            <>
-              <Header />
-              <Dashboard />
-            </>
+            <ProtectedRoute
+              element={
+                <>
+                  <Header />
+                  <Dashboard />
+                </>
+              }
+            />
           }
         />
 
-        {/* Project Route */}
         <Route
           path="/project"
           element={
-            <>
-              <ProjectHeader />
-              <Project />
-            </>
+            <ProtectedRoute
+              element={
+                <>
+                  <ProjectHeader />
+                  <Project />
+                </>
+              }
+            />
           }
         />
 
-        {/* Task Route */}
         <Route
           path="/task"
           element={
-            <>
-              <TaskHeader />
-              <Task />
-            </>
+            <ProtectedRoute
+              element={
+                <>
+                  <TaskHeader />
+                  <Task />
+                </>
+              }
+            />
           }
         />
 
-        {/* Spent Time Route */}
-        { <Route
+        <Route
           path="/spenttime"
           element={
-            <>
-              <SpenttimeHeader/>
-              <AddSpenttime />
-            </>
+            <ProtectedRoute
+              element={
+                <>
+                  <SpenttimeHeader />
+                  <AddSpenttime />
+                </>
+              }
+            />
           }
-        /> }
+        />
       </Routes>
     </BrowserRouter>
   );
