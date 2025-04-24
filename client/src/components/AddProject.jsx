@@ -187,7 +187,7 @@ const AddProject = ({ onClose, onSubmit }) => {
               <DatePicker
                 selected={startDate}
                 onChange={(date) => setStartDate(date)}
-                placeholderText="Select Start Date"
+                placeholderText="Start Date"
                 dateFormat="dd/MM/yyyy"
                 customInput={<CustomInput placeholder="Select Start Date" />}
               />
@@ -196,7 +196,7 @@ const AddProject = ({ onClose, onSubmit }) => {
               <DatePicker
                 selected={endDate}
                 onChange={(date) => setEndDate(date)}
-                placeholderText="Select End Date"
+                placeholderText="Actual End Date"
                 dateFormat="dd/MM/yyyy"
                 customInput={<CustomInput placeholder="Select End Date" />}
               />
@@ -207,7 +207,7 @@ const AddProject = ({ onClose, onSubmit }) => {
               <DatePicker
                 selected={endDate}
                 onChange={(date) => setEndDate(date)}
-                placeholderText="Select End Date"
+                placeholderText="End Date"
                 dateFormat="dd/MM/yyyy"
                 customInput={<CustomInput placeholder="Select End Date" />}
               />
