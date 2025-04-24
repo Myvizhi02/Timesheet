@@ -1,23 +1,20 @@
-import React, { useState } from 'react';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Box,
   Button,
+  IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Typography,
-  IconButton,
-  Dialog,
-  DialogContent,
+  Typography
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import AddTask from './AddTask';
-import EditView from './EditView';
+import React, { useState } from 'react';
 import addIcon from '../add.png'; // Check your image path!
+import EditView from './EditView';
 
 const Task = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -139,31 +136,11 @@ const Task = () => {
           </Table>
         </TableContainer>
       </Box>
+{/* EditView popup */}
 
-      {/* Add Task Dialog */}
-      <Dialog
-        open={showPopup}
-        onClose={() => setShowPopup(false)}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: '12px' } }}
-      >
-        <DialogContent sx={{ padding: 0 }}>
-          <AddTask onClose={() => setShowPopup(false)} onSubmit={handleCreateTask} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Action View Dialog */}
-      <Dialog
-        open={openEditView}
-        onClose={handleCloseEditView}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogContent>
-          <EditView task={selectedTask} onClose={handleCloseEditView} />
-        </DialogContent>
-      </Dialog>
+      {openEditView && (
+        <EditView task={selectedTask} onClose={handleCloseEditView} />
+      )}
     </>
   );
 };

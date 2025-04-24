@@ -5,12 +5,11 @@ import {
   Tabs,
   Tab,
   TextField,
-  Switch,
-  FormControlLabel,
   Button,
   Grid,
   Paper,
   IconButton,
+  InputAdornment,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -19,11 +18,11 @@ const EditView = ({ task = {}, onClose }) => {
   const [formData, setFormData] = useState({
     project: task.project || '',
     taskname: task.taskname || '',
+    subtaskname: task.subtaskname || '',
     description: task.description || '',
-    status: task.status === 'Open',
-    assignedTo: task.assignedTo || '',
-    dueDate: task.dueDate || '',
-    priority: task.priority || '',
+    subtaskdescription: task.subtaskdescription || '',
+    taskstatus: task.taskstatus === 'Open',
+    subtaskstatus: task.subtaskstatus === 'Open',
   });
 
   const handleChange = (e) => {
@@ -31,35 +30,70 @@ const EditView = ({ task = {}, onClose }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleStatusToggle = () => {
-    setFormData((prev) => ({ ...prev, status: !prev.status }));
+  const handleTaskStatusToggle = () => {
+    setFormData((prev) => ({ ...prev, taskstatus: !prev.taskstatus }));
+  };
+
+  const handleSubtaskStatusToggle = () => {
+    setFormData((prev) => ({ ...prev, subtaskstatus: !prev.subtaskstatus }));
   };
 
   const handleUpdate = () => {
     const updatedTask = {
       ...task,
       ...formData,
-      status: formData.status ? 'Open' : 'Closed',
+      taskstatus: formData.taskstatus ? 'Open' : 'Closed',
+      subtaskstatus: formData.subtaskstatus ? 'Open' : 'Closed',
     };
     console.log('Updated Task:', updatedTask);
     onClose?.();
   };
 
+  const renderStatusToggle = (status, onClick) => (
+    <Box
+      onClick={onClick}
+      sx={{
+        width: '40px',
+        height: '20px',
+        backgroundColor: status ? '#3DC1F2' : '#ccc',
+        borderRadius: '20px',
+        position: 'relative',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
+        ml: 1,
+      }}
+    >
+      <Box
+        sx={{
+          height: '16px',
+          width: '16px',
+          backgroundColor: '#fff',
+          borderRadius: '50%',
+          position: 'absolute',
+          top: '2px',
+          left: status ? '20px' : '3px',
+          transition: 'left 0.3s',
+        }}
+      />
+    </Box>
+  );
+
   return (
     <Paper
       elevation={4}
       sx={{
-        width: '602px',
-        height:'892px',
+        width: '95%',
         maxWidth: 600,
-        mx: 'auto',  
+        height: '700px',
         borderRadius: 2,
         overflow: 'hidden',
         bgcolor: '#fff',
         zIndex: 1000,
-        position: 'fixed', // Make it fixed to place it anywhere
-        top: 0.5,           // Distance from the top of the screen
-        right: 1, 
+        position: 'fixed',
+        top: '0.5%',
+        right: '0.5%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       {/* Header */}
@@ -67,7 +101,6 @@ const EditView = ({ task = {}, onClose }) => {
         sx={{
           backgroundColor: '#9DECF9',
           px: 2,
-          py: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -88,7 +121,7 @@ const EditView = ({ task = {}, onClose }) => {
         indicatorColor="primary"
         sx={{
           borderBottom: 1,
-          borderColor: 'divider',
+          borderColor: 'white',
           '& .MuiTab-root': {
             textTransform: 'none',
             fontWeight: 500,
@@ -100,11 +133,22 @@ const EditView = ({ task = {}, onClose }) => {
         <Tab label="Task Details" />
       </Tabs>
 
-      {/* Edit Task Tab */}
-      {tabIndex === 0 && (
-        <Box sx={{ p: 4 }}>
+      {/* Content */}
+      <Box sx={{ p: 2, flex: 1, overflowY: 'auto', ml: 2.5 }}>
+        {tabIndex === 0 && (
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Project"
+                name="project"
+                value={formData.project}
+                onChange={handleChange}
+                size="small"
+                sx={{ width: '252px' }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 label="Task Name"
@@ -112,49 +156,36 @@ const EditView = ({ task = {}, onClose }) => {
                 value={formData.taskname}
                 onChange={handleChange}
                 size="small"
+                sx={{ width: '252px' }}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Assigned To"
-                name="assignedTo"
-                value={formData.assignedTo}
+                label="Task Description"
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
                 size="small"
+                multiline
+                rows={1}
+                sx={{ width: '525px' }}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                fullWidth
-                label="Due Date"
-                type="date"
-                name="dueDate"
-                value={formData.dueDate}
-                onChange={handleChange}
-                InputLabelProps={{ shrink: true }}
-                size="small"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Priority"
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                size="small"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.status}
-                    onChange={handleStatusToggle}
-                  />
-                }
-                label={`Status: ${formData.status ? 'Open' : 'Closed'}`}
+                label="Task Status"
+                variant="outlined"
+                value={formData.taskstatus ? 'Open' : 'Closed'}
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {renderStatusToggle(formData.taskstatus, handleTaskStatusToggle)}
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ width: '252px', '& .MuiOutlinedInput-root': { height: '40px' } }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -169,22 +200,21 @@ const EditView = ({ task = {}, onClose }) => {
                     borderRadius: 2,
                     textTransform: 'none',
                     fontWeight: 600,
+                    ml: 28,
+                    mt: 15,
                     '&:hover': {
                       backgroundColor: '#0D1640',
                     },
                   }}
                 >
-                  Submit
+                  Update
                 </Button>
               </Box>
             </Grid>
           </Grid>
-        </Box>
-      )}
+        )}
 
-      {/* Sub-Task Tab */}
-      {tabIndex === 1 && (
-        <Box sx={{ p: 4 }}>
+        {tabIndex === 1 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -194,39 +224,47 @@ const EditView = ({ task = {}, onClose }) => {
                 value={formData.project}
                 InputProps={{ readOnly: true }}
                 size="small"
+                sx={{ width: '252px', backgroundColor: '#FBECEC' }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Task Name"
-                name="taskname"
-                value={formData.taskname}
-                InputProps={{ readOnly: true }}
+                label="SubTask Name"
+                name="subtaskname"
+                value={formData.subtaskname}
+                onChange={handleChange}
                 size="small"
+                sx={{ width: '252px' }}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Description"
-                name="description"
-                value={formData.description}
+                label="SubTask Description"
+                name="subtaskdescription"
+                value={formData.subtaskdescription}
                 onChange={handleChange}
                 size="small"
                 multiline
-                rows={3}
+                rows={1}
+                sx={{ width: '525px' }}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.status}
-                    onChange={handleStatusToggle}
-                  />
-                }
-                label={`Status: ${formData.status ? 'Open' : 'Closed'}`}
+              <TextField
+                label="SubTask Status"
+                variant="outlined"
+                value={formData.subtaskstatus ? 'Open' : 'Closed'}
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {renderStatusToggle(formData.subtaskstatus, handleSubtaskStatusToggle)}
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ width: '252px', '& .MuiOutlinedInput-root': { height: '40px' } }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -241,6 +279,8 @@ const EditView = ({ task = {}, onClose }) => {
                     borderRadius: 2,
                     textTransform: 'none',
                     fontWeight: 600,
+                    mt: 15,
+                    ml: 28,
                     '&:hover': {
                       backgroundColor: '#0D1640',
                     },
@@ -251,38 +291,43 @@ const EditView = ({ task = {}, onClose }) => {
               </Box>
             </Grid>
           </Grid>
-        </Box>
-      )}
+        )}
 
-      {/* Task Details Tab */}
-      {tabIndex === 2 && (
-        <Box sx={{ p: 4 }}>
-          <Typography variant="subtitle1" fontWeight={600}>
-            Task Summary
-          </Typography>
-          <Typography variant="body2" mt={1}>
-            <strong>Project:</strong> {formData.project}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Task Name:</strong> {formData.taskname}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Description:</strong> {formData.description}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Assigned To:</strong> {formData.assignedTo}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Due Date:</strong> {formData.dueDate}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Status:</strong> {formData.status ? 'Open' : 'Closed'}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Priority:</strong> {formData.priority}
-          </Typography>
-        </Box>
-      )}
+        {tabIndex === 2 && (
+          <Grid container spacing={3}>
+            {[
+              ['Project', 'project'],
+              ['Task Name', 'taskname'],
+              ['Task Description', 'description'],
+              ['Sub Task Name', 'subtaskname'],
+              ['Sub Task Description', 'subtaskdescription'],
+              ['Task Status', 'taskstatus'],
+              ['Sub Task Status', 'subtaskstatus'],
+            ].map(([label, key]) => (
+              <Grid item xs={12} key={key}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  name={key}
+                  variant="standard"
+                  value={
+                    typeof formData[key] === 'boolean'
+                      ? formData[key]
+                        ? 'Open'
+                        : 'Closed'
+                      : formData[key]
+                  }
+                  InputProps={{ readOnly: true }}
+                  size="small"
+                  multiline
+                  rows={1}
+                  sx={{ width: '252px' }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Box>
     </Paper>
   );
 };
