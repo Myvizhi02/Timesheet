@@ -1,31 +1,21 @@
 import React, { useState } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
+  Box,
+  Typography,
   Tabs,
   Tab,
   TextField,
   Button,
   Grid,
-<<<<<<< HEAD
-  Box
-=======
   Paper,
   IconButton,
   InputAdornment,
->>>>>>> 6a68d38e38fd6b3120d705fdc473a85aeea2b0f4
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
-const EditTaskDialog = ({ open, onClose }) => {
-  const [tabIndex, setTabIndex] = useState(0);
+const EditView = ({ task = {}, onClose }) => {
+  const [tabIndex, setTabIndex] = useState(1); // Default to "Sub-Task"
   const [formData, setFormData] = useState({
-<<<<<<< HEAD
-    project: 'Winfast',
-    taskName: 'Merge JD and Core',
-    description: 'Uniting Core and JD',
-    status: true,
-=======
     project: task.project || '',
     taskname: task.taskname || '',
     subtaskname: task.subtaskname || '',
@@ -33,7 +23,6 @@ const EditTaskDialog = ({ open, onClose }) => {
     subtaskdescription: task.subtaskdescription || '',
     taskstatus: task.taskstatus === 'Open',
     subtaskstatus: task.subtaskstatus === 'Open',
->>>>>>> 6a68d38e38fd6b3120d705fdc473a85aeea2b0f4
   });
 
   const handleChange = (e) => {
@@ -41,15 +30,6 @@ const EditTaskDialog = ({ open, onClose }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-<<<<<<< HEAD
-  const handleSwitchChange = () => {
-    setFormData((prev) => ({ ...prev, status: !prev.status }));
-  };
-
-  const handleUpdate = () => {
-    console.log('Updated data:', formData);
-    onClose();
-=======
   const handleTaskStatusToggle = () => {
     setFormData((prev) => ({ ...prev, taskstatus: !prev.taskstatus }));
   };
@@ -67,7 +47,6 @@ const EditTaskDialog = ({ open, onClose }) => {
     };
     console.log('Updated Task:', updatedTask);
     onClose?.();
->>>>>>> 6a68d38e38fd6b3120d705fdc473a85aeea2b0f4
   };
 
   const renderStatusToggle = (status, onClick) => (
@@ -100,61 +79,6 @@ const EditTaskDialog = ({ open, onClose }) => {
   );
 
   return (
-<<<<<<< HEAD
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ bgcolor: '#e0f7fa' }}>Actions</DialogTitle>
-      <DialogContent>
-        <Tabs value={tabIndex} onChange={(e, newVal) => setTabIndex(newVal)} variant="fullWidth" sx={{ mb: 2 }}>
-          <Tab label="Edit Task" />
-          <Tab label="Sub-Task" />
-          <Tab label="Task Details" />
-        </Tabs>
-
-        {tabIndex === 0 && (
-          <Box component="form" noValidate autoComplete="off" sx={{ mt: 1 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  label="Project"
-                  name="project"
-                  fullWidth
-                  variant="outlined"
-                  value={formData.project}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Task Name"
-                  name="taskName"
-                  fullWidth
-                  variant="outlined"
-                  value={formData.taskName}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Description"
-                  name="description"
-                  fullWidth
-                  variant="outlined"
-                  value={formData.description}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={<Switch checked={formData.status} onChange={handleSwitchChange} />}
-                  label={formData.status ? 'Open' : 'Closed'}
-                />
-              </Grid>
-              <Grid item xs={12} textAlign="center">
-                <Button
-                  variant="contained"
-                  onClick={handleUpdate}
-                  sx={{ backgroundColor: '#002884', px: 4 }}
-=======
     <Paper
       elevation={4}
       sx={{
@@ -282,20 +206,11 @@ const EditTaskDialog = ({ open, onClose }) => {
                       backgroundColor: '#0D1640',
                     },
                   }}
->>>>>>> 6a68d38e38fd6b3120d705fdc473a85aeea2b0f4
                 >
                   Update
                 </Button>
-              </Grid>
+              </Box>
             </Grid>
-<<<<<<< HEAD
-          </Box>
-        )}
-
-        {/* Add content for "Sub-Task" and "Task Details" tabs here */}
-      </DialogContent>
-    </Dialog>
-=======
           </Grid>
         )}
 
@@ -414,8 +329,7 @@ const EditTaskDialog = ({ open, onClose }) => {
         )}
       </Box>
     </Paper>
->>>>>>> 6a68d38e38fd6b3120d705fdc473a85aeea2b0f4
   );
 };
 
-export default EditTaskDialog;
+export default EditView;
