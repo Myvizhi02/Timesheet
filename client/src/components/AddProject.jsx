@@ -5,77 +5,185 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import dateIcon from '../date.png';
 
-// Custom Date Input
-const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
-  <Box
-    onClick={onClick}
-    ref={ref}
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      padding: '0.1em 0.3em',
-      border: '1px solid #ccc',
-      borderRadius: '0.5em',
-      backgroundColor: '#fff',
-      width: '100%',
-      height: '2.625em',
-      cursor: 'pointer',marginBottom: '1em',
-    }}
-  >
-    <input
-      type="text"
-      value={value}
-      placeholder={placeholder}
-      readOnly
-      style={{
-        border: 'none',
-        outline: 'none',
-        width: '100%',
-        backgroundColor: 'transparent',
-        fontSize: '1rem',
-        color: value ? '#000' : '#888',padding: '1em 0.4em'
-      }}
-    />
-    <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em' }} />
-  </Box>
-));
-
 const AddProject = ({ onClose, onSubmit }) => {
+  const theme = useTheme();
+
+  const [adminOptions, setAdminOptions] = useState([]);
   const [formData, setFormData] = useState({
     projectId: '',
     projectName: '',
-    domain: '',
     lob: '',
     budget: '',
-    people: '',
+    domain: '',
+    created_by: 'crm003',
+    modified_by: 'crm003',
+    addPeople: [], // Array to store selected person IDs
   });
+
   const [startDate, setStartDate] = useState(null);
+  const [actualEndDate, setActualEndDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  // Fetch admin names and project ID once on component mount
+  useEffect(() => {
+    fetch('http://localhost:3030/api/admins')
+      .then((res) => res.json())
+      .then((data) => setAdminOptions(data))
+      .catch((err) => console.error('Failed to fetch admin names:', err));
+  }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:3030/api/projects/new-id')
+      .then((res) => res.json())
+      .then((data) => {
+        setFormData((prev) => ({
+          ...prev,
+          projectId: data.project_unique_id,
+        }));
+      })
+      .catch((err) => console.error('Failed to fetch project ID', err));
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const data = { ...formData, startDate, endDate };
-    onSubmit(data);
-    onClose();
+  const handlePeopleChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+  
+    // If the value is a string, split it by commas, trim each part, and update state
+    setFormData({
+      ...formData,
+      addPeople: typeof value === 'string' ? value.split(',').map(item => item.trim()) : value,
+    });
   };
+  
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const loggedInUserId = 'crm003';
+
+    const data = {
+      project_name: formData.projectName,
+      lob: formData.lob,
+      start_date: startDate ? startDate.toISOString().split('T')[0] : null,
+      end_date: endDate ? endDate.toISOString().split('T')[0] : null,
+      expected_date: actualEndDate ? actualEndDate.toISOString().split('T')[0] : null,
+      budget: formData.budget,
+      created_by: loggedInUserId,
+      modified_by: loggedInUserId,
+      department: formData.domain,
+      allocated_executives: formData.addPeople,
+    };
+
+    console.log('Submitting Data:', data); // Log the data before submitting
+
+    try {
+      const response = await fetch('http://localhost:3030/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error('Failed to add project');
+
+      const result = await response.json();
+      console.log(result.message);
+      onSubmit(data);
+      onClose();
+    } catch (err) {
+      console.error('Error:', err);
+      alert('❌ Failed to add project. Please try again.');
+    }
+  };
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
+  function getStyles(name, selected, theme) {
+    return {
+      fontWeight: selected.includes(name)
+        ? theme.typography.fontWeightMedium
+        : theme.typography.fontWeightRegular,
+    };
+  }
+
+  // Convert selected IDs to names for display in TextField
+  const selectedNames = formData.addPeople
+    .map((id) => {
+      const admin = adminOptions.find((admin) => admin.id === id);
+      return admin ? admin.name : null;
+    })
+    .filter((name) => name) // Filter out null values
+    .join(', ');
+
+  const CustomInput = React.forwardRef((props, ref) => {
+    const { value, onClick, placeholder } = props;
+    return (
+      <Box
+        onClick={onClick}
+        ref={ref}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0.1em 0.3em',
+          border: '1px solid #ccc',
+          borderRadius: '0.5em',
+          backgroundColor: '#fff',
+          width: '100%',
+          height: '2.625em',
+          cursor: 'pointer',
+          marginBottom: '0.5em',
+        }}
+      >
+        <input
+          type="text"
+          value={value}
+          placeholder={placeholder}
+          readOnly
+          style={{
+            border: 'none',
+            outline: 'none',
+            width: '100%',
+            backgroundColor: 'transparent',
+            fontSize: '1rem',
+            color: value ? '#000' : '#888',
+            padding: '1em 0.4em',
+          }}
+        />
+        <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em' }} />
+      </Box>
+    );
+  });
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
-      {/* Header */}
       <Box sx={{ backgroundColor: '#A3EAFD', borderTopLeftRadius: '0.625em', borderTopRightRadius: '0.625em' }}>
         <DialogTitle
           sx={{
@@ -95,73 +203,43 @@ const AddProject = ({ onClose, onSubmit }) => {
       </Box>
 
       <DialogContent sx={{ padding: '1.5em' }}>
-        {/* Form */}
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
-            {/* Row 1: Project ID & Project Name */}
-            <Grid item xs={12} sm={6} mb={0}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="projectId"
                 label="Project ID"
                 variant="outlined"
                 fullWidth
-                onChange={handleChange}
-                required
-                sx={{
-                  height: '60px', // height of the container
-                  '& .MuiInputBase-root': {
-                    height: '80%', // make the input take full height
-                  },
-                  '& input': {
-                    height: '100%',
-                    padding: '0 2.3em', // optional: adjust padding
-                  },
-                }}
+                value={formData.projectId || ''}
+                disabled
+                sx={inputStyle}
               />
             </Grid>
-            <Grid item xs={12} sm={6} mb={0}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="projectName"
                 label="Project Name"
                 variant="outlined"
                 fullWidth
                 onChange={handleChange}
+                value={formData.projectName}
                 required
-                sx={{
-                  height: '60px', // height of the container
-                  '& .MuiInputBase-root': {
-                    height: '80%', // make the input take full height
-                  },
-                  '& input': {
-                    height: '100%',
-                    padding: '0 2.3em', // optional: adjust padding
-                  },
-                }}
+                sx={inputStyle}
               />
             </Grid>
-
-            {/* Row 2: Domain & LOB */}
-            <Grid item xs={12} sm={6} mb={0}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="domain"
                 label="Domain"
                 variant="outlined"
                 fullWidth
                 onChange={handleChange}
-                required 
-                sx={{
-                  height: '60px', // height of the container
-                  '& .MuiInputBase-root': {
-                    height: '80%', // make the input take full height
-                  },
-                  '& input': {
-                    height: '100%',
-                    padding: '0 2.3em', // optional: adjust padding
-                  },
-                }}
+                required
+                sx={inputStyle}
               />
             </Grid>
-            <Grid item xs={12} sm={6} mb={0}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="lob"
                 label="LOB"
@@ -169,21 +247,10 @@ const AddProject = ({ onClose, onSubmit }) => {
                 fullWidth
                 onChange={handleChange}
                 required
-                sx={{
-                  height: '60px', // height of the container
-                  '& .MuiInputBase-root': {
-                    height: '80%', // make the input take full height
-                  },
-                  '& input': {
-                    height: '100%',
-                    padding: '0 2.3em', // optional: adjust padding
-                  },
-                }}
+                sx={inputStyle}
               />
             </Grid>
-
-            {/* Row 3: Start Date & End Date */}
-            <Grid item xs={12} sm={6} mb={0} >
+            <Grid item xs={12} sm={6}>
               <DatePicker
                 selected={startDate}
                 onChange={(date) => setStartDate(date)}
@@ -192,18 +259,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 customInput={<CustomInput placeholder="Select Start Date" />}
               />
             </Grid>
-            <Grid item xs={12} sm={6} mb={0}>
-              <DatePicker
-                selected={endDate}
-                onChange={(date) => setEndDate(date)}
-                placeholderText="Actual End Date"
-                dateFormat="dd/MM/yyyy"
-                customInput={<CustomInput placeholder="Select End Date" />}
-              />
-            </Grid>
-
-            {/* Row 4: End Date & Budget */}
-            <Grid item xs={12} sm={6} mb={0}>
+            <Grid item xs={12} sm={6}>
               <DatePicker
                 selected={endDate}
                 onChange={(date) => setEndDate(date)}
@@ -212,49 +268,54 @@ const AddProject = ({ onClose, onSubmit }) => {
                 customInput={<CustomInput placeholder="Select End Date" />}
               />
             </Grid>
-            <Grid item xs={12} sm={6} mb={0}>
+            <Grid item xs={12} sm={6}>
+              <DatePicker
+                selected={actualEndDate}
+                onChange={(date) => setActualEndDate(date)}
+                placeholderText="Actual End Date"
+                dateFormat="dd/MM/yyyy"
+                customInput={<CustomInput placeholder="Select Actual End Date" />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="budget"
                 label="Budget"
                 variant="outlined"
                 fullWidth
                 onChange={handleChange}
-                sx={{
-                  height: '60px', // height of the container
-                  '& .MuiInputBase-root': {
-                    height: '80%', // make the input take full height
-                  },
-                  '& input': {
-                    height: '100%',
-                    padding: '0 2.3em', // optional: adjust padding
-                  },
-                }}
+                sx={inputStyle}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="select-multiple-label">Add People</InputLabel>
+                <Select
+  labelId="select-multiple-label"
+  multiple
+  value={formData.addPeople}
+  onChange={handlePeopleChange}
+  input={<OutlinedInput label="Add People" />}
+  MenuProps={MenuProps}
+  sx={{ width: '254px', height: '50px' }}
+>
+  {adminOptions.map((admin) => (
+    <MenuItem
+      key={admin.id}
+      value={admin.id}  // Set this to admin's ID (e.g., "crm002", "crm004")
+      style={getStyles(admin.id, formData.addPeople, theme)}
+    >
+      {admin.name}
+    </MenuItem>
+  ))}
+</Select>
+
+              </FormControl>
             </Grid>
 
-            {/* Row 5: Add People */}
-            <Grid item xs={12} sm={6} mb={0}>
-              <TextField
-                name="people"
-                label="Add People"
-                variant="outlined"
-                fullWidth
-                onChange={handleChange}
-                sx={{
-                  height: '60px', // height of the container
-                  '& .MuiInputBase-root': {
-                    height: '80%', // make the input take full height
-                  },
-                  '& input': {
-                    height: '100%',
-                    padding: '0 2.3em', // optional: adjust padding
-                  },
-                }}
-              />
-            </Grid>
+           
           </Grid>
 
-          {/* Submit Button */}
           <Box textAlign="center" mt={4}>
             <Button
               type="submit"
@@ -278,6 +339,17 @@ const AddProject = ({ onClose, onSubmit }) => {
       </DialogContent>
     </Dialog>
   );
+};
+
+const inputStyle = {
+  height: '60px',
+  '& .MuiInputBase-root': {
+    height: '80%',
+  },
+  '& input': {
+    height: '100%',
+    padding: '0 2.3em',
+  },
 };
 
 export default AddProject;
