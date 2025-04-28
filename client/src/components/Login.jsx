@@ -56,7 +56,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     if (!agentId.trim() || !password.trim()) {
-      alert('Please enter both fields.');
+      alert('Please enter both Employee ID and Password.');
       return;
     }
 
@@ -76,11 +76,11 @@ const Login = () => {
         localStorage.setItem('agentId', agentId.trim());
         navigate(redirectTo || '/dashboard');
       } else {
-        alert('Invalid credentials.');
+        alert('Invalid login details.');
       }
     } catch (err) {
-      console.error("Login failed:", err.response?.data || err.message);
-      alert('Login failed: ' + (err.response?.data || 'Unknown error'));
+      console.error("Login failed:", err.response?.data?.error || err.message);
+      alert('Login failed: ' + (err.response?.data?.error || 'Unknown error'));
       setPassword('');
     } finally {
       setLoading(false);
@@ -99,36 +99,48 @@ const Login = () => {
         alignItems: 'center',
       }}
     >
-      <Paper elevation={6} sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        borderRadius: 4,
-        overflow: 'hidden',
-        width: { xs: '90%', md: '70%', lg: '55%' },
-        maxWidth: 1000,
-      }}>
+      <Paper
+        elevation={6}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          borderRadius: 4,
+          overflow: 'hidden',
+          width: { xs: '90%', md: '70%', lg: '55%' },
+          maxWidth: 1000,
+        }}
+      >
         {/* Left side image */}
-        <Box sx={{
-          flex: 1,
-          backgroundColor: '#f5f7ff',
-          display: { xs: 'none', md: 'flex' },
-          justifyContent: 'center',
-          alignItems: 'center',
-          p: 3,
-        }}>
+        <Box
+          sx={{
+            flex: 1,
+            backgroundColor: '#f5f7ff',
+            display: { xs: 'none', md: 'flex' },
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 3,
+          }}
+        >
           <img src={timeIcon} alt="Time Icon" style={{ width: "80%", maxWidth: "300px" }} />
         </Box>
 
         {/* Right side form */}
-        <Box sx={{
-          flex: 1,
-          backgroundColor: '#fff',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          p: { xs: 4, md: 6 },
-        }}>
-          <Typography variant="h4" color="#3758f9" fontWeight="bold" sx={{ mb: 4 }}>
+        <Box
+          sx={{
+            flex: 1,
+            backgroundColor: '#fff',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            p: { xs: 4, md: 6 },
+          }}
+        >
+          <Typography
+            variant="h4"
+            color="#3758f9"
+            fontWeight="bold"
+            sx={{ mb: 4 }}
+          >
             Timesheet Login
           </Typography>
 

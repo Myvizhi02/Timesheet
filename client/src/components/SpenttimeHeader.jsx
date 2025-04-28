@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { Box, Typography, IconButton } from '@mui/material';
 import { Home as HomeIcon, ArrowForward as ArrowIcon, Menu as NavIcon } from '@mui/icons-material';
-import DimgIcon from '../Dimg.png';
+import DimgIcon from '../assets/Dimg.png';
 
 const SpenttimeHeader = () => {
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
@@ -13,7 +13,7 @@ const SpenttimeHeader = () => {
       try {
         const agentId = localStorage.getItem('agentId'); // Get agentId from localStorage
         if (agentId) {
-          const response = await axios.get(`http://localhost:5000/api/agents/${agentId}`);
+          const response = await axios.get(`http://localhost:3030/api/agents/${agentId}`);
           setAgentName(response.data.name);
           localStorage.setItem('name', response.data.name);
         }

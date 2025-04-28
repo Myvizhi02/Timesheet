@@ -10,10 +10,10 @@ import {
   Typography
 } from '@mui/material';
 
-import arrowIcon from '../arrow.png';
-import DimgIcon from '../Dimg.png';
-import homeIcon from '../home.png';
-import navIcon from '../navigation.png';
+import arrowIcon from '../assets/arrow.png';
+import DimgIcon from '../assets/Dimg.png';
+import homeIcon from '../assets/home.png';
+import navIcon from '../assets/navigation.png';
 
 const TaskHeader = () => {
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
@@ -23,7 +23,7 @@ const TaskHeader = () => {
       try {
         const agentId = localStorage.getItem('agentId');
         if (agentId) {
-          const response = await axios.get(`http://localhost:5000/api/agents/${agentId}`);
+          const response = await axios.get(`http://localhost:3030/api/agents/${agentId}`);
           setAgentName(response.data.name);
           localStorage.setItem('name', response.data.name);
         }

@@ -1,11 +1,12 @@
 import { AppBar, Avatar, Box, IconButton, Toolbar, Typography } from '@mui/material';
 import axios from 'axios'; // Axios for API call
 import React, { useEffect, useState } from 'react';
-import DimgIcon from '../Dimg.png';
-import homeIcon from '../home.png';
-import navIcon from '../navigation.png';
+import DimgIcon from '../assets/Dimg.png';
+import homeIcon from '../assets/home.png';
+import navIcon from '../assets/navigation.png';
 
 const Header = () => {
+  
   
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
 
@@ -14,7 +15,7 @@ const Header = () => {
       try {
         const agentId = localStorage.getItem('agentId'); // Get agentId from localStorage
         if (agentId) {
-          const response = await axios.get(`http://localhost:5000/api/agents/${agentId}`);
+          const response = await axios.get(`http://localhost:3030/api/agents/${agentId}`);
           setAgentName(response.data.name); // ✅ Update UI immediately
         localStorage.setItem('name', response.data.name);
         }

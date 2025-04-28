@@ -1,35 +1,51 @@
-import React, { useState } from 'react';
 import {
   Box,
   Button,
+  Modal,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Modal,
-  Paper
+  TableRow
 } from '@mui/material';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+
 import AddProject from './AddProject';
-<<<<<<< HEAD
-import addIcon from '../add.png';import editIcon from '../edit.png';
-import DimgIcon from '../Dimg.png';
-=======
 import EditProject from './EditProject';
-import addIcon from '../add.png';
-import editIcon from '../edit.png';
-import dateIcon from '../date.png';
->>>>>>> 5d9b620c9ad8d5932834e0c03e0f78f78c86f03e
+
+import addIcon from '../assets/add.png';
+import editIcon from '../assets/edit.png';
 
 const Project = () => {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [projects, setProjects] = useState([]);
 
-  const handleCreateProject = (data) => {
-    console.log('New Project:', data);
-    // Add new project to state or send to backend
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get('http://localhost:3030/api/projects');
+      setProjects(response.data);
+    } catch (error) {
+      console.error('Failed to fetch projects:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleCreateProject = async (data) => {
+    try {
+      await axios.post('http://localhost:3030/api/projects', data);
+      fetchProjects();
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
   };
 
   const handleEditClick = (project) => {
@@ -37,34 +53,18 @@ const Project = () => {
     setShowEditModal(true);
   };
 
-  const handleUpdateProject = (updatedData) => {
-    console.log('Updated Project:', updatedData);
-    // Update project logic here
-    setShowEditModal(false);
-  };
-
-  const projects = [
-    {
-      id: 1,
-      name: "Winfast",
-      domain: "Development",
-      lob: "-",
-      startDate: "01/03/2025",
-      endDate: "31/03/2025"
-    },
-    {
-      id: 2,
-      name: "Winfast",
-      domain: "Development",
-      lob: "-",
-      startDate: "01/03/2025",
-      endDate: "31/03/2025"
+  const handleUpdateProject = async (updatedData) => {
+    try {
+      await axios.put(`http://localhost:3030/api/projects/${updatedData.id}`, updatedData);
+      fetchProjects();
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Error updating project:', error);
     }
-  ];
+  };
 
   return (
     <Box sx={{ padding: '30px 40px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      {/* Header and Create Button */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
         <Button
           onClick={() => setShowModal(true)}
@@ -79,7 +79,7 @@ const Project = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '1px',
+            gap: '8px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             textTransform: 'none',
             '&:hover': {
@@ -92,13 +92,12 @@ const Project = () => {
         </Button>
       </Box>
 
-      {/* Table */}
       <TableContainer component={Paper} sx={{ boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
         <Table>
           <TableHead sx={{ backgroundColor: '#84E7F9' }}>
             <TableRow>
               <TableCell align="center" sx={{ fontWeight: 600 }}>SL No</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 600 }}>Name of the Project</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>Name of Project</TableCell>
               <TableCell align="center" sx={{ fontWeight: 600 }}>Domain</TableCell>
               <TableCell align="center" sx={{ fontWeight: 600 }}>LOB</TableCell>
               <TableCell align="center" sx={{ fontWeight: 600 }}>Start Date</TableCell>
@@ -108,14 +107,14 @@ const Project = () => {
           </TableHead>
           <TableBody>
             {projects.map((proj, index) => (
-              <TableRow key={proj.id} sx={{ textAlign: 'center', borderBottom: '1px solid #ddd' }}>
-                <TableCell sx={{ textAlign: 'center' }}>{index + 1}</TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>{proj.name}</TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>{proj.domain}</TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>{proj.lob}</TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>{proj.startDate}</TableCell>
-                <TableCell sx={{ textAlign: 'center' }}>{proj.endDate}</TableCell>
-                <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
+              <TableRow key={proj.id}>
+                <TableCell align="center">{index + 1}</TableCell>
+                <TableCell align="center">{proj.project_name}</TableCell>
+                <TableCell align="center">{proj.department}</TableCell>
+                <TableCell align="center">{proj.lob}</TableCell>
+                <TableCell align="center">{proj.start_date}</TableCell>
+                <TableCell align="center">{proj.end_date}</TableCell>
+                <TableCell align="center">
                   <Button
                     variant="outlined"
                     onClick={() => handleEditClick(proj)}
@@ -126,12 +125,12 @@ const Project = () => {
                       fontWeight: 500,
                       padding: '6px 12px',
                       borderRadius: '4px',
-                      backgroundColor: "#F9E49261",
-                      borderColor: "#F9E49261",
-                      color: 'black'
+                      backgroundColor: '#F9E49261',
+                      borderColor: '#F9E49261',
+                      color: 'black',
                     }}
                   >
-                    <img src={editIcon} alt="Edit" style={{ width: '16px', height: '16px' }} />
+                    <img src={editIcon} alt="Edit" width="16" />
                     Edit Project
                   </Button>
                 </TableCell>
@@ -141,7 +140,7 @@ const Project = () => {
         </Table>
       </TableContainer>
 
-      {/* Add Project Modal */}
+      {/* Create Project Modal */}
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
@@ -168,7 +167,7 @@ const Project = () => {
         open={showEditModal}
         onClose={() => setShowEditModal(false)}
         aria-labelledby="edit-project-modal"
-        aria-describedby="modal-to-edit-existing-project"
+        aria-describedby="modal-to-edit-project"
       >
         <Box sx={{
           position: 'absolute',
@@ -177,7 +176,7 @@ const Project = () => {
           transform: 'translate(-50%, -50%)',
           backgroundColor: 'white',
           borderRadius: 2,
-          //padding: 3,
+          padding: 3,
           width: 500,
           boxShadow: 24,
         }}>

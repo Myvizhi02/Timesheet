@@ -1,42 +1,58 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
-const bodyParser = require('body-parser');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = 3030;
 
-// Middleware
-app.use(cors());
+// ----------------------------------------------
+// CORS Middleware
+// ----------------------------------------------
+const corsOptions = {
+  origin: 'http://localhost:5173',  // Allow requests from your React app
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// MySQL Connection Config
+// ----------------------------------------------
+// MySQL Database Configuration
+// ----------------------------------------------
 const dbConfig = {
   host: 'localhost',
   port: '3306',
   user: 'root',
-  password: '', // your mysql root password
+  password: '', // your MySQL password here
   database: 'timesheet',
 };
 
-// Initialize the database connection
 let db;
+
+// Connect to MySQL
 (async () => {
   try {
     db = await mysql.createConnection(dbConfig);
     console.log('✅ Connected to MySQL Database!');
-  } catch (err) {
-    console.error('❌ MySQL connection error:', err);
+  } catch (error) {
+    console.error('❌ MySQL connection error:', error);
+    process.exit(1);
   }
 })();
 
+// Middleware to ensure DB connection
+const checkDbConnection = (req, res, next) => {
+  if (!db) return res.status(500).json({ error: 'Database connection not established.' });
+  next();
+};
 
 // ----------------------------------------------
 // LOGIN API
 // ----------------------------------------------
-app.post('/login', async (req, res) => {
+app.post('/login', checkDbConnection, async (req, res) => {
   const { agent_id, password } = req.body;
 
   if (!agent_id || !password) {
@@ -44,8 +60,6 @@ app.post('/login', async (req, res) => {
   }
 
   try {
-    if (!db) return res.status(500).json({ error: 'Database connection is not established.' });
-
     const [results] = await db.execute('SELECT * FROM crm_admin WHERE agent_id = ?', [agent_id]);
 
     if (results.length === 0) {
@@ -53,10 +67,6 @@ app.post('/login', async (req, res) => {
     }
 
     const user = results[0];
-
-    if (!user.password) {
-      return res.status(500).json({ error: 'Password not set for this user.' });
-    }
 
     if (user.password === password) {
       console.log(`✅ Employee ${agent_id} logged in successfully.`);
@@ -69,87 +79,56 @@ app.post('/login', async (req, res) => {
     } else {
       return res.status(401).json({ error: 'Incorrect password.' });
     }
-  } catch (err) {
-    console.error('❌ Error during login:', err.message);
+  } catch (error) {
+    console.error('❌ Error during login:', error.message);
     return res.status(500).json({ error: 'Server error.' });
   }
 });
 
-
 // ----------------------------------------------
-// GET agent name by agent ID
+// GET: Agent Name by Agent ID
 // ----------------------------------------------
-app.get('/api/agents/:agentId', async (req, res) => {
+app.get('/api/agents/:agentId', checkDbConnection, async (req, res) => {
   const { agentId } = req.params;
 
   try {
     const [results] = await db.execute('SELECT name FROM crm_admin WHERE agent_id = ?', [agentId]);
 
-    if (results.length === 0) return res.status(404).json({ error: 'Agent not found.' });
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Agent not found.' });
+    }
 
-    const agent = results[0];
-    res.json({ name: agent.name });
-  } catch (err) {
-    console.error('❌ Error fetching agent:', err.message);
-    return res.status(500).json({ error: 'Server error' });
+    res.json({ name: results[0].name });
+  } catch (error) {
+    console.error('❌ Error fetching agent name:', error.message);
+    res.status(500).json({ error: 'Server error.' });
   }
 });
 
-
 // ----------------------------------------------
-// GET crm_log_id by agent_id
+// GET: crm_log_id by Agent ID
 // ----------------------------------------------
-app.get('/getCrmLogId/:agent_id', async (req, res) => {
+app.get('/getCrmLogId/:agent_id', checkDbConnection, async (req, res) => {
   const { agent_id } = req.params;
 
   try {
-    const [rows] = await db.execute(
-      'SELECT crm_log_id FROM crm_login WHERE agent_id = ?',
-      [agent_id]
-    );
+    const [rows] = await db.execute('SELECT crm_log_id FROM crm_login WHERE agent_id = ?', [agent_id]);
 
     if (rows.length > 0) {
       res.json({ crm_log_id: rows[0].crm_log_id });
     } else {
-      res.status(404).json({ error: 'Agent ID not found' });
+      res.status(404).json({ error: 'Agent ID not found.' });
     }
   } catch (error) {
     console.error('❌ Error fetching crm_log_id:', error.message);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error.' });
   }
 });
 
-
 // ----------------------------------------------
-// GET next available project ID
+// POST: Add a New Project
 // ----------------------------------------------
-const getNextProjectId = async () => {
-  const [rows] = await db.execute(
-    "SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1"
-  );
-  if (rows.length > 0) {
-    const lastId = parseInt(rows[0].project_unique_id.replace("P", ""));
-    return `P${String(lastId + 1).padStart(4, "0")}`;
-  } else {
-    return "P0001";
-  }
-};
-
-app.get('/api/projects/new-id', async (req, res) => {
-  try {
-    const newProjectId = await getNextProjectId();
-    res.json({ project_unique_id: newProjectId });
-  } catch (err) {
-    console.error('❌ Error generating new project ID:', err.message);
-    res.status(500).json({ error: 'Failed to generate project ID' });
-  }
-});
-
-
-// ----------------------------------------------
-// POST: Add a new project
-// ----------------------------------------------
-app.post('/api/projects', async (req, res) => {
+app.post('/api/projects', checkDbConnection, async (req, res) => {
   try {
     const {
       project_name,
@@ -164,7 +143,12 @@ app.post('/api/projects', async (req, res) => {
       allocated_executives,
     } = req.body;
 
-    const project_unique_id = await getNextProjectId();
+    // Fetch the last project for unique ID generation
+    const [lastProject] = await db.execute('SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1');
+
+    const newProjectId = lastProject.length > 0
+      ? `P${(parseInt(lastProject[0].project_unique_id.replace('P', '')) + 1).toString().padStart(4, '0')}`
+      : 'P0001';
 
     const query = `
       INSERT INTO main_project (
@@ -176,7 +160,7 @@ app.post('/api/projects', async (req, res) => {
     `;
 
     await db.execute(query, [
-      project_unique_id,
+      newProjectId,
       project_name,
       lob,
       start_date,
@@ -189,30 +173,49 @@ app.post('/api/projects', async (req, res) => {
       JSON.stringify(allocated_executives),
     ]);
 
-    res.status(201).json({ message: 'Project created successfully', project_unique_id });
+    res.status(201).json({ message: 'Project created successfully.', project_unique_id: newProjectId });
   } catch (error) {
     console.error('❌ Error creating project:', error.message);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
-
 // ----------------------------------------------
-// GET: Admin names and crm_log_id
+// GET: List All Admin Names
 // ----------------------------------------------
-app.get('/api/admins', async (req, res) => {
+app.get('/api/admins', checkDbConnection, async (req, res) => {
   try {
     const [rows] = await db.query('SELECT id, name, crm_log_id FROM crm_admin');
     res.json(rows);
   } catch (error) {
-    console.error('❌ Error fetching admin names:', error.message);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('❌ Error fetching admins:', error.message);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
+// ----------------------------------------------
+// GET: Fetch All Active Projects
+// ----------------------------------------------
+app.get('/api/projects', checkDbConnection, async (req, res) => {
+  try {
+    const [projects] = await db.execute('SELECT * FROM main_project WHERE is_active = 1 ORDER BY created_date ASC');
+    res.json(projects);
+  } catch (error) {
+    console.error('❌ Error fetching projects:', error.message);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
 
 // ----------------------------------------------
-// Start server
+// Global Error Handler
+// ----------------------------------------------
+app.use((err, req, res, next) => {
+  console.error('❌ Global error:', err.message);
+  res.status(500).json({ error: 'Internal server error.' });
+});
+
+// ----------------------------------------------
+// Start the Server
 // ----------------------------------------------
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

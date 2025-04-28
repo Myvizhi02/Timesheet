@@ -1,5 +1,4 @@
 import {
-<<<<<<< HEAD
   Box,
   Button,
   Grid,
@@ -19,19 +18,19 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
-import addIcon from '../add.png';
-import dateIcon from '../date.png';
-import foldereyeIcon from '../foldereye.png';
-import selectionIcon from '../selection.png';
-import shareIcon from '../share.png';
-import visibilityIcon from '../visibility.png';
-import visibility2Icon from '../visibility2.png';
+import addIcon from '../assets/add.png';
+import dateIcon from '../assets/date.png';
+import foldereyeIcon from '../assets/foldereye.png';
+import selectionIcon from '../assets/selection.png';
+import shareIcon from '../assets/share.png';
+import visibilityIcon from '../assets/visibility.png';
+import visibility2Icon from '../assets/visibility2.png';
 import AddSpenttime from './AddSpenttime';
 import Project from './Project';
 import View from './View';
 
 const Dashboard = () => {
-  const navigate = useNavigate(); // ✅ Correct placement
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('all');
   const [showModal, setShowModal] = useState(false);
@@ -58,8 +57,15 @@ const Dashboard = () => {
   };
 
   const closeModal = () => setShowModal(false);
-  const handleOpenSpentModal = () => setShowSpentModal(true);
-  const handleCloseSpentModal = () => setShowSpentModal(false);
+  
+  const handleOpenSpentModal = () => {
+    setShowSpentModal(true);
+  };
+
+  const handleCloseSpentModal = () => {
+    setShowSpentModal(false);
+  };
+  
   const handleOpenProjectModal = () => setShowProjectModal(true);
   const handleCloseProjectModal = () => setShowProjectModal(false);
 
@@ -70,38 +76,6 @@ const Dashboard = () => {
   const handleViewTaskPage = () => {
     navigate('/task');
   };
-
-=======
-    Box,
-    Button,
-    Grid,
-    IconButton,
-    MenuItem,
-    Paper,
-    Select,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
-  } from '@mui/material';
-  import React, { useState } from 'react';
-  import DatePicker from 'react-datepicker';
-  import 'react-datepicker/dist/react-datepicker.css';
-  import addIcon from '../add.png';
-  import dateIcon from '../date.png';
-  import foldereyeIcon from '../foldereye.png';
-  import selectionIcon from '../selection.png';
-  import shareIcon from '../share.png';
-  import visibilityIcon from '../visibility.png';
-  import visibility2Icon from '../visibility2.png';
-  import AddSpenttime from './AddSpenttime';
-  import View from './View';
-  import { useNavigate } from 'react-router-dom';
->>>>>>> 5d9b620c9ad8d5932834e0c03e0f78f78c86f03e
-  
 
   const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
     <Box
@@ -124,7 +98,7 @@ const Dashboard = () => {
         type="text"
         value={value}
         placeholder={placeholder}
-        readOnly
+        disabled
         style={{
           border: 'none',
           outline: 'none',

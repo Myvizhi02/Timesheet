@@ -19,7 +19,7 @@ import { useTheme } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import dateIcon from '../date.png';
+import dateIcon from '../assets/date.png';
 
 const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
@@ -41,10 +41,8 @@ const AddProject = ({ onClose, onSubmit }) => {
   const [actualEndDate, setActualEndDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
-
   // Fetch admin names and project ID once on component mount
-  useEffect(() => { console.log(localStorage);
-
+  useEffect(() => {
     const fetchAdmins = async () => {
       try {
         const res = await fetch('http://localhost:3030/api/admins');
@@ -68,10 +66,8 @@ const AddProject = ({ onClose, onSubmit }) => {
       }
     };
 
-   
     fetchAdmins();
     fetchProjectId();
-    //fetchLoggedInUser();
   }, []);
 
   const handleChange = (e) => {
@@ -83,21 +79,14 @@ const AddProject = ({ onClose, onSubmit }) => {
       target: { value },
     } = event;
 
-    // If the value is a string, split it by commas, trim each part, and update state
     setFormData({
       ...formData,
       addPeople: typeof value === 'string' ? value.split(',').map(item => item.trim()) : value,
     });
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // if (!loggedInUserId) {
-    //   alert('Logged-in user information not available. Please try again.');
-    //   return;
-    // }
 
     const data = {
       project_name: formData.projectName,

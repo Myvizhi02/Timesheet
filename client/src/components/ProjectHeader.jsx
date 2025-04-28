@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import { Home as HomeIcon, ArrowForward as ArrowIcon, Menu as NavIcon } from '@mui/icons-material';
-import DimgIcon from '../Dimg.png';
+import DimgIcon from '../assets/Dimg.png';
 import axios from 'axios';
 
 const ProjectHeader = () => {

@@ -13,7 +13,7 @@ import {
   Typography
 } from '@mui/material';
 import React, { useState } from 'react';
-import addIcon from '../add.png'; // Check your image path!
+import addIcon from '../assets/add.png'; // Check your image path!
 import EditView from './EditView';
 import AddTask from './AddTask'; // Make sure the path is correct
 

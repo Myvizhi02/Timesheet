@@ -88,7 +88,7 @@ function App() {
             <ProtectedRoute
               element={
                 <>
-                  <SpenttimeHeader />
+                  {/* <SpenttimeHeader /> */}
                   <AddSpenttime />
                 </>
               }
