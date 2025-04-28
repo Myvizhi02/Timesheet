@@ -15,7 +15,12 @@ import {
 import React, { useState } from 'react';
 import addIcon from '../add.png'; // Check your image path!
 import EditView from './EditView';
+<<<<<<< HEAD
 import addtask from'./Addtask';
+=======
+import AddTask from './AddTask'; // Make sure the path is correct
+
+>>>>>>> 3b2bc8c66b6b37f05e8cb260c1a3c888cfadf9c5
 
 const Task = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -137,10 +142,17 @@ const Task = () => {
           </Table>
         </TableContainer>
       </Box>
-{/* EditView popup */}
-
+      {/* EditView popup */}
       {openEditView && (
         <EditView task={selectedTask} onClose={handleCloseEditView} />
+      )}
+
+      {/* AddTask popup */}
+      {showPopup && (
+        <AddTask
+          onClose={() => setShowPopup(false)}
+          onSubmit={handleCreateTask}
+        />
       )}
     </>
   );

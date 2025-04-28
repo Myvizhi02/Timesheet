@@ -1,28 +1,25 @@
-import React, { useState } from "react";
-import { Box, Button, Typography, Paper, TextField } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Paper, Typography, TextField, Button, CircularProgress } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import timeIcon from "../assets/time.png";
-import image from "../assets/bgimg.png";
+import backgroundImg from "../assets/bgimg.png";
 
-// Styling the TextField
-const CssTextField = styled(TextField)({
+// Custom styled TextField
+const StyledTextField = styled(TextField)({
   '& label.Mui-focused': {
-    color: '#A0AAB4',
-  },
-  '& .MuiInput-underline:after': {
-    borderBottomColor: '#B2BAC2',
+    color: '#3758f9',
   },
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
-      borderColor: '#E0E3E7',
+      borderColor: '#bfc7d2',
     },
     '&:hover fieldset': {
-      borderColor: '#B2BAC2',
+      borderColor: '#3758f9',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#6F7E8C',
+      borderColor: '#3758f9',
     },
   },
 });
@@ -33,72 +30,146 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Check if user already logged in
+  useEffect(() => {
+    const checkLogin = async () => {
+      const crm_log_id = localStorage.getItem('crm_log_id');
+      const name = localStorage.getItem('name');
+
+      if (crm_log_id && name) {
+        try {
+          const res = await axios.post('http://localhost:3030/validate-session', { crm_log_id });
+          if (res.data.valid) {
+            navigate('/dashboard');
+          } else {
+            localStorage.clear();
+          }
+        } catch (err) {
+          console.error("Session validation error:", err.message);
+          localStorage.clear();
+        }
+      }
+    };
+
+    checkLogin();
+  }, [navigate]);
+
   const handleLogin = async () => {
     if (!agentId.trim() || !password.trim()) {
-      alert('Please fill in both Agent ID and Password.');
+      alert('Please enter both fields.');
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3030/login', {
+      const res = await axios.post('http://localhost:3030/login', {
         agent_id: agentId.trim(),
         password: password.trim(),
       });
 
-      if (response.data.name) {
-        localStorage.setItem('name', response.data.name); // Store name in localStorage
-        localStorage.setItem('agentId', agentId.trim()); // Store agentId in localStorage
-      }
+      const { crm_log_id, name, redirectTo } = res.data;
 
-      if (response.data.redirectTo) {
-        navigate(response.data.redirectTo); // Navigate to the dashboard or next page
+      if (crm_log_id && name) {
+        localStorage.setItem('crm_log_id', crm_log_id);
+        localStorage.setItem('name', name);
+        localStorage.setItem('agentId', agentId.trim());
+        navigate(redirectTo || '/dashboard');
+      } else {
+        alert('Invalid credentials.');
       }
-    } catch (error) {
-      console.error('Login failed:', error.response?.data || error.message);
-      alert('Login failed: ' + (error.response?.data || 'Unknown error'));
-      setPassword(''); // Clear password after failed login
+    } catch (err) {
+      console.error("Login failed:", err.response?.data || err.message);
+      alert('Login failed: ' + (err.response?.data || 'Unknown error'));
+      setPassword('');
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 
   return (
-    <Box sx={{
-      backgroundImage: `url(${image})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      height: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    }}>
-      <Paper elevation={10} sx={{
-        display: "flex", borderRadius: 5, overflow: "hidden", maxWidth: 1000, width: "90%",
+    <Box
+      sx={{
+        backgroundImage: `url(${backgroundImg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Paper elevation={6} sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        borderRadius: 4,
+        overflow: 'hidden',
+        width: { xs: '90%', md: '70%', lg: '55%' },
+        maxWidth: 1000,
       }}>
+        {/* Left side image */}
         <Box sx={{
-          flex: 1, display: "flex", justifyContent: "center", alignItems: "center", px: 2, backgroundColor: "#f5f7ff",
+          flex: 1,
+          backgroundColor: '#f5f7ff',
+          display: { xs: 'none', md: 'flex' },
+          justifyContent: 'center',
+          alignItems: 'center',
+          p: 3,
         }}>
-          <img src={timeIcon} alt="Time Icon" style={{ width: "100%", maxWidth: 400 }} />
+          <img src={timeIcon} alt="Time Icon" style={{ width: "80%", maxWidth: "300px" }} />
         </Box>
 
+        {/* Right side form */}
         <Box sx={{
-          flex: 1, backgroundColor: "white", display: "flex", flexDirection: "column", justifyContent: "center", px: 6, py: 8,
+          flex: 1,
+          backgroundColor: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          p: { xs: 4, md: 6 },
         }}>
-          <Typography variant="h4" fontWeight="bold" color="#3758f9" sx={{ mb: 4 }}>
-            Welcome to Timesheet
+          <Typography variant="h4" color="#3758f9" fontWeight="bold" sx={{ mb: 4 }}>
+            Timesheet Login
           </Typography>
 
-          <CssTextField label="Employee ID" placeholder="Enter your Employee ID" variant="standard" fullWidth value={agentId} onChange={(e) => setAgentId(e.target.value)} sx={{ mb: 4 }} />
-          <CssTextField label="Password" type="password" placeholder="Enter your password" variant="standard" fullWidth value={password} onChange={(e) => setPassword(e.target.value)} sx={{ mb: 4 }} />
+          <StyledTextField
+            label="Employee ID"
+            variant="outlined"
+            fullWidth
+            sx={{ mb: 3 }}
+            value={agentId}
+            onChange={(e) => setAgentId(e.target.value)}
+          />
 
-          <Button variant="contained" onClick={handleLogin} disabled={loading} sx={{
-            mt: 1, backgroundColor: "#3758f9", color: "#fff", borderRadius: "8px", fontSize: "1rem", textTransform: "none", padding: "0.75rem", '&:hover': {
-              backgroundColor: "#2c47c5",
-            },
-          }} fullWidth>
-            {loading ? 'Logging in...' : 'Login'}
+          <StyledTextField
+            label="Password"
+            variant="outlined"
+            type="password"
+            fullWidth
+            sx={{ mb: 4 }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={loading}
+            sx={{
+              backgroundColor: '#3758f9',
+              color: '#fff',
+              textTransform: 'none',
+              fontWeight: 'bold',
+              fontSize: '1rem',
+              borderRadius: 2,
+              py: 1.5,
+              '&:hover': {
+                backgroundColor: '#2c47c5',
+              },
+            }}
+            onClick={handleLogin}
+          >
+            {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : "Login"}
           </Button>
         </Box>
       </Paper>

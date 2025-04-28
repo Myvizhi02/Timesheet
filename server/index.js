@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql2/promise'); // Use mysql2 with promises
+const mysql = require('mysql2/promise');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -17,7 +17,7 @@ const dbConfig = {
   host: 'localhost',
   port: '3306',
   user: 'root',
-  password: '', // replace with your actual MySQL root password
+  password: '', // your mysql root password
   database: 'timesheet',
 };
 
@@ -28,65 +28,101 @@ let db;
     db = await mysql.createConnection(dbConfig);
     console.log('✅ Connected to MySQL Database!');
   } catch (err) {
-    console.error('MySQL connection error:', err);
+    console.error('❌ MySQL connection error:', err);
   }
 })();
 
+
+// ----------------------------------------------
 // LOGIN API
+// ----------------------------------------------
 app.post('/login', async (req, res) => {
   const { agent_id, password } = req.body;
 
+  if (!agent_id || !password) {
+    return res.status(400).json({ error: 'Employee ID and Password are required.' });
+  }
+
   try {
-    // Ensure the database is connected
-    if (!db) {
-      return res.status(500).send('Database connection is not established.');
-    }
+    if (!db) return res.status(500).json({ error: 'Database connection is not established.' });
 
     const [results] = await db.execute('SELECT * FROM crm_admin WHERE agent_id = ?', [agent_id]);
 
     if (results.length === 0) {
-      return res.status(401).send('Employee ID not found.');
+      return res.status(401).json({ error: 'Employee ID not found.' });
     }
 
     const user = results[0];
 
-    // Check if the password matches
+    if (!user.password) {
+      return res.status(500).json({ error: 'Password not set for this user.' });
+    }
+
     if (user.password === password) {
       console.log(`✅ Employee ${agent_id} logged in successfully.`);
       return res.json({
         message: 'Login successful',
         name: user.name,
+        crm_log_id: user.crm_log_id,
         redirectTo: '/dashboard',
       });
     } else {
-      return res.status(401).send('Incorrect password.');
+      return res.status(401).json({ error: 'Incorrect password.' });
     }
   } catch (err) {
-    console.error('Error during login:', err);
-    return res.status(500).send('Server error.');
+    console.error('❌ Error during login:', err.message);
+    return res.status(500).json({ error: 'Server error.' });
   }
 });
 
-// FETCH agent's name by agent_id
+
+// ----------------------------------------------
+// GET agent name by agent ID
+// ----------------------------------------------
 app.get('/api/agents/:agentId', async (req, res) => {
   const { agentId } = req.params;
 
   try {
     const [results] = await db.execute('SELECT name FROM crm_admin WHERE agent_id = ?', [agentId]);
 
-    if (results.length === 0) {
-      return res.status(404).send('Agent not found.');
-    }
+    if (results.length === 0) return res.status(404).json({ error: 'Agent not found.' });
 
     const agent = results[0];
     res.json({ name: agent.name });
   } catch (err) {
-    console.error('Error fetching agent:', err);
-    return res.status(500).send('Server error.');
+    console.error('❌ Error fetching agent:', err.message);
+    return res.status(500).json({ error: 'Server error' });
   }
 });
 
-// 🆕 Get latest project_unique_id
+
+// ----------------------------------------------
+// GET crm_log_id by agent_id
+// ----------------------------------------------
+app.get('/getCrmLogId/:agent_id', async (req, res) => {
+  const { agent_id } = req.params;
+
+  try {
+    const [rows] = await db.execute(
+      'SELECT crm_log_id FROM crm_login WHERE agent_id = ?',
+      [agent_id]
+    );
+
+    if (rows.length > 0) {
+      res.json({ crm_log_id: rows[0].crm_log_id });
+    } else {
+      res.status(404).json({ error: 'Agent ID not found' });
+    }
+  } catch (error) {
+    console.error('❌ Error fetching crm_log_id:', error.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+// ----------------------------------------------
+// GET next available project ID
+// ----------------------------------------------
 const getNextProjectId = async () => {
   const [rows] = await db.execute(
     "SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1"
@@ -99,31 +135,20 @@ const getNextProjectId = async () => {
   }
 };
 
-// Backend route to get the next available project ID
 app.get('/api/projects/new-id', async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      "SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1"
-    );
-
-    let newProjectId;
-
-    if (rows.length > 0 && rows[0].project_unique_id) {
-      const lastId = parseInt(rows[0].project_unique_id.replace("P", ""));
-      newProjectId = `P${String(lastId + 1).padStart(4, "0")}`;
-    } else {
-      newProjectId = "P0001";
-    }
-
+    const newProjectId = await getNextProjectId();
     res.json({ project_unique_id: newProjectId });
   } catch (err) {
-    console.error('Error generating new project ID:', err);
+    console.error('❌ Error generating new project ID:', err.message);
     res.status(500).json({ error: 'Failed to generate project ID' });
   }
 });
 
 
-// 📥 POST: Add a new project
+// ----------------------------------------------
+// POST: Add a new project
+// ----------------------------------------------
 app.post('/api/projects', async (req, res) => {
   try {
     const {
@@ -136,7 +161,7 @@ app.post('/api/projects', async (req, res) => {
       created_by,
       modified_by,
       department,
-      allocated_executives, // should be array like ["crm001", "crm002"]
+      allocated_executives,
     } = req.body;
 
     const project_unique_id = await getNextProjectId();
@@ -166,22 +191,29 @@ app.post('/api/projects', async (req, res) => {
 
     res.status(201).json({ message: 'Project created successfully', project_unique_id });
   } catch (error) {
-    console.error('Error creating project:', error);
+    console.error('❌ Error creating project:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// 📥 GET: Fetch admin names and IDs from crm_admin
+
+// ----------------------------------------------
+// GET: Admin names and crm_log_id
+// ----------------------------------------------
 app.get('/api/admins', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, name FROM crm_admin');
+    const [rows] = await db.query('SELECT id, name, crm_log_id FROM crm_admin');
     res.json(rows);
   } catch (error) {
-    console.error('Error fetching admin names:', error);
+    console.error('❌ Error fetching admin names:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-// 🟢 Start server
+
+
+// ----------------------------------------------
+// Start server
+// ----------------------------------------------
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
