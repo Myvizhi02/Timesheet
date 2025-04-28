@@ -1,8 +1,4 @@
 import {
-<<<<<<< HEAD
-=======
-
->>>>>>> d4ca4ec65b139649a31a354ecc63034a27c73e59
   Box,
   Button,
   Grid,
@@ -81,14 +77,6 @@ const Dashboard = () => {
     navigate('/task');
   };
 
-<<<<<<< HEAD
-=======
-
-   
-
-  
-
->>>>>>> d4ca4ec65b139649a31a354ecc63034a27c73e59
   const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
     <Box
       onClick={onClick}
