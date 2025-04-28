@@ -1,72 +1,82 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Grid,
+  TextField,
+  Switch,
+  FormControlLabel,
+  Button,
+  Typography,
+} from '@mui/material';
 
-const SubTask = () => {
-  const [showNewInput, setShowNewInput] = useState(false);
-  const [highlightSubTask, setHighlightSubTask] = useState(false);
-  const [subTasks, setSubTasks] = useState(['']); // for multiple subtasks
+const SubTaskTab = () => {
+  const [status, setStatus] = useState(true);
 
-  const handleAddSubTask = () => {
-    setHighlightSubTask(true);
-    setShowNewInput(true);
-    setSubTasks([...subTasks, '']);
+  const handleStatusChange = () => {
+    setStatus((prev) => !prev);
   };
 
-  const handleSubTaskChange = (index, value) => {
-    const updated = [...subTasks];
-    updated[index] = value;
-    setSubTasks(updated);
+  const handleSubmit = () => {
+    console.log('Submit Sub-Task', {
+      project: 'Winfast',
+      taskName: 'Merge JD and Core',
+      description: 'Uniting Core and JD',
+      status: status ? 'Open' : 'Closed',
+    });
   };
 
   return (
-    <Box>
-      {/* Select SubTask Box */}
-      <Box
-        sx={{
-          backgroundColor: highlightSubTask ? '#ffdddd' : '#fff',
-          border: '1px solid #ccc',
-          borderRadius: '6px',
-          padding: '10px',
-          marginBottom: '10px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Typography sx={{ color: highlightSubTask ? 'red' : '#999' }}>
-          Select SubTask
-        </Typography>
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: '#2264E5',
-            color: '#fff',
-            borderRadius: '4px',textTransform: 'none',
-          }}
-          onClick={handleAddSubTask}
-        >
-          Add Sub Task
-        </Button>
-      </Box>
-
-      {/* New Subtask Input Boxes */}
-      {showNewInput &&
-        subTasks.map((task, index) => (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h6" mb={2}>
+        Sub-Task
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
           <TextField
-            key={index}
-            value={task}
-            onChange={(e) => handleSubTaskChange(index, e.target.value)}
-            placeholder={`Enter Sub Task ${index + 1}`}
-            variant="outlined"
+            label="Project"
+            value="Winfast"
             fullWidth
-            sx={{
-              marginBottom: '8px',
-              borderRadius: '6px',
-            }}
+            disabled
           />
-        ))}
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Task Name"
+            value="Merge JD and Core"
+            fullWidth
+            disabled
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            label="Description"
+            value="Uniting Core and JD"
+            fullWidth
+            disabled
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={<Switch checked={status} onChange={handleStatusChange} />}
+            label={status ? 'Open' : 'Closed'}
+          />
+        </Grid>
+        <Grid item xs={12} textAlign="center">
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: '#002884',
+              px: 4,
+              '&:hover': { backgroundColor: '#001e6c' },
+            }}
+            onClick={handleSubmit}
+          >
+            Submit
+          </Button>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
 
-export default SubTask;
+export default SubTaskTab;

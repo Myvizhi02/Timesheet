@@ -1,16 +1,46 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Modal, Paper, IconButton } from '@mui/material';
-// import { Add as AddIcon, BorderColor as BorderIcon } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Modal,
+  Paper
+} from '@mui/material';
 import AddProject from './AddProject';
+<<<<<<< HEAD
 import addIcon from '../add.png';import editIcon from '../edit.png';
 import DimgIcon from '../Dimg.png';
+=======
+import EditProject from './EditProject';
+import addIcon from '../add.png';
+import editIcon from '../edit.png';
+import dateIcon from '../date.png';
+>>>>>>> 5d9b620c9ad8d5932834e0c03e0f78f78c86f03e
 
 const Project = () => {
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   const handleCreateProject = (data) => {
     console.log('New Project:', data);
     // Add new project to state or send to backend
+  };
+
+  const handleEditClick = (project) => {
+    setSelectedProject(project);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateProject = (updatedData) => {
+    console.log('Updated Project:', updatedData);
+    // Update project logic here
+    setShowEditModal(false);
   };
 
   const projects = [
@@ -37,7 +67,7 @@ const Project = () => {
       {/* Header and Create Button */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
         <Button
-          onClick={() => setShowModal(true)} 
+          onClick={() => setShowModal(true)}
           sx={{
             borderRadius: '12px',
             backgroundColor: '#3D6BFA',
@@ -50,13 +80,14 @@ const Project = () => {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '1px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',textTransform: 'none',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            textTransform: 'none',
             '&:hover': {
               backgroundColor: '#2c47c5',
             }
           }}
-        > <img src={addIcon} alt="Add" width="18" sx={{ width: '12px',display:'flex', justifyContent:'center' }}/>
-          
+        >
+          <img src={addIcon} alt="Add" width="18" />
           Create Project
         </Button>
       </Box>
@@ -78,27 +109,29 @@ const Project = () => {
           <TableBody>
             {projects.map((proj, index) => (
               <TableRow key={proj.id} sx={{ textAlign: 'center', borderBottom: '1px solid #ddd' }}>
-                <TableCell sx={{ textAlign: 'center'}}>{index + 1}</TableCell>
-                <TableCell sx={{ textAlign: 'center'}} >{proj.name}</TableCell>
-                <TableCell sx={{ textAlign: 'center'}}>{proj.domain}</TableCell>
-                <TableCell sx={{ textAlign: 'center'}}>{proj.lob}</TableCell>
-                <TableCell sx={{ textAlign: 'center'}}>{proj.startDate}</TableCell>
-                <TableCell sx={{ textAlign: 'center'}}>{proj.endDate}</TableCell>
-                <TableCell sx={{ display: 'flex', justifyContent:'center'}}>
+                <TableCell sx={{ textAlign: 'center' }}>{index + 1}</TableCell>
+                <TableCell sx={{ textAlign: 'center' }}>{proj.name}</TableCell>
+                <TableCell sx={{ textAlign: 'center' }}>{proj.domain}</TableCell>
+                <TableCell sx={{ textAlign: 'center' }}>{proj.lob}</TableCell>
+                <TableCell sx={{ textAlign: 'center' }}>{proj.startDate}</TableCell>
+                <TableCell sx={{ textAlign: 'center' }}>{proj.endDate}</TableCell>
+                <TableCell sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Button
                     variant="outlined"
-                    color="black"
-                   
+                    onClick={() => handleEditClick(proj)}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
                       fontWeight: 500,
                       padding: '6px 12px',
-                      borderRadius: '4px', backgroundColor:"#F9E49261", borderColor:"#F9E49261"
+                      borderRadius: '4px',
+                      backgroundColor: "#F9E49261",
+                      borderColor: "#F9E49261",
+                      color: 'black'
                     }}
                   >
-                    <img src={editIcon} alt="Edit" sx={{ width: '16px',height:'16px' }} />
+                    <img src={editIcon} alt="Edit" style={{ width: '16px', height: '16px' }} />
                     Edit Project
                   </Button>
                 </TableCell>
@@ -108,7 +141,7 @@ const Project = () => {
         </Table>
       </TableContainer>
 
-      {/* Add Project Popup */}
+      {/* Add Project Modal */}
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
@@ -127,6 +160,32 @@ const Project = () => {
           boxShadow: 24,
         }}>
           <AddProject onClose={() => setShowModal(false)} onSubmit={handleCreateProject} />
+        </Box>
+      </Modal>
+
+      {/* Edit Project Modal */}
+      <Modal
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        aria-labelledby="edit-project-modal"
+        aria-describedby="modal-to-edit-existing-project"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          backgroundColor: 'white',
+          borderRadius: 2,
+          //padding: 3,
+          width: 500,
+          boxShadow: 24,
+        }}>
+          <EditProject
+            project={selectedProject}
+            onClose={() => setShowEditModal(false)}
+            onUpdate={handleUpdateProject}
+          />
         </Box>
       </Modal>
     </Box>
