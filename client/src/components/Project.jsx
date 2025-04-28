@@ -15,9 +15,15 @@ import React, { useEffect, useState } from 'react';
 
 import AddProject from './AddProject';
 import EditProject from './EditProject';
+<<<<<<< HEAD
 
 import addIcon from '../assets/add.png';
 import editIcon from '../assets/edit.png';
+=======
+import addIcon from '../add.png';
+import editIcon from '../edit.png';
+import dateIcon from '../date.png';
+>>>>>>> d4ca4ec65b139649a31a354ecc63034a27c73e59
 
 const Project = () => {
   const [showModal, setShowModal] = useState(false);
