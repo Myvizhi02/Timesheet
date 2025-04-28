@@ -1,5 +1,5 @@
 import {
-<<<<<<< HEAD
+
   Box,
   Button,
   Grid,
@@ -71,36 +71,9 @@ const Dashboard = () => {
     navigate('/task');
   };
 
-=======
-    Box,
-    Button,
-    Grid,
-    IconButton,
-    MenuItem,
-    Paper,
-    Select,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
-  } from '@mui/material';
-  import React, { useState } from 'react';
-  import DatePicker from 'react-datepicker';
-  import 'react-datepicker/dist/react-datepicker.css';
-  import addIcon from '../add.png';
-  import dateIcon from '../date.png';
-  import foldereyeIcon from '../foldereye.png';
-  import selectionIcon from '../selection.png';
-  import shareIcon from '../share.png';
-  import visibilityIcon from '../visibility.png';
-  import visibility2Icon from '../visibility2.png';
-  import AddSpenttime from './AddSpenttime';
-  import View from './View';
-  import { useNavigate } from 'react-router-dom';
->>>>>>> 5d9b620c9ad8d5932834e0c03e0f78f78c86f03e
+
+   
+
   
 
   const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (

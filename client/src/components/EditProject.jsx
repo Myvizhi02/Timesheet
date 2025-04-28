@@ -47,10 +47,10 @@ const EditProject = ({ project, onClose, onUpdate }) => {
   const handleChange = (field) => (event) => {
     setFormData({
       ...formData,
-      [field]: event.target.value,  // This will update the correct field in formData
+      [field]: event.target.value,
     });
   };
-  
+
   const handleDateChange = (field) => (date) => {
     setFormData({ ...formData, [field]: date });
   };
@@ -84,7 +84,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
         top: '50%',
         right: 20,
         transform: 'translateY(-50%)',
-        width: { xs: '95%', sm: '600px' }, // wider popup
+        width: { xs: '95%', sm: '600px' },
         bgcolor: 'white',
         boxShadow: '-4px 0 12px rgba(0,0,0,0.2)',
         borderRadius: 2,
@@ -92,45 +92,29 @@ const EditProject = ({ project, onClose, onUpdate }) => {
         zIndex: 1500,
       }}
     >
-      {/* Header */}
-      <Box
-        sx={{
-          bgcolor: '#84E7F9',
-          p: 2,
-          position: 'relative'
-        }}
-      >
+      <Box sx={{ bgcolor: '#84E7F9', p: 2, position: 'relative' }}>
         <Typography variant="h6" color="black">
           Edit Project
         </Typography>
-        <IconButton
-          onClick={onClose}
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-          }}
-        >
+        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8 }}>
           <CloseIcon />
         </IconButton>
       </Box>
 
-      {/* Form Content */}
       <Box sx={{ p: 3 }}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Project ID"
+                value={formData.projectId}
+                onChange={handleChange('projectId')}
+                fullWidth
+                size="small"
+              />
+            </Grid>
 
-          <Grid item xs={6}>
-  <TextField
-    label="Project ID"
-    value={formData.projectId}
-    onChange={handleChange('projectId')}  // Ensure this handles the update
-    fullWidth
-    size="small"
-  />
-</Grid>
-
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 label="Project Name"
                 value={formData.projectName}
@@ -140,8 +124,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
               />
             </Grid>
 
-            {/* Second Row */}
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 label="Domain"
                 value={formData.domain}
@@ -150,7 +133,8 @@ const EditProject = ({ project, onClose, onUpdate }) => {
                 size="small"
               />
             </Grid>
-            <Grid item xs={6}>
+
+            <Grid item xs={12} sm={6}>
               <TextField
                 label="LOB"
                 value={formData.lob}
@@ -160,40 +144,61 @@ const EditProject = ({ project, onClose, onUpdate }) => {
               />
             </Grid>
 
-            {/* Third Row */}
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <DatePicker
                 label="Start Date"
                 value={formData.startDate}
                 onChange={handleDateChange('startDate')}
                 slotProps={{
-                  textField: { fullWidth: true, size: 'small' }
+                  textField: {
+                    fullWidth: true,
+                    size: 'small', 
+                    sx: {
+                      width: '85%', // 👈 Decrease width here
+                      mx: 'auto',    // 👈 Center it horizontally (optional)
+                    },
+                  },
                 }}
               />
             </Grid>
-            <Grid item xs={6}>
+
+            <Grid item xs={12} sm={6}>
               <DatePicker
                 label="End Date"
                 value={formData.endDate}
                 onChange={handleDateChange('endDate')}
                 slotProps={{
-                  textField: { fullWidth: true, size: 'small' }
+                  textField: {
+                    fullWidth: true,
+                    size: 'small', 
+                    sx: {
+                      width: '85%', // 👈 Decrease width here
+                      mx: 'auto',    // 👈 Center it horizontally (optional)
+                    },
+                  },
                 }}
               />
             </Grid>
 
-            {/* Fourth Row */}
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <DatePicker
                 label="Actual End Date"
                 value={formData.actualEndDate}
                 onChange={handleDateChange('actualEndDate')}
                 slotProps={{
-                  textField: { fullWidth: true, size: 'small' }
+                  textField: {
+                    fullWidth: true,
+                    size: 'small', 
+                    sx: {
+                      width: '85%', // 👈 Decrease width here
+                      mx: 'auto',    // 👈 Center it horizontally (optional)
+                    },
+                  },
                 }}
               />
             </Grid>
-            <Grid item xs={6}>
+
+            <Grid item xs={12} sm={6}>
               <TextField
                 label="Budget"
                 value={formData.budget}
@@ -203,7 +208,6 @@ const EditProject = ({ project, onClose, onUpdate }) => {
               />
             </Grid>
 
-            {/* Add People (full width) */}
             <Grid item xs={12}>
               <TextField
                 label="Add People"
@@ -220,7 +224,6 @@ const EditProject = ({ project, onClose, onUpdate }) => {
               />
             </Grid>
 
-            {/* People Chips */}
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {formData.people.map((person, index) => (
@@ -234,22 +237,39 @@ const EditProject = ({ project, onClose, onUpdate }) => {
                 ))}
               </Box>
             </Grid>
+            <Grid item xs={12}>
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center', // vertically center if needed
+      mt: 2
+      
+    }}
+  >
+    <Button
+      variant="contained"
+      onClick={handleSubmit}
+      sx={{
+        backgroundColor: '#213E9A',
+        padding: '0.625em 1.875em',
+                borderRadius: '0.375em',
+                fontWeight: 600,
+                textTransform: 'none',
+                
+        px: 8,
+        
+        
+      }}
+    >
+      Update
+    </Button>
+  </Box>
+</Grid>
 
-            {/* Update Button */}
-            <Grid item xs={12} textAlign="center">
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                sx={{
-                  backgroundColor: '#0052cc',
-                  textTransform: 'none',
-                  mt: 2,
-                  px: 8
-                }}
-              >
-                Update
-              </Button>
-            </Grid>
+
+
+
 
           </Grid>
         </LocalizationProvider>

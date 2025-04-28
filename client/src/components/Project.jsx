@@ -12,15 +12,10 @@ import {
   Paper
 } from '@mui/material';
 import AddProject from './AddProject';
-<<<<<<< HEAD
-import addIcon from '../add.png';import editIcon from '../edit.png';
-import DimgIcon from '../Dimg.png';
-=======
 import EditProject from './EditProject';
 import addIcon from '../add.png';
 import editIcon from '../edit.png';
 import dateIcon from '../date.png';
->>>>>>> 5d9b620c9ad8d5932834e0c03e0f78f78c86f03e
 
 const Project = () => {
   const [showModal, setShowModal] = useState(false);

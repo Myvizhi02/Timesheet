@@ -15,12 +15,10 @@ import {
 import React, { useState } from 'react';
 import addIcon from '../add.png'; // Check your image path!
 import EditView from './EditView';
-<<<<<<< HEAD
-import addtask from'./Addtask';
-=======
-import AddTask from './AddTask'; // Make sure the path is correct
 
->>>>>>> 3b2bc8c66b6b37f05e8cb260c1a3c888cfadf9c5
+//import addtask from'./Addtask';
+
+import AddTask from './AddTask'; // Make sure the path is correc
 
 const Task = () => {
   const [showPopup, setShowPopup] = useState(false);
