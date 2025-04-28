@@ -124,6 +124,48 @@ app.get('/getCrmLogId/:agent_id', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Server error.' });
   }
 });
+// ----------------------------------------------
+// GET: Validation
+// ----------------------------------------------
+
+app.get('/validate-session', (req, res) => {
+  // Check session validity logic here
+  // For example, check if user is authenticated or not
+  if (req.session && req.session.user) {
+      res.status(200).json({ message: 'Session valid' });
+  } else {
+      res.status(401).json({ message: 'Session invalid' });
+  }
+});
+
+// ----------------------------------------------
+// GET: Generate Next Available Project ID
+// ----------------------------------------------
+app.get('/api/projects/new-id', checkDbConnection, async (req, res) => {
+  try {
+    const nextProjectId = await getNextProjectId();
+    res.json({ project_unique_id: nextProjectId });
+  } catch (error) {
+    console.error('❌ Error generating next project ID:', error.message);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+// ----------------------------------------------
+// Function to get Next Available Project ID
+// ----------------------------------------------
+const getNextProjectId = async () => {
+  const [rows] = await db.execute(
+    "SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1"
+  );
+
+  if (rows.length > 0) {
+    const lastId = parseInt(rows[0].project_unique_id.replace("P", ""));
+    return `P${String(lastId + 1).padStart(4, "0")}`;
+  } else {
+    return "P0001"; // If no projects exist yet, start from P0001
+  }
+};
 
 // ----------------------------------------------
 // POST: Add a New Project
