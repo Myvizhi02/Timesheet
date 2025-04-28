@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
-import IconButton from '@mui/material/IconButton';
 import {
+  Box,
   TextField,
-  Grid,
-  Button,
   Typography,
+  Grid,
   Chip,
-  Box
+  Button,
+  IconButton
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import CloseIcon from '@mui/icons-material/Close';
 
 const EditProject = ({ project, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
@@ -23,7 +23,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     endDate: null,
     actualEndDate: null,
     budget: '',
-    people: ['Employee 1', 'Employee 2'],
+    people: [],
     newPerson: ''
   });
 
@@ -44,19 +44,15 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     }
   }, [project]);
 
-  const handleChange = (field) => (e) => {
-    setFormData({ ...formData, [field]: e.target.value });
+  const handleChange = (field) => (event) => {
+    setFormData({
+      ...formData,
+      [field]: event.target.value,  // This will update the correct field in formData
+    });
   };
-
+  
   const handleDateChange = (field) => (date) => {
     setFormData({ ...formData, [field]: date });
-  };
-
-  const handleDeletePerson = (name) => {
-    setFormData((prev) => ({
-      ...prev,
-      people: prev.people.filter((p) => p !== name)
-    }));
   };
 
   const handleAddPerson = () => {
@@ -70,6 +66,13 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     }
   };
 
+  const handleDeletePerson = (name) => {
+    setFormData((prev) => ({
+      ...prev,
+      people: prev.people.filter((p) => p !== name)
+    }));
+  };
+
   const handleSubmit = () => {
     onUpdate(formData);
   };
@@ -78,173 +81,179 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     <Box
       sx={{
         position: 'fixed',
-        top: '0.5%',
-        right: '0.5%',
-        width: { xs: '90%', sm: '400px', md: '480px' },
-        maxHeight: '90vh',
-        overflowY: 'auto',
+        top: '50%',
+        right: 20,
+        transform: 'translateY(-50%)',
+        width: { xs: '95%', sm: '600px' }, // wider popup
         bgcolor: 'white',
-        border: '1px solid #ccc',
+        boxShadow: '-4px 0 12px rgba(0,0,0,0.2)',
         borderRadius: 2,
-        boxShadow: 4,
-        p: 3,
-        zIndex: 1300
+        overflow: 'hidden',
+        zIndex: 1500,
       }}
     >
-      <IconButton
-        onClick={onClose}
-        sx={{ position: 'absolute', top: 8, right: 8 }}
-      >
-        <CloseIcon />
-      </IconButton>
-
-      <Typography
-        variant="h6"
+      {/* Header */}
+      <Box
         sx={{
-          mb: 2,
-          backgroundColor: '#84E7F9',
-          color: 'black',
-          padding: 1,
-          borderRadius: 1
+          bgcolor: '#84E7F9',
+          p: 2,
+          position: 'relative'
         }}
       >
-        Edit Project
-      </Typography>
+        <Typography variant="h6" color="black">
+          Edit Project
+        </Typography>
+        <IconButton
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
 
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Project ID"
-              fullWidth
-              size="small"
-              value={formData.projectId}
-              onChange={handleChange('projectId')}
-            />
-          </Grid>
+      {/* Form Content */}
+      <Box sx={{ p: 3 }}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Grid container spacing={2}>
 
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Project Name"
-              fullWidth
-              size="small"
-              value={formData.projectName}
-              onChange={handleChange('projectName')}
-            />
-          </Grid>
+          <Grid item xs={6}>
+  <TextField
+    label="Project ID"
+    value={formData.projectId}
+    onChange={handleChange('projectId')}  // Ensure this handles the update
+    fullWidth
+    size="small"
+  />
+</Grid>
 
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Domain"
-              fullWidth
-              size="small"
-              value={formData.domain}
-              onChange={handleChange('domain')}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="LOB"
-              fullWidth
-              size="small"
-              value={formData.lob}
-              onChange={handleChange('lob')}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <DatePicker
-              label="Start Date"
-              value={formData.startDate}
-              onChange={handleDateChange('startDate')}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth size="small" />
-              )}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <DatePicker
-              label="End Date"
-              value={formData.endDate}
-              onChange={handleDateChange('endDate')}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth size="small" />
-              )}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <DatePicker
-              label="Actual End Date"
-              value={formData.actualEndDate}
-              onChange={handleDateChange('actualEndDate')}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth size="small" />
-              )}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Budget"
-              fullWidth
-              size="small"
-              value={formData.budget}
-              onChange={handleChange('budget')}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              label="Add People"
-              fullWidth
-              size="small"
-              value={formData.newPerson}
-              onChange={handleChange('newPerson')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleAddPerson();
-                }
-              }}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            {formData.people.map((person, index) => (
-              <Chip
-                key={index}
-                label={person}
-                onDelete={() => handleDeletePerson(person)}
-                sx={{
-                  mr: 1,
-                  mb: 1,
-                  backgroundColor: '#49E8EE80',
-                  color: '#000'
-                }}
+            <Grid item xs={6}>
+              <TextField
+                label="Project Name"
+                value={formData.projectName}
+                onChange={handleChange('projectName')}
+                fullWidth
                 size="small"
               />
-            ))}
-          </Grid>
+            </Grid>
 
-          <Grid item xs={12} sx={{ textAlign: 'center', mt: 2 }}>
-            <Button
-              variant="contained"
-              onClick={handleSubmit}
-              sx={{
-                backgroundColor: '#0052cc',
-                color: 'white',
-                px: 4,
-                py: 1
-              }}
-            >
-              Update
-            </Button>
+            {/* Second Row */}
+            <Grid item xs={6}>
+              <TextField
+                label="Domain"
+                value={formData.domain}
+                onChange={handleChange('domain')}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="LOB"
+                value={formData.lob}
+                onChange={handleChange('lob')}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+
+            {/* Third Row */}
+            <Grid item xs={6}>
+              <DatePicker
+                label="Start Date"
+                value={formData.startDate}
+                onChange={handleDateChange('startDate')}
+                slotProps={{
+                  textField: { fullWidth: true, size: 'small' }
+                }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <DatePicker
+                label="End Date"
+                value={formData.endDate}
+                onChange={handleDateChange('endDate')}
+                slotProps={{
+                  textField: { fullWidth: true, size: 'small' }
+                }}
+              />
+            </Grid>
+
+            {/* Fourth Row */}
+            <Grid item xs={6}>
+              <DatePicker
+                label="Actual End Date"
+                value={formData.actualEndDate}
+                onChange={handleDateChange('actualEndDate')}
+                slotProps={{
+                  textField: { fullWidth: true, size: 'small' }
+                }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Budget"
+                value={formData.budget}
+                onChange={handleChange('budget')}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+
+            {/* Add People (full width) */}
+            <Grid item xs={12}>
+              <TextField
+                label="Add People"
+                value={formData.newPerson}
+                onChange={handleChange('newPerson')}
+                fullWidth
+                size="small"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddPerson();
+                  }
+                }}
+              />
+            </Grid>
+
+            {/* People Chips */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {formData.people.map((person, index) => (
+                  <Chip
+                    key={index}
+                    label={person}
+                    onDelete={() => handleDeletePerson(person)}
+                    size="small"
+                    sx={{ bgcolor: '#84E7F9', color: 'black' }}
+                  />
+                ))}
+              </Box>
+            </Grid>
+
+            {/* Update Button */}
+            <Grid item xs={12} textAlign="center">
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                sx={{
+                  backgroundColor: '#0052cc',
+                  textTransform: 'none',
+                  mt: 2,
+                  px: 8
+                }}
+              >
+                Update
+              </Button>
+            </Grid>
+
           </Grid>
-        </Grid>
-      </LocalizationProvider>
+        </LocalizationProvider>
+      </Box>
     </Box>
   );
 };
