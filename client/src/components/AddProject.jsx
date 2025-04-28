@@ -25,39 +25,53 @@ const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
 
   const [adminOptions, setAdminOptions] = useState([]);
+  const [loggedInUserId, setLoggedInUserId] = useState(null); // State to store the logged-in user's crm_log_id
   const [formData, setFormData] = useState({
     projectId: '',
     projectName: '',
     lob: '',
     budget: '',
     domain: '',
-    created_by: 'crm003',
-    modified_by: 'crm003',
-    addPeople: [], // Array to store selected person IDs
+    created_by: '', // Will be set dynamically
+    modified_by: '', // Will be set dynamically
+    addPeople: [], // Array to store selected person IDs (crm_log_id)
   });
 
   const [startDate, setStartDate] = useState(null);
   const [actualEndDate, setActualEndDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
-  // Fetch admin names and project ID once on component mount
-  useEffect(() => {
-    fetch('http://localhost:3030/api/admins')
-      .then((res) => res.json())
-      .then((data) => setAdminOptions(data))
-      .catch((err) => console.error('Failed to fetch admin names:', err));
-  }, []);
 
-  useEffect(() => {
-    fetch('http://localhost:3030/api/projects/new-id')
-      .then((res) => res.json())
-      .then((data) => {
+  // Fetch admin names and project ID once on component mount
+  useEffect(() => { console.log(localStorage);
+
+    const fetchAdmins = async () => {
+      try {
+        const res = await fetch('http://localhost:3030/api/admins');
+        const data = await res.json();
+        setAdminOptions(data);
+      } catch (err) {
+        console.error('Failed to fetch admin names:', err);
+      }
+    };
+
+    const fetchProjectId = async () => {
+      try {
+        const res = await fetch('http://localhost:3030/api/projects/new-id');
+        const data = await res.json();
         setFormData((prev) => ({
           ...prev,
           projectId: data.project_unique_id,
         }));
-      })
-      .catch((err) => console.error('Failed to fetch project ID', err));
+      } catch (err) {
+        console.error('Failed to fetch project ID', err);
+      }
+    };
+
+   
+    fetchAdmins();
+    fetchProjectId();
+    //fetchLoggedInUser();
   }, []);
 
   const handleChange = (e) => {
@@ -68,18 +82,22 @@ const AddProject = ({ onClose, onSubmit }) => {
     const {
       target: { value },
     } = event;
-  
+
     // If the value is a string, split it by commas, trim each part, and update state
     setFormData({
       ...formData,
       addPeople: typeof value === 'string' ? value.split(',').map(item => item.trim()) : value,
     });
   };
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const loggedInUserId = 'crm003';
+
+    // if (!loggedInUserId) {
+    //   alert('Logged-in user information not available. Please try again.');
+    //   return;
+    // }
 
     const data = {
       project_name: formData.projectName,
@@ -88,8 +106,8 @@ const AddProject = ({ onClose, onSubmit }) => {
       end_date: endDate ? endDate.toISOString().split('T')[0] : null,
       expected_date: actualEndDate ? actualEndDate.toISOString().split('T')[0] : null,
       budget: formData.budget,
-      created_by: loggedInUserId,
-      modified_by: loggedInUserId,
+      created_by: localStorage.getItem('crm_log_id'),
+      modified_by: localStorage.getItem('crm_log_id'),
       department: formData.domain,
       allocated_executives: formData.addPeople,
     };
@@ -133,15 +151,6 @@ const AddProject = ({ onClose, onSubmit }) => {
         : theme.typography.fontWeightRegular,
     };
   }
-
-  // Convert selected IDs to names for display in TextField
-  const selectedNames = formData.addPeople
-    .map((id) => {
-      const admin = adminOptions.find((admin) => admin.id === id);
-      return admin ? admin.name : null;
-    })
-    .filter((name) => name) // Filter out null values
-    .join(', ');
 
   const CustomInput = React.forwardRef((props, ref) => {
     const { value, onClick, placeholder } = props;
@@ -291,29 +300,26 @@ const AddProject = ({ onClose, onSubmit }) => {
               <FormControl fullWidth>
                 <InputLabel id="select-multiple-label">Add People</InputLabel>
                 <Select
-  labelId="select-multiple-label"
-  multiple
-  value={formData.addPeople}
-  onChange={handlePeopleChange}
-  input={<OutlinedInput label="Add People" />}
-  MenuProps={MenuProps}
-  sx={{ width: '254px', height: '50px' }}
->
-  {adminOptions.map((admin) => (
-    <MenuItem
-      key={admin.id}
-      value={admin.id}  // Set this to admin's ID (e.g., "crm002", "crm004")
-      style={getStyles(admin.id, formData.addPeople, theme)}
-    >
-      {admin.name}
-    </MenuItem>
-  ))}
-</Select>
-
+                  labelId="select-multiple-label"
+                  multiple
+                  value={formData.addPeople}
+                  onChange={handlePeopleChange}
+                  input={<OutlinedInput label="Add People" />}
+                  MenuProps={MenuProps}
+                  sx={{ width: '254px', height: '50px' }}
+                >
+                  {adminOptions.map((admin) => (
+                    <MenuItem
+                      key={admin.crm_log_id}
+                      value={admin.crm_log_id}
+                      style={getStyles(admin.crm_log_id, formData.addPeople, theme)}
+                    >
+                      {admin.name}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
-
-           
           </Grid>
 
           <Box textAlign="center" mt={4}>

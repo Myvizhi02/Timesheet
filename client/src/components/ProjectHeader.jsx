@@ -1,9 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import { Home as HomeIcon, ArrowForward as ArrowIcon, Menu as NavIcon } from '@mui/icons-material';
 import DimgIcon from '../Dimg.png';
+import axios from 'axios';
 
 const ProjectHeader = () => {
+  const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
+  
+    useEffect(() => {
+      const fetchAgentName = async () => {
+        try {
+          const agentId = localStorage.getItem('agentId'); // Get agentId from localStorage
+          if (agentId) {
+            const response = await axios.get(`http://localhost:3030/api/agents/${agentId}`);
+            setAgentName(response.data.name); // ✅ Update UI immediately
+          localStorage.setItem('name', response.data.name);
+          }
+        } catch (error) {
+          console.error('Error fetching agent name:', error);
+        }
+      };
+  
+      fetchAgentName();
+    }, []);
+  
   return (
     <Box
       sx={{
@@ -34,7 +54,7 @@ const ProjectHeader = () => {
 
       {/* Right Side: Name and Profile Image */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Pradeep Shiva</Typography>
+        <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}> {agentName}</Typography>
         <img src={DimgIcon} alt="User Icon" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
       </Box>
     </Box>

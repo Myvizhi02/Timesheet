@@ -3,6 +3,7 @@ import { Box, Button, Typography, Table, TableBody, TableCell, TableContainer, T
 // import { Add as AddIcon, BorderColor as BorderIcon } from '@mui/icons-material';
 import AddProject from './AddProject';
 import addIcon from '../add.png';import editIcon from '../edit.png';
+import DimgIcon from '../Dimg.png';
 
 const Project = () => {
   const [showModal, setShowModal] = useState(false);
