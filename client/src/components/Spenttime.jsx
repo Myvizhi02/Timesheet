@@ -14,6 +14,19 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday'; // or your ow
 
 const SpentTimeTable = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [showSpentModal, setShowSpentModal] = useState(false);
+
+  // Open the Add Spent Time modal
+  const handleOpenSpentModal = () => {
+    console.log("Opening Add Spent Time Modal");
+    setShowSpentModal(true);  // Set showSpentModal to true
+  };
+
+  // Close the Add Spent Time modal
+  const handleCloseSpentModal = () => {
+    console.log("Closing Add Spent Time Modal");
+    setShowSpentModal(false);  // Set showSpentModal to false
+  };
 
   const rows = [
     {
@@ -49,70 +62,77 @@ const SpentTimeTable = () => {
 
   return (
     <Box p={4} sx={{ backgroundColor: '#f4f6f9', minHeight: '100vh' }}>
-
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={0}>
-        <Typography variant="h6" sx={{ backgroundColor: '#213E9AE5', color: 'white', px: 2, py: 1, borderTopLeftRadius:10,borderTopRightRadius:10 }}>
-          Total Hours Worked: {totalWorkedHours} hrs
-        </Typography>
-        <Stack direction="row" spacing={3}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              value={selectedDate}
-              onChange={(newDate) => setSelectedDate(newDate)}
-              format="DD-MM-YYYY"
-              slotProps={{
-                textField: {
-                  size: 'small',
-                  sx: {
-                    backgroundColor: '#FFFFFF', // Set background color to white
-                    '& .MuiInputBase-root': {
-                      backgroundColor: '#FFFFFF' // Ensure input field background is also white
-                    }
+      <Stack direction="row" spacing={3} mt={5} display="flex" justifyContent="flex-end">
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            value={selectedDate}
+            onChange={(newDate) => setSelectedDate(newDate)}
+            format="DD-MM-YYYY"
+            slotProps={{
+              textField: {
+                size: 'small',
+                sx: {
+                  backgroundColor: '#FFFFFF',// Set background color to white
+                  '& .MuiInputBase-root': {
+                    backgroundColor: '#FFFFFF'
+                    // Ensure input field background is also white
                   }
                 }
-              }}
-            />
-          </LocalizationProvider>
-          <Button
-            variant="contained"
-            startIcon={<img src={addIcon} alt="Add" width="20" />}
-            sx={ { backgroundColor: '#3D6BFA' } }
-          >
-            Add Spent Time
-          </Button>
-        </Stack>
+              }
+            }}
+          />
+        </LocalizationProvider>
+        <Button
+          variant="contained"
+          startIcon={<img src={addIcon} alt="Add" width="20" />}
+          onClick={handleOpenSpentModal}
+          sx={{ backgroundColor: '#3D6BFA', textTransform: 'none', borderRadius: 2 }}
+        >
+          Add Spent Time
+        </Button>
+      </Stack>
+      <Stack direction="column" justifyContent="space-between" alignItems="flex-start" mt={3}>
+        <Typography
+          variant="h6"
+          sx={{ backgroundColor: '#213E9AE5', color: 'white', px: 2, py: 1, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
+        >
+          Total Hours Worked: {totalWorkedHours} hrs
+        </Typography>
+
+        <TableContainer component={Paper}>
+          <Table size="small">
+            <TableHead sx={{ backgroundColor: '#84E7F9' }}>
+              <TableRow>
+                <TableCell>No</TableCell>
+                <TableCell>Project</TableCell>
+                <TableCell>Task</TableCell>
+                <TableCell>Sub-Task</TableCell>
+                <TableCell>Start Time</TableCell>
+                <TableCell>End Time</TableCell>
+                <TableCell>Comments</TableCell>
+                <TableCell>Worked Hrs</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{row.project}</TableCell>
+                  <TableCell>{row.task}</TableCell>
+                  <TableCell>{row.subTask}</TableCell>
+                  <TableCell>{row.startTime}</TableCell>
+                  <TableCell>{row.endTime}</TableCell>
+                  <TableCell>{row.comments}</TableCell>
+                  <TableCell>{row.workedHrs}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Stack>
 
-      <TableContainer component={Paper}>
-        <Table size="small">
-          <TableHead sx={{ backgroundColor: '#84E7F9' }}>
-            <TableRow>
-              <TableCell>No</TableCell>
-              <TableCell>Project</TableCell>
-              <TableCell>Task</TableCell>
-              <TableCell>Sub-Task</TableCell>
-              <TableCell>Start Time</TableCell>
-              <TableCell>End Time</TableCell>
-              <TableCell>Comments</TableCell>
-              <TableCell>Worked Hrs</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{row.project}</TableCell>
-                <TableCell>{row.task}</TableCell>
-                <TableCell>{row.subTask}</TableCell>
-                <TableCell>{row.startTime}</TableCell>
-                <TableCell>{row.endTime}</TableCell>
-                <TableCell>{row.comments}</TableCell>
-                <TableCell>{row.workedHrs}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Modal for adding spent time */}
+      {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
     </Box>
   );
 };

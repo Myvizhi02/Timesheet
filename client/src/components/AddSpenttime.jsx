@@ -1,6 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -10,15 +9,13 @@ import {
   IconButton,
   InputAdornment,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
-import { Home as HomeIcon, ArrowForward as ArrowIcon, Menu as NavIcon } from '@mui/icons-material';
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios'; 
-import dateIcon from '../assets/date.png'; 
-import DimgIcon from '../assets/Dimg.png';
+import dateIcon from '../assets/date.png';
 
 const AddSpenttime = ({ open, onClose }) => {
   const [subTasks, setSubTasks] = useState([]);
@@ -49,7 +46,7 @@ const AddSpenttime = ({ open, onClose }) => {
 
   return (
     <>
-      {/* Header Section */}
+      {/* Header Section
       <Box
         sx={{
           backgroundColor: 'white',
@@ -86,7 +83,7 @@ const AddSpenttime = ({ open, onClose }) => {
             style={{ width: '36px', height: '36px', borderRadius: '50%' }}
           />
         </Box>
-      </Box>
+      </Box> */}
 
       {/* Modal (Popup) */}
       <Dialog
@@ -205,61 +202,71 @@ const AddSpenttime = ({ open, onClose }) => {
               ))}
 
               <Grid item xs={12} sm={6}>
-                <TimePicker
-                  label="Start Time"
-                  value={startDateTime}
-                  onChange={(newValue) => setStartDateTime(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <img
-                              src={dateIcon}
-                              alt="Date Icon"
-                              style={{ width: '1.25rem', cursor: 'pointer' }}
-                              onClick={() => {
-                                params.inputProps?.onClick?.();
-                              }}
-                            />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
+              <TimePicker
+  label="Start Time"
+  value={startDateTime}
+  onChange={(newValue) => setStartDateTime(newValue)}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      fullWidth
+      sx={{
+        width: '247px', // Set the width to 247px
+        height: '40px', // Set the height to 40px
+      }}
+      InputProps={{
+        ...params.InputProps,
+        endAdornment: (
+          <InputAdornment position="end">
+            <img
+              src={dateIcon}
+              alt="Date Icon"
+              style={{ width: '1.25rem', cursor: 'pointer' }}
+              onClick={() => {
+                params.inputProps?.onClick?.();
+              }}
+            />
+          </InputAdornment>
+        ),
+      }}
+    />
+  )}
+/>
+
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <TimePicker
-                  label="End Time"
-                  value={endDateTime}
-                  onChange={(newValue) => setEndDateTime(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <img
-                              src={dateIcon}
-                              alt="Date Icon"
-                              style={{ width: '1.25rem', cursor: 'pointer' }}
-                              onClick={() => {
-                                params.inputProps?.onClick?.();
-                              }}
-                            />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
+              <TimePicker
+  label="Start Time"
+  value={startDateTime}
+  onChange={(newValue) => setStartDateTime(newValue)}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      fullWidth
+      sx={{
+        width: '247px', // Set the width to 247px
+        height: '40px', // Set the height to 40px
+      }}
+      InputProps={{
+        ...params.InputProps,
+        endAdornment: (
+          <InputAdornment position="end">
+            <img
+              src={dateIcon}
+              alt="Date Icon"
+              style={{ width: '1.25rem', cursor: 'pointer' }}
+              onClick={() => {
+                params.inputProps?.onClick?.();
+              }}
+            />
+          </InputAdornment>
+        ),
+      }}
+    />
+  )}
+/>
+
               </Grid>
 
               <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
