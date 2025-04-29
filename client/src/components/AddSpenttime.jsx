@@ -139,7 +139,7 @@ const AddSpenttime = ({ open, onClose }) => {
                   label="Select Project"
                   variant="outlined"
                   size="small"
-                  sx={{ width: '15.5rem', height: '2.5rem' }}
+                  sx={{ width: '16rem', height: '2.5rem' }}
                 />
               </Grid>
 
@@ -148,7 +148,7 @@ const AddSpenttime = ({ open, onClose }) => {
                   label="Select Task"
                   variant="outlined"
                   size="small"
-                  sx={{ width: '15.5rem', height: '2.5rem' }}
+                  sx={{ width: '16rem', height: '2.5rem' }}
                 />
               </Grid>
 
@@ -166,7 +166,7 @@ const AddSpenttime = ({ open, onClose }) => {
                     variant="outlined"
                     size="small"
                     sx={{
-                      width: '27rem',
+                      width: '27.5rem',
                       height: '2.5rem',
                       backgroundColor: subTasks.length > 0 ? '#f8d7da' : 'transparent',
                     }}
@@ -245,9 +245,8 @@ const AddSpenttime = ({ open, onClose }) => {
       {...params}
       fullWidth
       sx={{
-        width: '247px', // Set the width to 247px
-        height: '40px', // Set the height to 40px
-      }}
+        width: '257px',
+        height: '40px',}}
       InputProps={{
         ...params.InputProps,
         endAdornment: (
@@ -275,7 +274,7 @@ const AddSpenttime = ({ open, onClose }) => {
                   multiline
                   variant="outlined"
                   sx={{
-                    width: '32.6rem',
+                    width: '33rem',
                     '& .MuiInputBase-root': {
                       minHeight: '6.25rem',
                     },

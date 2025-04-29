@@ -70,10 +70,9 @@ const SpentTimeTable = () => {
               textField: {
                 size: 'small',
                 sx: {
-                  backgroundColor: '#FFFFFF',// Set background color to white
+                  backgroundColor: '#FFFFFF', // Set background color to white
                   '& .MuiInputBase-root': {
-                    backgroundColor: '#FFFFFF'
-                    // Ensure input field background is also white
+                    backgroundColor: '#FFFFFF' // Ensure input field background is also white
                   }
                 }
               }
@@ -131,19 +130,8 @@ const SpentTimeTable = () => {
 
       {/* Modal for adding spent time */}
       {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
-      {showSpentModal && (
-  <Box mt={3}>
-    <Typography variant="h6" sx={{ color: '#3D6BFA', mb: 2 }}>
-      Spent Time
-    </Typography>
-    <AddSpenttime onClose={handleCloseSpentModal} />
-  </Box>
-)}
-
     </Box>
-    
   );
 };
-
 
 export default SpentTimeTable;
