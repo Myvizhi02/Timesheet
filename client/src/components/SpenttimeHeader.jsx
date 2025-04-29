@@ -27,18 +27,22 @@ const SpenttimeHeader = () => {
 
   return (
     <Box
-      sx={{
-        backgroundColor: 'white',
-        width: '100%',
-        height: '70px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 20px',
-        boxSizing: 'border-box',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-      }}
-    >
+  sx={{
+    backgroundColor: 'white',
+    width: '100%',
+    height: '70px',
+    position: 'fixed',        // Fix it to the top
+    top: 0,                   // Stick to top of screen
+    zIndex: 1302,             // Higher than the modal
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0 20px',
+    boxSizing: 'border-box',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+  }}
+>
+
       {/* Left Side: Navigation, Home, Arrow, Spenttime */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <IconButton>

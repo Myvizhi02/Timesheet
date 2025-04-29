@@ -186,18 +186,25 @@ const AddProject = ({ onClose, onSubmit }) => {
 
   return (
     <>
-      <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
-        <Box sx={{ backgroundColor: '#A3EAFD', borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}>
-          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 3,
-            py: 0, }}>
-            <Typography variant="h6" fontWeight="600">
-              Add Project
-            </Typography>
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-        </Box>
+     <Dialog
+  open={open}
+  onClose={onClose}
+  fullWidth={false}
+  PaperProps={{
+    sx: {
+      width: '37.625rem',
+      height: '37.5rem',
+      m: 0,
+      p: 0,
+      position: 'absolute',
+      top: 'calc(50% + 35px)', // Move it slightly down to avoid header overlap
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 1300, // LOWER than the header
+    },
+  }}
+>
+
 
         <DialogContent sx={{ padding: '1.5em' }}>
           <form onSubmit={handleSubmit}>
