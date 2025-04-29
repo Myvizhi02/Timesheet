@@ -34,8 +34,8 @@ const Dashboard = () => {
 
   const [activeTab, setActiveTab] = useState('all');
   const [showModal, setShowModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
   const [showSpentModal, setShowSpentModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [project, setProject] = useState('');
   const [showProjectModal, setShowProjectModal] = useState(false);
