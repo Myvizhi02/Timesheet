@@ -1,280 +1,299 @@
-import React, { useState, useEffect } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
-  TextField,
-  Typography,
-  Grid,
-  Chip,
   Button,
-  IconButton
+  Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
 } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import CloseIcon from '@mui/icons-material/Close';
+import { useTheme } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
 
 const EditProject = ({ project, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
-    projectId: '',
-    projectName: '',
-    domain: '',
+    id: '',
+    project_name: '',
+    department: '',
     lob: '',
-    startDate: null,
-    endDate: null,
-    actualEndDate: null,
+    start_date: '',
+    end_date: '',
+    actual_end_date: '',
     budget: '',
-    people: [],
-    newPerson: ''
+    employees: [],
   });
+
+  const [adminOptions, setAdminOptions] = useState([]);
+  const theme = useTheme();
 
   useEffect(() => {
     if (project) {
       setFormData({
-        projectId: project.id || 'PJ1234567',
-        projectName: project.name || '',
-        domain: project.domain || '',
+        id: project.id || '',
+        project_name: project.project_name || '',
+        department: project.department || '',
         lob: project.lob || '',
-        startDate: new Date('2025-03-19'),
-        endDate: new Date('2025-04-01'),
-        actualEndDate: new Date('2025-04-08'),
-        budget: '$400',
-        people: ['Employee 1', 'Employee 2'],
-        newPerson: ''
+        start_date: project.start_date || '',
+        end_date: project.end_date || '',
+        actual_end_date: project.actual_end_date || '',
+        budget: project.budget || '',
+        employees: project.employees || [],
       });
     }
   }, [project]);
 
-  const handleChange = (field) => (event) => {
-    setFormData({
-      ...formData,
-      [field]: event.target.value,
-    });
-  };
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const res = await fetch('http://localhost:3030/api/admins');
+        const data = await res.json();
+        setAdminOptions(data);
+      } catch (err) {
+        console.error('Failed to fetch admin names:', err);
+      }
+    };
+    fetchAdmins();
+  }, []);
 
-  const handleDateChange = (field) => (date) => {
-    setFormData({ ...formData, [field]: date });
-  };
-
-  const handleAddPerson = () => {
-    const newPerson = formData.newPerson.trim();
-    if (newPerson && !formData.people.includes(newPerson)) {
-      setFormData((prev) => ({
-        ...prev,
-        people: [...prev.people, newPerson],
-        newPerson: ''
-      }));
-    }
-  };
-
-  const handleDeletePerson = (name) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      people: prev.people.filter((p) => p !== name)
+      [name]: value,
+    }));
+  };
+
+  const handleEmployeeChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      employees: e.target.value,
     }));
   };
 
   const handleSubmit = () => {
     onUpdate(formData);
   };
+  const handleChipDelete = (chipToDelete) => {
+    setFormData((prev) => ({
+      ...prev,
+      employees: prev.employees.filter((employee) => employee !== chipToDelete),
+    }));
+  };
+  
+  const getStyles = (name, selectedValues, theme) => ({
+    fontWeight: selectedValues.includes(name)
+      ? theme.typography.fontWeightMedium
+      : theme.typography.fontWeightRegular,
+  });
+
+  const inputStyle = {
+    width: '270px',
+    '& .MuiInputBase-root': {
+      height: '40px',
+    },
+  };
 
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        top: '50%',
-        right: 20,
-        transform: 'translateY(-50%)',
-        width: { xs: '95%', sm: '600px' },
-        bgcolor: 'white',
-        boxShadow: '-4px 0 12px rgba(0,0,0,0.2)',
-        borderRadius: 2,
-        overflow: 'hidden',
-        zIndex: 1500,
+    <Dialog
+      open
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          width: '650px',
+          height: '793px',
+          borderRadius: '10px'
+        }
       }}
     >
-      <Box sx={{ bgcolor: '#84E7F9', p: 2, position: 'relative' }}>
-        <Typography variant="h6" color="black">
-          Edit Project
-        </Typography>
-        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8 }}>
-          <CloseIcon />
-        </IconButton>
+      <Box
+        sx={{
+          backgroundColor: '#A3EAFD',
+          borderTopLeftRadius: '0.625em',
+          borderTopRightRadius: '0.625em',
+          px: 1,
+          py: 0,
+          mt:0,
+          ml:-1
+
+        }}
+      >
+        <DialogTitle
+          sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0em 1em' }}
+        >
+          <Typography variant="h6" fontWeight="600">
+            Edit Project
+          </Typography>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
       </Box>
 
-      <Box sx={{ p: 3 }}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Project ID"
-                value={formData.projectId}
-                onChange={handleChange('projectId')}
-                fullWidth
-                size="small"
-              />
-            </Grid>
+      <DialogContent dividers sx={{ px: 3, py: 5 }}>
+        <Grid container spacing={5}>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Project ID"
+              name="id"
+              value={formData.id}
+              onChange={handleChange}
+              disabled
+              sx={inputStyle}
+            />
+          </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Project Name"
-                value={formData.projectName}
-                onChange={handleChange('projectName')}
-                fullWidth
-                size="small"
-              />
-            </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Project Name"
+              name="project_name"
+              value={formData.project_name}
+              onChange={handleChange}
+              sx={inputStyle}
+            />
+          </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Domain"
-                value={formData.domain}
-                onChange={handleChange('domain')}
-                fullWidth
-                size="small"
-              />
-            </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Domain"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              sx={inputStyle}
+            />
+          </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="LOB"
-                value={formData.lob}
-                onChange={handleChange('lob')}
-                fullWidth
-                size="small"
-              />
-            </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="LOB"
+              name="lob"
+              value={formData.lob}
+              onChange={handleChange}
+              sx={inputStyle}
+            />
+          </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <DatePicker
-                label="Start Date"
-                value={formData.startDate}
-                onChange={handleDateChange('startDate')}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    size: 'small', 
-                    sx: {
-                      width: '85%', // 👈 Decrease width here
-                      mx: 'auto',    // 👈 Center it horizontally (optional)
-                    },
-                  },
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Start Date"
+              name="start_date"
+              type="date"
+              value={formData.start_date}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              sx={inputStyle}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="End Date"
+              name="end_date"
+              type="date"
+              value={formData.end_date}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              sx={inputStyle}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Actual End Date"
+              name="actual_end_date"
+              type="date"
+              value={formData.actual_end_date}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              sx={inputStyle}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Budget"
+              name="budget"
+              value={formData.budget}
+              onChange={handleChange}
+              sx={inputStyle}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Add People</InputLabel>
+              <Select
+                multiple
+                value={formData.employees}
+                onChange={handleEmployeeChange}
+                sx={{
+                  width: '270px',
+                  height: '40px',
                 }}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <DatePicker
-                label="End Date"
-                value={formData.endDate}
-                onChange={handleDateChange('endDate')}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    size: 'small', 
-                    sx: {
-                      width: '85%', // 👈 Decrease width here
-                      mx: 'auto',    // 👈 Center it horizontally (optional)
-                    },
-                  },
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <DatePicker
-                label="Actual End Date"
-                value={formData.actualEndDate}
-                onChange={handleDateChange('actualEndDate')}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    size: 'small', 
-                    sx: {
-                      width: '85%', // 👈 Decrease width here
-                      mx: 'auto',    // 👈 Center it horizontally (optional)
-                    },
-                  },
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Budget"
-                value={formData.budget}
-                onChange={handleChange('budget')}
-                fullWidth
-                size="small"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                label="Add People"
-                value={formData.newPerson}
-                onChange={handleChange('newPerson')}
-                fullWidth
-                size="small"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddPerson();
-                  }
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {formData.people.map((person, index) => (
-                  <Chip
-                    key={index}
-                    label={person}
-                    onDelete={() => handleDeletePerson(person)}
-                    size="small"
-                    sx={{ bgcolor: '#84E7F9', color: 'black' }}
-                  />
+               
+              >
+                {adminOptions.map((admin) => (
+                  <MenuItem
+                    key={admin.name}
+                    value={admin.name}
+                    style={getStyles(admin.name, formData.employees, theme)}
+                  >
+                    {admin.name}
+                  </MenuItem>
                 ))}
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-  <Box
-    sx={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center', // vertically center if needed
-      mt: 2
-      
-    }}
-  >
-    <Button
-      variant="contained"
-      onClick={handleSubmit}
+              </Select>
+            </FormControl>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 2, }}>
+  {formData.employees.map((value) => (
+    <Chip
+      key={value}
+      label={value}
+      onDelete={() => handleChipDelete(value)} // Add delete function
+      minRows={3}
       sx={{
-        backgroundColor: '#213E9A',
-        padding: '0.625em 1.875em',
-                borderRadius: '0.375em',
-                fontWeight: 600,
-                textTransform: 'none',
-                
-        px: 8,
-        
-        
+        backgroundColor: '#A3EAFD',
+        color: '#000',
       }}
-    >
-      Update
-    </Button>
-  </Box>
-</Grid>
-
-
-
-
+    />
+  ))}
+</Box>
 
           </Grid>
-        </LocalizationProvider>
-      </Box>
-    </Box>
+
+          
+        </Grid>
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center',mt:20,mr:8 }}>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              sx={{
+                width: '120px',
+                backgroundColor: '#1E40AF',
+                '&:hover': { backgroundColor: '#1A35A0' },
+              }}
+            >
+              Update
+            </Button>
+          </Grid>
+      </DialogContent>
+    </Dialog>
   );
 };
 
