@@ -25,23 +25,23 @@ const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
 
   const [adminOptions, setAdminOptions] = useState([]);
-  const [loggedInUserId, setLoggedInUserId] = useState(null); // State to store the logged-in user's crm_log_id
   const [formData, setFormData] = useState({
     projectId: '',
     projectName: '',
     lob: '',
     budget: '',
     domain: '',
-    created_by: '', // Will be set dynamically
-    modified_by: '', // Will be set dynamically
-    addPeople: [], // Array to store selected person IDs (crm_log_id)
+    addPeople: [],
   });
 
   const [startDate, setStartDate] = useState(null);
-  const [actualEndDate, setActualEndDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [actualEndDate, setActualEndDate] = useState(null);
 
-  // Fetch admin names and project ID once on component mount
+  const [isSubmitting, setIsSubmitting] = useState(false); // NEW
+ 
+
+
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
@@ -75,10 +75,7 @@ const AddProject = ({ onClose, onSubmit }) => {
   };
 
   const handlePeopleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-
+    const { value } = event.target;
     setFormData({
       ...formData,
       addPeople: typeof value === 'string' ? value.split(',').map(item => item.trim()) : value,
@@ -87,6 +84,9 @@ const AddProject = ({ onClose, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return; // prevent double submission
+    setIsSubmitting(true);
 
     const data = {
       project_name: formData.projectName,
@@ -101,7 +101,7 @@ const AddProject = ({ onClose, onSubmit }) => {
       allocated_executives: formData.addPeople,
     };
 
-    console.log('Submitting Data:', data); // Log the data before submitting
+    console.log('Submitting Data:', data);
 
     try {
       const response = await fetch('http://localhost:3030/api/projects', {
@@ -114,11 +114,13 @@ const AddProject = ({ onClose, onSubmit }) => {
 
       const result = await response.json();
       console.log(result.message);
-      onSubmit(data);
+      //onSubmit(data);
       onClose();
     } catch (err) {
       console.error('Error:', err);
       alert('❌ Failed to add project. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -183,14 +185,7 @@ const AddProject = ({ onClose, onSubmit }) => {
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       <Box sx={{ backgroundColor: '#A3EAFD', borderTopLeftRadius: '0.625em', borderTopRightRadius: '0.625em' }}>
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '0em 1em',
-          }}
-        >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0em 1em' }}>
           <Typography variant="h6" fontWeight="600">
             Add Project
           </Typography>
@@ -315,6 +310,7 @@ const AddProject = ({ onClose, onSubmit }) => {
             <Button
               type="submit"
               variant="contained"
+              disabled={isSubmitting}
               sx={{
                 backgroundColor: '#3D6BFA',
                 color: '#fff',
@@ -327,7 +323,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 },
               }}
             >
-              Submit
+              {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
           </Box>
         </form>
