@@ -10,6 +10,7 @@ import Project from "./components/Project";
 import ProjectHeader from "./components/ProjectHeader";
 import Task from "./components/Task";
 import TaskHeader from "./components/TaskHeader";
+import Spenttime from "./components/Spenttime";
 
 
 // Session handling function to check if user is logged in
@@ -90,6 +91,7 @@ function App() {
                 <>
                   {/* <SpenttimeHeader /> */}
                   <AddSpenttime />
+                  <Spenttime/>
                 </>
               }
             />

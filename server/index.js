@@ -10,7 +10,7 @@ const PORT = 3030;
 // CORS Middleware
 // ----------------------------------------------
 const corsOptions = {
-  origin: 'http://localhost:5173',  // Allow requests from your React app
+  origin: 'http://localhost:5174',  // Allow requests from your React app
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
