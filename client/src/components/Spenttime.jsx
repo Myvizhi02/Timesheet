@@ -131,8 +131,19 @@ const SpentTimeTable = () => {
 
       {/* Modal for adding spent time */}
       {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
+      {showSpentModal && (
+  <Box mt={3}>
+    <Typography variant="h6" sx={{ color: '#3D6BFA', mb: 2 }}>
+      Spent Time
+    </Typography>
+    <AddSpenttime onClose={handleCloseSpentModal} />
+  </Box>
+)}
+
     </Box>
+    
   );
 };
+
 
 export default SpentTimeTable;
