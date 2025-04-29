@@ -24,9 +24,10 @@ import 'react-datepicker/dist/react-datepicker.css';
 import MuiAlert from '@mui/material/Alert';
 import dateIcon from '../assets/date.png';
 
+// (Imports remain unchanged)
+
 const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
-
   const [adminOptions, setAdminOptions] = useState([]);
   const [loadingAdmins, setLoadingAdmins] = useState(false);
   const [formData, setFormData] = useState({
@@ -53,7 +54,6 @@ const AddProject = ({ onClose, onSubmit }) => {
         const data = await res.json();
         setAdminOptions(data);
       } catch (err) {
-        console.error('Failed to fetch admin names:', err);
         setSnackbar({ open: true, message: 'Failed to load admins', severity: 'error' });
       } finally {
         setLoadingAdmins(false);
@@ -91,17 +91,10 @@ const AddProject = ({ onClose, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (isSubmitting) return;
+
     setIsSubmitting(true);
-
     const createdBy = localStorage.getItem('crm_log_id') || 'default_admin';
-
-    if (!createdBy) {
-      setSnackbar({ open: true, message: 'User not logged in.', severity: 'error' });
-      setIsSubmitting(false);
-      return;
-    }
 
     const data = {
       project_name: formData.projectName,
@@ -126,12 +119,10 @@ const AddProject = ({ onClose, onSubmit }) => {
       if (!response.ok) throw new Error('Failed to add project');
 
       const result = await response.json();
-      console.log(result.message);
       setSnackbar({ open: true, message: '✅ Project added successfully!', severity: 'success' });
       onSubmit && onSubmit(data);
       onClose();
     } catch (err) {
-      console.error('Error:', err);
       setSnackbar({ open: true, message: '❌ Failed to add project. Please try again.', severity: 'error' });
     } finally {
       setIsSubmitting(false);
@@ -139,11 +130,7 @@ const AddProject = ({ onClose, onSubmit }) => {
   };
 
   const isFormValid =
-    formData.projectName &&
-    formData.lob &&
-    formData.domain &&
-    startDate &&
-    endDate;
+    formData.projectName && formData.lob && formData.domain && startDate && endDate;
 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -170,15 +157,14 @@ const AddProject = ({ onClose, onSubmit }) => {
       sx={{
         display: 'flex',
         alignItems: 'center',
-        padding: '0.1em 0.8em',
         border: '1px solid #ccc',
-        borderRadius: '0.5em',
+        borderRadius: '8px',
         backgroundColor: '#fff',
-        width: '100%',
-        height: '2.625em',
+        width: '250px',
+        height: '40px',
         cursor: 'pointer',
+        paddingLeft: '10px',
       }}
-      tabIndex={0}
     >
       <input
         type="text"
@@ -192,30 +178,37 @@ const AddProject = ({ onClose, onSubmit }) => {
           backgroundColor: 'transparent',
           fontSize: '1rem',
           color: value ? '#000' : '#888',
-          padding: '0.5em 0',
         }}
       />
-      <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em' }} />
+      <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em',padding:8 }} />
     </Box>
   ));
 
   return (
     <>
-      <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
-        <Box sx={{ backgroundColor: '#A3EAFD', borderTopLeftRadius: '0.625em', borderTopRightRadius: '0.625em' }}>
-          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6" fontWeight="600">
-              Add Project
-            </Typography>
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-        </Box>
+     <Dialog
+  open={open}
+  onClose={onClose}
+  fullWidth={false}
+  PaperProps={{
+    sx: {
+      width: '37.625rem',
+      height: '37.5rem',
+      m: 0,
+      p: 0,
+      position: 'absolute',
+      top: 'calc(50% + 35px)', // Move it slightly down to avoid header overlap
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 1300, // LOWER than the header
+    },
+  }}
+>
+
 
         <DialogContent sx={{ padding: '1.5em' }}>
           <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
+            <Grid container spacing={3.5}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   name="projectId"
@@ -302,7 +295,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControl fullWidth>
+                <FormControl fullWidth sx={selectStyle}>
                   <InputLabel id="select-multiple-label">Add People</InputLabel>
                   <Select
                     labelId="select-multiple-label"
@@ -311,8 +304,6 @@ const AddProject = ({ onClose, onSubmit }) => {
                     onChange={handlePeopleChange}
                     input={<OutlinedInput label="Add People" />}
                     MenuProps={MenuProps}
-                    fullWidth
-                    sx={{ height: '50px' }}
                   >
                     {loadingAdmins ? (
                       <MenuItem disabled>
@@ -336,24 +327,29 @@ const AddProject = ({ onClose, onSubmit }) => {
             </Grid>
 
             <Box textAlign="center" mt={4}>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!isFormValid || isSubmitting}
-                sx={{
-                  backgroundColor: '#3D6BFA',
-                  color: '#fff',
-                  padding: '0.625em 1.875em',
-                  borderRadius: '0.375em',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  '&:hover': {
-                    backgroundColor: '#2C52C7',
-                  },
-                }}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </Button>
+            <Button
+  type="submit"
+  variant="contained"
+  //disabled={!isFormValid || isSubmitting}
+  sx={{
+    backgroundColor: '#213E9A',
+    color: 'white',
+    width: '250px',
+    height: '40px',
+    fontWeight: 600,
+    borderRadius: '8px',
+    textTransform: 'none',
+    width:"20%",
+      height:"42px" ,
+    '&:hover': {
+      backgroundColor: '#213E9A',
+      height:"42px"
+    },
+  }}
+>
+  {isSubmitting ? 'Submitting...' : 'Submit'}
+</Button>
+
             </Box>
           </form>
         </DialogContent>
@@ -373,12 +369,22 @@ const AddProject = ({ onClose, onSubmit }) => {
 };
 
 const inputStyle = {
+  width: '260px',
   '& .MuiInputBase-root': {
-    height: '80%',
+    height: '40px',
   },
   '& input': {
-    height: '100%',
+    height: '40px',
     padding: '0 1em',
+  },
+};
+
+const selectStyle = {
+  width: '260px',
+  '& .MuiInputBase-root': {
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
   },
 };
 
