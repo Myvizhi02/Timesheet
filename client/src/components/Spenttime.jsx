@@ -1,31 +1,29 @@
-import React, { useState } from 'react';
 import {
-  Box, Button, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Stack
+  Box, Button, Paper, Stack,
+  Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow,
+  Typography
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
+import React, { useState } from 'react';
 import addIcon from '../assets/add.png';
-import { InputAdornment, TextField } from '@mui/material';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday'; // or your own icon
-
+import AddSpenttime from './AddSpenttime'; // Make sure this path is correct
 
 const SpentTimeTable = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [showSpentModal, setShowSpentModal] = useState(false);
 
-  // Open the Add Spent Time modal
   const handleOpenSpentModal = () => {
     console.log("Opening Add Spent Time Modal");
-    setShowSpentModal(true);  // Set showSpentModal to true
+    setShowSpentModal(true);
   };
 
-  // Close the Add Spent Time modal
   const handleCloseSpentModal = () => {
     console.log("Closing Add Spent Time Modal");
-    setShowSpentModal(false);  // Set showSpentModal to false
+    setShowSpentModal(false);
   };
 
   const rows = [
@@ -62,7 +60,7 @@ const SpentTimeTable = () => {
 
   return (
     <Box p={4} sx={{ backgroundColor: '#f4f6f9', minHeight: '100vh' }}>
-      <Stack direction="row" spacing={3} mt={5} display="flex" justifyContent="flex-end">
+      <Stack direction="row" spacing={3} mt={10} justifyContent="flex-end">
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
             value={selectedDate}
@@ -72,9 +70,9 @@ const SpentTimeTable = () => {
               textField: {
                 size: 'small',
                 sx: {
-                  backgroundColor: '#FFFFFF', // Set background color to white
+                  backgroundColor: '#FFFFFF',
                   '& .MuiInputBase-root': {
-                    backgroundColor: '#FFFFFF' // Ensure input field background is also white
+                    backgroundColor: '#FFFFFF'
                   }
                 }
               }
@@ -90,6 +88,7 @@ const SpentTimeTable = () => {
           Add Spent Time
         </Button>
       </Stack>
+
       <Stack direction="column" justifyContent="space-between" alignItems="flex-start" mt={3}>
         <Typography
           variant="h6"
@@ -130,8 +129,9 @@ const SpentTimeTable = () => {
         </TableContainer>
       </Stack>
 
-      {/* Modal for adding spent time */}
-      {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
+      {/* Modal */}
+      {/* {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />} */}
+      <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} />
     </Box>
   );
 };

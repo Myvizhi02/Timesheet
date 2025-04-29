@@ -40,6 +40,16 @@ const AddSpenttime = ({ open, onClose }) => {
     fetchAgentName();
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      // Reset fields when modal opens
+      setSubTasks([]);
+      setStartDateTime(null);
+      setEndDateTime(null);
+    }
+  }, [open]);
+  
+
   const handleAddSubTask = () => {
     setSubTasks([...subTasks, '']);
   };
@@ -320,4 +330,5 @@ const ParentComponent = () => {
   );
 };
 
-export default ParentComponent;
+export default AddSpenttime;
+

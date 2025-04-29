@@ -194,8 +194,6 @@ const AddProject = ({ onClose, onSubmit }) => {
     sx: {
       width: '37.625rem',
       height: '37.5rem',
-      m: 0,
-      p: 0,
       position: 'absolute',
       top: 'calc(50% + 35px)', // Move it slightly down to avoid header overlap
       left: '50%',
@@ -204,9 +202,28 @@ const AddProject = ({ onClose, onSubmit }) => {
     },
   }}
 >
+<DialogTitle
+          sx={{
+            backgroundColor: '#A3EAFD',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            height: '3rem',
+            px: 3,
+            py: 0,
+            
+          }}
+        >
+          <Typography variant="h6" fontWeight={600}>
+            Add Project
+          </Typography>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
 
-        <DialogContent sx={{ padding: '1.5em' }}>
+        <DialogContent sx={{ padding: '1.5em',mt:5 }}>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3.5}>
               <Grid item xs={12} sm={6}>

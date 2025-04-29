@@ -309,8 +309,9 @@ const Dashboard = () => {
       </Box>
 
       {/* Modals */}
-      <View show={showModal} data={selectedTask} onClose={closeModal} />
+    <View show={showModal} data={selectedTask} onClose={closeModal} />
       {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
+      <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} />
       {showProjectModal && <Project onClose={handleCloseProjectModal} />}
     </>
   );
