@@ -1,29 +1,85 @@
-import React, { useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
-  Typography,
-  Tabs,
-  Tab,
-  TextField,
   Button,
   Grid,
-  Paper,
   IconButton,
   InputAdornment,
+  Paper,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
-const EditView = ({ task = {}, onClose }) => {
-  const [tabIndex, setTabIndex] = useState(1); // Default to "Sub-Task"
+const ActionView = ({ task = {}, onClose }) => {
+  const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
-    project: task.project || '',
-    taskname: task.taskname || '',
-    subtaskname: task.subtaskname || '',
+    project: task.project_name || '',
+    taskname: task.task_name || '',
+    subtaskname: task.subtask_name || '',
     description: task.description || '',
     subtaskdescription: task.subtaskdescription || '',
-    taskstatus: task.taskstatus === 'Open',
-    subtaskstatus: task.subtaskstatus === 'Open',
+    taskstatus: task.task_status === 'Open',
+    subtaskstatus: task.subtask_status === 'Open',
   });
+
+  useEffect(() => {
+    const fetchMainTaskDescription = async () => {
+      if (task.task_name) {
+        console.log('Fetching task description for:', task.task_name);
+        try {
+          const res = await axios.get(`http://localhost:3030/api/main-task/${task.task_name}`);
+          const task_description = res.data.task_description || res.data.description;
+          const task_status = res.data.task_status;
+  
+          setFormData((prev) => ({
+            ...prev,
+            description: task_description || prev.description || '',
+            taskstatus: task_status === 'Open',
+          }));
+        } catch (error) {
+          console.error('Failed to fetch task description:', error);
+        }
+      }
+    };
+  
+    const fetchSubtaskDescription = async () => {
+      console.log('Fetching subtask description for:', task.subtask_name);
+      if (task.subtask_name) {
+        try {
+          const res = await axios.get('http://localhost:3030/api/main-subtask', {
+            params: {
+              subtask_name: task.subtask_name,
+            }
+          });
+    
+          console.log('Subtask API response:', res.data);
+    
+          const subtask_description = res.data.description || '';
+    
+          setFormData((prev) => {
+            console.log('Setting formData with subtask description:', subtask_description);
+            return {
+              ...prev,
+              subtaskdescription: subtask_description || prev.subtaskdescription || '',
+            };
+          });
+        } catch (error) {
+          console.error('Failed to fetch subtask description:', error);
+        }
+      }
+    };
+
+    if (task?.task_name) {
+      fetchMainTaskDescription();
+    }
+    if (task?.subtask_name) {
+      fetchSubtaskDescription();
+    }
+  }, [task.task_name, task.subtask_name]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,15 +94,43 @@ const EditView = ({ task = {}, onClose }) => {
     setFormData((prev) => ({ ...prev, subtaskstatus: !prev.subtaskstatus }));
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
+    if (!task?.id) {
+      console.error('❌ id is undefined. Cannot proceed with update.');
+      return;
+    }
+
     const updatedTask = {
-      ...task,
-      ...formData,
-      taskstatus: formData.taskstatus ? 'Open' : 'Closed',
-      subtaskstatus: formData.subtaskstatus ? 'Open' : 'Closed',
+      project_name: formData.project,
+      task_name: formData.taskname,
+      description: formData.description,
+      task_status: formData.taskstatus ? 'Open' : 'Closed',
     };
-    console.log('Updated Task:', updatedTask);
-    onClose?.();
+
+    try {
+      await axios.put(`http://localhost:3030/api/update-task/${task.id}`, updatedTask);
+      console.log('✅ Task updated successfully');
+      onClose?.();
+    } catch (error) {
+      console.error('❌ Error updating task:', error);
+    }
+  };
+
+  const handleSubtaskSubmit = async () => {
+    const newSubtask = {
+      project_name: formData.project,
+      subtask_name: formData.subtaskname,
+      description: formData.subtaskdescription,
+      subtask_status: formData.subtaskstatus ? 'Open' : 'Closed',
+    };
+
+    try {
+      await axios.post('http://localhost:3030/api/create-subtask', newSubtask);
+      console.log('✅ Subtask submitted successfully');
+      onClose?.();
+    } catch (error) {
+      console.error('❌ Error submitting subtask:', error);
+    }
   };
 
   const renderStatusToggle = (status, onClick) => (
@@ -88,7 +172,7 @@ const EditView = ({ task = {}, onClose }) => {
         borderRadius: 2,
         overflow: 'hidden',
         bgcolor: '#fff',
-        zIndex: 1000,
+        zIndex: 10000,
         position: 'fixed',
         top: '0.5%',
         right: '0.5%',
@@ -96,7 +180,6 @@ const EditView = ({ task = {}, onClose }) => {
         flexDirection: 'column',
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           backgroundColor: '#9DECF9',
@@ -112,7 +195,6 @@ const EditView = ({ task = {}, onClose }) => {
         </IconButton>
       </Box>
 
-      {/* Tabs */}
       <Tabs
         value={tabIndex}
         onChange={(e, newValue) => setTabIndex(newValue)}
@@ -133,7 +215,6 @@ const EditView = ({ task = {}, onClose }) => {
         <Tab label="Task Details" />
       </Tabs>
 
-      {/* Content */}
       <Box sx={{ p: 2, flex: 1, overflowY: 'auto', ml: 2.5 }}>
         {tabIndex === 0 && (
           <Grid container spacing={3}>
@@ -271,7 +352,7 @@ const EditView = ({ task = {}, onClose }) => {
               <Box display="flex" justifyContent="center">
                 <Button
                   variant="contained"
-                  onClick={handleUpdate}
+                  onClick={handleSubtaskSubmit}
                   sx={{
                     px: 6,
                     py: 1.5,
@@ -279,8 +360,8 @@ const EditView = ({ task = {}, onClose }) => {
                     borderRadius: 2,
                     textTransform: 'none',
                     fontWeight: 600,
-                    mt: 15,
                     ml: 28,
+                    mt: 15,
                     '&:hover': {
                       backgroundColor: '#0D1640',
                     },
@@ -332,4 +413,4 @@ const EditView = ({ task = {}, onClose }) => {
   );
 };
 
-export default EditView;
+export default ActionView;
