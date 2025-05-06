@@ -270,7 +270,51 @@ app.post('/api/tasks', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+app.get('/api/tasks', checkDbConnection, async (req, res) => {
+  try {
+    const [tasks] = await db.execute(`
+      SELECT 
+        st.task_id,
+        st.id as sub_task_id,
+        t.project_id,
+        p.project_name, 
+        t.task_name, 
+        st.subtask_name, 
+        t.description AS task_description,
+        st.description AS subtask_description,
+        t.status AS task_status,
+        st.status AS subtask_status
+      FROM main_project p
+      JOIN main_task t ON t.project_id = p.id
+      LEFT JOIN main_sub_task st ON st.task_id = t.id
+      WHERE p.is_active = 1 AND t.is_active = 1
+      ORDER BY p.created_date ASC
+    `);
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+// to fetch all subtasks
+app.get('/api/subtasks', async (req, res) => {
+  const { taskId } = req.query;
 
+  // Ensure the taskId is provided
+  if (!taskId) {
+    return res.status(400).json({ error: 'Task ID is required' });
+  }
+
+  try {
+    // Query the database to fetch subtasks for the given taskId
+    const [rows] = await pool.promise().query('SELECT * FROM main_sub_task WHERE task_id = ?', [taskId]);
+
+    // Send the fetched subtasks as a response
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching subtasks:', error);
+    res.status(500).json({ error: 'Error fetching subtasks' });
+  }
+});
 app.put('/api/update-task/:taskId', checkDbConnection, async (req, res) => {
   const { taskId } = req.params; // fetch taskId from the URL parameter
 
@@ -358,6 +402,7 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
 
 
 
+
 app.get('/api/tasks', checkDbConnection, async (req, res) => {
   try {
     const [tasks] = await db.execute(`
@@ -386,6 +431,8 @@ app.get('/api/tasks', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
+
 app.put('/api/subtasks/:task_id', async (req, res) => {
   const { task_id } = req.params;
   const { subtask_name, description, status } = req.body;

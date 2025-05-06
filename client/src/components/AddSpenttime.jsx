@@ -23,6 +23,9 @@ const AddSpenttime = ({ open, onClose }) => {
   const [projectsList, setProjectsList] = useState([]);
   const [tasksList, setTasksList] = useState([]);
 const [selectedTask, setSelectedTask] = useState('');
+const [subtaskOptions, setSubtaskOptions] = useState([]);
+const [selectedSubtask, setSelectedSubtask] = useState('');
+
 
   const [startDateTime, setStartDateTime] = useState(null);
   const [endDateTime, setEndDateTime] = useState(null);
@@ -73,7 +76,25 @@ const [selectedTask, setSelectedTask] = useState('');
     }
   }, [open]);
   
-
+  const handleTaskChange = async (e) => {
+    const taskName = e.target.value;
+    setSelectedTask(taskName);
+    
+    // Find task_id from task name
+    const selected = tasksList.find(t => t.task_name === taskName);
+    const taskId = selected?.task_id;
+  
+    if (taskId) {
+      try {
+        const response = await fetch(`http://localhost:3030/api/subtasks?taskId=${taskId}`);
+        const data = await response.json();
+        setSubtaskOptions(data);
+      } catch (err) {
+        console.error('Error fetching subtasks:', err);
+      }
+    }
+  };
+  
   const handleAddSubTask = () => {
     if (subTasks.length === 0) {
       setSubTasks(['']);
@@ -162,7 +183,7 @@ const [selectedTask, setSelectedTask] = useState('');
   label="Select Task"
   fullWidth
   value={selectedTask}
-  onChange={(e) => setSelectedTask(e.target.value)}
+  onChange={handleTaskChange}
   SelectProps={{ native: true }}
   sx={{
     width: '16rem',
@@ -180,6 +201,7 @@ const [selectedTask, setSelectedTask] = useState('');
   ))}
 </TextField>
 
+
               </Grid>
 
               <Grid
@@ -191,16 +213,29 @@ const [selectedTask, setSelectedTask] = useState('');
                 sx={{ flexWrap: 'nowrap' }}
               >
                 <Grid item>
-                  <TextField
-                    label="Select SubTask"
-                    variant="outlined"
-                    size="small"
-                    sx={{
-                      width: '27.5rem',
-                      height: '2.5rem',
-                      backgroundColor: subTasks.length > 0 ? '#f8d7da' : 'transparent',
-                    }}
-                  />
+                <TextField
+  select
+  label="Select SubTask"
+  fullWidth
+  value={selectedSubtask}
+  onChange={(e) => setSelectedSubtask(e.target.value)}
+  SelectProps={{ native: true }}
+  sx={{
+    width: '26.5rem',
+    height: '2.5rem',
+    '& .MuiOutlinedInput-root': {
+      height: '40px',
+    },
+  }}
+>
+  <option value="" disabled></option>
+  {subtaskOptions.map((sub) => (
+    <option key={sub.subtask_id} value={sub.subtask_name}>
+      {sub.subtask_name}
+    </option>
+  ))}
+</TextField>
+
                 </Grid>
                 <Grid item>
                   <Button
