@@ -24,6 +24,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import MuiAlert from '@mui/material/Alert';
 import dateIcon from '../assets/date.png';
 
+
+
 const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
   const [adminOptions, setAdminOptions] = useState([]);
@@ -74,6 +76,7 @@ const AddProject = ({ onClose, onSubmit }) => {
     fetchAdmins();
     fetchProjectId();
   }, []);
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

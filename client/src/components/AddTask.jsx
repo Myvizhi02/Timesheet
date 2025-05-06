@@ -10,7 +10,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import AddSubTask from './AddSubTask';
 
 const AddTask = ({ onClose, onSubmit }) => {
@@ -18,22 +19,111 @@ const AddTask = ({ onClose, onSubmit }) => {
   const [taskName, setTaskName] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(true);
-  const [showSubTaskModal, setShowSubTaskModal] = useState(false);
+  
 
-  const handleSubmit = () => {
+  const [showSubTaskModal, setShowSubTaskModal] = useState(false);
+  const [projectsList, setProjectsList] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:3030/api/projects')
+      .then(res => res.json())
+      .then(data => {
+        setProjectsList(data);
+      })
+      .catch(err => {
+        console.error('Error fetching project list:', err);
+      });
+  }, []);
+
+  const handleSubmit = async () => {
+    console.log('DEBUG:', { project, taskName, description, status });
+  
+    if (!project || !taskName || !description) {
+      alert('⚠️ Please fill in all the required fields.');
+      return;
+    }
+  
+    const crm_log_id = localStorage.getItem('crm_log_id');
+  
+    // Send status as 'Open' or 'Closed', depending on the toggle value
     const taskData = {
-      project,
-      taskName,
+      project_name: project,
+      task_name: taskName,
+      description,
+      status: status ? 'Open' : 'Closed', // Correctly passing the status value
+      created_by: crm_log_id,
+      modified_by: crm_log_id,
+    };
+  
+    try {
+      const res = await fetch('http://localhost:3030/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(taskData)
+      });
+  
+      const result = await res.json();
+  
+      if (res.ok) {
+        alert('✅ Task added successfully!');
+        onSubmit(taskData);
+        onClose();
+      } else {
+        alert(`❌ Failed to add task: ${result.error || 'Unknown error'}`);
+        console.error('Backend response:', result);
+      }
+    } catch (err) {
+      console.error('Error submitting task:', err); // More detailed error logging
+      alert('❌ Something went wrong while submitting the task.');
+    }
+  };
+  const handleAddSubTask = async () => {
+    // Prevent opening subtask modal if main task fields are incomplete
+    if (!project || !taskName || !description) {
+      alert('⚠️ Please fill in all main task fields before adding a subtask.');
+      return;
+    }
+  
+    const crm_log_id = localStorage.getItem('crm_log_id');
+  
+    const taskData = {
+      project_name: project,
+      task_name: taskName,
       description,
       status: status ? 'Open' : 'Closed',
+      created_by: crm_log_id,
+      modified_by: crm_log_id,
     };
-    onSubmit(taskData);
-    onClose();
+  
+    try {
+      const res = await fetch('http://localhost:3030/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(taskData)
+      });
+  
+      const result = await res.json();
+  
+      if (res.ok) {
+        console.log('✅ Task stored before opening subtask modal');
+        setShowSubTaskModal(true); // Now open the AddSubTask popup
+      } else {
+        alert(`❌ Failed to add task: ${result.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Error saving task before subtask:', err);
+      alert('❌ Could not store task before opening subtask popup.');
+    }
   };
-
+  
+  
+  
   return (
     <>
-      {/* Main Task Dialog */}
       <Dialog
         open
         onClose={onClose}
@@ -75,19 +165,28 @@ const AddTask = ({ onClose, onSubmit }) => {
             overflow: 'auto',
           }}
         >
-          {/* Project and Task Name */}
           <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} pt={3}>
             <TextField
+              select
               label="Select Project"
               fullWidth
               value={project}
               onChange={(e) => setProject(e.target.value)}
+              SelectProps={{ native: true }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   height: '40px',
-                }
+                },
               }}
-            />
+            >
+              <option value="" disabled></option>
+              {projectsList.map((proj) => (
+                <option key={proj.project_unique_id} value={proj.project_name}>
+                  {proj.project_name}
+                </option>
+              ))}
+            </TextField>
+
             <TextField
               label="Enter Task Name"
               fullWidth
@@ -101,7 +200,6 @@ const AddTask = ({ onClose, onSubmit }) => {
             />
           </Box>
 
-          {/* Description */}
           <TextField
             label="Description"
             fullWidth
@@ -111,7 +209,6 @@ const AddTask = ({ onClose, onSubmit }) => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
-          {/* Status Toggle */}
           <Box mt={1}>
             <TextField
               label="Status"
@@ -159,23 +256,24 @@ const AddTask = ({ onClose, onSubmit }) => {
             />
           </Box>
 
-          {/* Buttons */}
           <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="center" alignItems="center" gap={3} mt="auto">
-            <Button
-              variant="contained"
-              onClick={() => setShowSubTaskModal(true)}
-              sx={{
-                backgroundColor: "#3758f9",
-                paddingX: 4,
-                paddingY: 1,
-                width: { xs: '100%', sm: 'auto' },textTransform: 'none',
-                '&:hover': {
-                  backgroundColor: "#2c47c5",
-                }
-              }}
-            >
-              Add Sub Task
-            </Button>
+          <Button
+  variant="contained"
+  onClick={handleAddSubTask}
+  sx={{
+    backgroundColor: "#3758f9",
+    paddingX: 4,
+    paddingY: 1,
+    width: { xs: '100%', sm: 'auto' },
+    textTransform: 'none',
+    '&:hover': {
+      backgroundColor: "#2c47c5",
+    }
+  }}
+>
+  Add Sub Task
+</Button>
+
             <Button
               variant="contained"
               onClick={handleSubmit}
@@ -183,7 +281,8 @@ const AddTask = ({ onClose, onSubmit }) => {
                 backgroundColor: "#3758f9",
                 paddingX: 4,
                 paddingY: 1,
-                width: { xs: '100%', sm: 'auto' },textTransform: 'none',
+                width: { xs: '100%', sm: 'auto' },
+                textTransform: 'none',
                 '&:hover': {
                   backgroundColor: "#2c47c5",
                 }
@@ -195,16 +294,17 @@ const AddTask = ({ onClose, onSubmit }) => {
         </DialogContent>
       </Dialog>
 
-      {/* SubTask Modal */}
       {showSubTaskModal && (
-        <AddSubTask
-          onClose={() => setShowSubTaskModal(false)}
-          onSubmit={(data) => {
-            console.log('Subtask data:', data);
-            setShowSubTaskModal(false);
-          }}
-        />
-      )}
+  <AddSubTask
+    onClose={() => setShowSubTaskModal(false)}
+    onSubmit={(data) => {
+      console.log('Subtask data:', data);
+      setShowSubTaskModal(false);
+    }}
+    project={project}
+    taskName={taskName}
+  />
+)}
     </>
   );
 };

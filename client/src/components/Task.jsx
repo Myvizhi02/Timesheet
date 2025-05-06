@@ -12,60 +12,52 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Ensure you have axios installed
 import addIcon from '../assets/add.png'; // Check your image path!
-import EditView from './EditView';
-
-//import addtask from'./Addtask';
-
-import AddTask from './AddTask'; // Make sure the path is correc
+import ActionView from './ActionView';
+import AddTask from './AddTask'; // Make sure the path is correct
 
 const Task = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [openEditView, setOpenEditView] = useState(false);
+  const [openActionView, setOpenActionView] = useState(false);
+  const [tasks, setTasks] = useState([]); // State to store task data
+
+  // Fetch tasks from backend API
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get('http://localhost:3030/api/tasks'); // Make sure the URL matches your backend
+        console.log(response.data); // Log the response for debugging
+        if (Array.isArray(response.data)) {
+          setTasks(response.data); // Set tasks data if it's an array
+        } else {
+          console.error('Expected an array of tasks, but got:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
+    };
+  
+    fetchTasks();
+  }, []);
+  
 
   const handleCreateTask = (data) => {
     console.log('New Task:', data);
     setShowPopup(false);
   };
 
-  const handleOpenEditView = (task) => {
+  const handleOpenActionView = (task) => {
     setSelectedTask(task);
-    setOpenEditView(true);
+    setOpenActionView(true);
   };
 
-  const handleCloseEditView = () => {
+  const handleCloseActionView = () => {
     setSelectedTask(null);
-    setOpenEditView(false);
+    setOpenActionView(false);
   };
-
-  const task = [
-    {
-      id: 1,
-      project: "Bridge Application",
-      taskname: "Merge Core and JD",
-      subtask: "Sub Task",
-      description: "Uniting the user of core and JD",
-      status: "Open"
-    },
-    {
-      id: 2,
-      project: "Winfast CRM",
-      taskname: "Setup Dashboard",
-      subtask: "UI Build",
-      description: "Designing dashboard UI",
-      status: "Open"
-    },
-    {
-      id: 3,
-      project: "Tata CRM",
-      taskname: "Setup Dashboard",
-      subtask: "UI Build",
-      description: "Creating initial dashboard",
-      status: "Open"
-    }
-  ];
 
   return (
     <>
@@ -112,25 +104,26 @@ const Task = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {task.map((proj, index) => (
-                <TableRow key={proj.id}>
+              {(Array.isArray(tasks) ? tasks : []).map((task, index) => (
+                <TableRow key={index}>
                   <TableCell align="center">{index + 1}</TableCell>
-                  <TableCell align="center">{proj.project}</TableCell>
-                  <TableCell align="center">{proj.taskname}</TableCell>
-                  <TableCell align="center">{proj.subtask}</TableCell>
-                  <TableCell align="center">{proj.description}</TableCell>
+                  <TableCell align="center">{task.project_name}</TableCell>
+                  <TableCell align="center">{task.task_name}</TableCell>
+                  <TableCell align="center">{task.subtask_name}</TableCell>
+                  {/* Display the main task description here */}
+                  <TableCell align="center">{task.task_description}</TableCell>
                   <TableCell align="center">
                     <Typography
                       sx={{
-                        color: proj.status === 'Open' ? 'green' : 'red',
+                        color: task.subtask_status === 'Open' ? 'green' : 'red',
                         fontWeight: 500
                       }}
                     >
-                      {proj.status}
+                      {task.subtask_status}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton onClick={() => handleOpenEditView(proj)}>
+                    <IconButton onClick={() => handleOpenActionView(task)}>
                       <VisibilityIcon />
                     </IconButton>
                   </TableCell>
@@ -140,9 +133,10 @@ const Task = () => {
           </Table>
         </TableContainer>
       </Box>
-      {/* EditView popup */}
-      {openEditView && (
-        <EditView task={selectedTask} onClose={handleCloseEditView} />
+
+      {/* ActionView popup */}
+      {openActionView && (
+        <ActionView task={selectedTask} onClose={handleCloseActionView} />
       )}
 
       {/* AddTask popup */}
