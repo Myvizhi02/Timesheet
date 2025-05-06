@@ -13,9 +13,11 @@ import {
   Typography,
 } from '@mui/material';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 const ActionView = ({ task = {}, onClose }) => {
+  console.log('checked')
+  console.log(task)
   const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
     project: task.project_name || '',
@@ -27,53 +29,6 @@ const ActionView = ({ task = {}, onClose }) => {
     subtask_status: task.subtask_status === 'Open' || task.subtask_status === true,
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await axios.get('http://localhost:3030/api/tasks');
-        if (Array.isArray(response.data)) {
-          const fetchedTask = response.data.find(t => t.id === task.id);
-          if (fetchedTask) {
-            setFormData(prev => ({
-              ...prev,
-              project: fetchedTask.project_name || '',
-              task_name: fetchedTask.task_name || '',
-              task_description: fetchedTask.task_description || '',
-              task_status: fetchedTask.task_status === 'Open' || fetchedTask.task_status === true,
-            }));
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-      }
-    };
-
-    fetchTasks();
-  }, [task?.id]);
-
-  useEffect(() => {
-    const fetchSubtask = async () => {
-      if (!task?.id) return;
-      try {
-        const res = await axios.get(`http://localhost:3030/api/subtasks/${task.id}`);
-        if (res.data) {
-          setFormData(prev => ({
-            ...prev,
-            subtask_name: res.data.subtask_name || '',
-            subtask_description: res.data.description || '',
-            subtask_status: res.data.status === 'Open' || res.data.status === true,
-          }));
-        }
-      } catch (err) {
-        console.warn('No subtask found or fetch failed:', err.message);
-      }
-    };
-
-    if (tabIndex === 1) {
-      fetchSubtask();
-    }
-  }, [tabIndex, task?.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

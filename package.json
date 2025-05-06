@@ -36,5 +36,8 @@
   "bugs": {
     "url": "https://github.com/Myvizhi02/Timesheet/issues"
   },
-  "homepage": "https://github.com/Myvizhi02/Timesheet#readme"
+  "homepage": "https://github.com/Myvizhi02/Timesheet#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
 }
