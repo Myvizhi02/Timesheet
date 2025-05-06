@@ -12,8 +12,8 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // Ensure you have axios installed
+import React, { useEffect, useState } from 'react';
 import addIcon from '../assets/add.png'; // Check your image path!
 import ActionView from './ActionView';
 import AddTask from './AddTask'; // Make sure the path is correct
@@ -29,6 +29,7 @@ const Task = () => {
     const fetchTasks = async () => {
       try {
         const response = await axios.get('http://localhost:3030/api/tasks'); // Make sure the URL matches your backend
+        console.log('Tasks==>'); // Log the response for debugging
         console.log(response.data); // Log the response for debugging
         if (Array.isArray(response.data)) {
           setTasks(response.data); // Set tasks data if it's an array

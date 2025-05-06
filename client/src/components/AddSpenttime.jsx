@@ -19,6 +19,11 @@ import dateIcon from '../assets/date.png';
 
 const AddSpenttime = ({ open, onClose }) => {
   const [subTasks, setSubTasks] = useState([]);
+  const [project, setProject] = useState('');
+  const [projectsList, setProjectsList] = useState([]);
+  const [tasksList, setTasksList] = useState([]);
+const [selectedTask, setSelectedTask] = useState('');
+
   const [startDateTime, setStartDateTime] = useState(null);
   const [endDateTime, setEndDateTime] = useState(null);
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
@@ -39,6 +44,25 @@ const AddSpenttime = ({ open, onClose }) => {
 
     fetchAgentName();
   }, []);
+   
+  
+    useEffect(() => {
+      fetch('http://localhost:3030/api/projects')
+        .then(res => res.json())
+        .then(data => {
+          setProjectsList(data);
+        })
+        .catch(err => {
+          console.error('Error fetching project list:', err);
+        });
+    }, []);
+    useEffect(() => {
+      fetch('http://localhost:3030/api/tasks')
+        .then(res => res.json())
+        .then(data => setTasksList(data))
+        .catch(err => console.error('Error fetching task list:', err));
+    }, []);
+    
 
   useEffect(() => {
     if (open) {
@@ -51,50 +75,14 @@ const AddSpenttime = ({ open, onClose }) => {
   
 
   const handleAddSubTask = () => {
-    setSubTasks([...subTasks, '']);
+    if (subTasks.length === 0) {
+      setSubTasks(['']);
+    }
   };
+  
 
   return (
     <>
-      {/* Header Section
-      <Box
-        sx={{
-          backgroundColor: 'white',
-          width: '100%',
-          height: '70px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '0 20px',
-          boxSizing: 'border-box',
-          position: 'sticky', // Keep the header fixed on top
-          top: 0,
-          zIndex: 10, // Ensures the header stays on top of other content
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton>
-            <NavIcon sx={{ width: 26 }} />
-          </IconButton>
-          <IconButton>
-            <HomeIcon sx={{ width: 24 }} />
-          </IconButton>
-          <IconButton>
-            <ArrowIcon sx={{ width: 26 }} />
-          </IconButton>
-          <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Spent Time</Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>{agentName}</Typography>
-          <img
-            src={DimgIcon}
-            alt="User Icon"
-            style={{ width: '36px', height: '36px', borderRadius: '50%' }}
-          />
-        </Box>
-      </Box> */}
-
       {/* Modal (Popup) */}
       <Dialog
         open={open} // controlled by parent
@@ -146,20 +134,52 @@ const AddSpenttime = ({ open, onClose }) => {
             <Grid container spacing={2} justifyContent="center">
               <Grid item>
                 <TextField
-                  label="Select Project"
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: '16rem', height: '2.5rem' }}
-                />
+                              select
+                              label="Select Project"
+                              fullWidth
+                              value={project}
+                              onChange={(e) => setProject(e.target.value)}
+                              SelectProps={{ native: true }}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  width: '247px',
+                                  height: '40px',
+                                },
+                              }}
+                            >
+                              <option value="" disabled></option>
+                              {projectsList.map((proj) => (
+                                <option key={proj.project_unique_id} value={proj.project_name}>
+                                  {proj.project_name}
+                                </option>
+                              ))}
+                            </TextField>
               </Grid>
 
               <Grid item>
-                <TextField
-                  label="Select Task"
-                  variant="outlined"
-                  size="small"
-                  sx={{ width: '16rem', height: '2.5rem' }}
-                />
+              <TextField
+  select
+  label="Select Task"
+  fullWidth
+  value={selectedTask}
+  onChange={(e) => setSelectedTask(e.target.value)}
+  SelectProps={{ native: true }}
+  sx={{
+    width: '16rem',
+    height: '2.5rem',
+    '& .MuiOutlinedInput-root': {
+      height: '40px',
+    },
+  }}
+>
+  <option value="" disabled></option>
+  {tasksList.map((task) => (
+    <option key={task.task_id} value={task.task_name}>
+      {task.task_name}
+    </option>
+  ))}
+</TextField>
+
               </Grid>
 
               <Grid

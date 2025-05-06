@@ -6,6 +6,7 @@ import {
   IconButton,
   InputAdornment,
   Paper,
+  Snackbar,
   Tab,
   Tabs,
   TextField,
@@ -18,121 +19,118 @@ const ActionView = ({ task = {}, onClose }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
     project: task.project_name || '',
-    taskname: task.task_name || '',
-    subtaskname: task.subtask_name || '',
-    description: task.description || '',
-    subtaskdescription: task.subtaskdescription || '',
-    taskstatus: task.task_status === 'Open',
-    subtaskstatus: task.subtask_status === 'Open',
+    task_name: task.task_name || '',
+    task_description: task.task_description || '',
+    subtask_name: task.subtask_name || '',
+    subtask_description: task.subtask_description || '',
+    task_status: task.task_status === 'Open' || task.task_status === true,
+    subtask_status: task.subtask_status === 'Open' || task.subtask_status === true,
   });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
-    const fetchMainTaskDescription = async () => {
-      if (task.task_name) {
-        console.log('Fetching task description for:', task.task_name);
-        try {
-          const res = await axios.get(`http://localhost:3030/api/main-task/${task.task_name}`);
-          const task_description = res.data.task_description || res.data.description;
-          const task_status = res.data.task_status;
-  
-          setFormData((prev) => ({
-            ...prev,
-            description: task_description || prev.description || '',
-            taskstatus: task_status === 'Open',
-          }));
-        } catch (error) {
-          console.error('Failed to fetch task description:', error);
-        }
-      }
-    };
-  
-    const fetchSubtaskDescription = async () => {
-      console.log('Fetching subtask description for:', task.subtask_name);
-      if (task.subtask_name) {
-        try {
-          const res = await axios.get('http://localhost:3030/api/main-subtask', {
-            params: {
-              subtask_name: task.subtask_name,
-            }
-          });
-    
-          console.log('Subtask API response:', res.data);
-    
-          const subtask_description = res.data.description || '';
-    
-          setFormData((prev) => {
-            console.log('Setting formData with subtask description:', subtask_description);
-            return {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get('http://localhost:3030/api/tasks');
+        if (Array.isArray(response.data)) {
+          const fetchedTask = response.data.find(t => t.id === task.id);
+          if (fetchedTask) {
+            setFormData(prev => ({
               ...prev,
-              subtaskdescription: subtask_description || prev.subtaskdescription || '',
-            };
-          });
-        } catch (error) {
-          console.error('Failed to fetch subtask description:', error);
+              project: fetchedTask.project_name || '',
+              task_name: fetchedTask.task_name || '',
+              task_description: fetchedTask.task_description || '',
+              task_status: fetchedTask.task_status === 'Open' || fetchedTask.task_status === true,
+            }));
+          }
         }
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
       }
     };
 
-    if (task?.task_name) {
-      fetchMainTaskDescription();
+    fetchTasks();
+  }, [task?.id]);
+
+  useEffect(() => {
+    const fetchSubtask = async () => {
+      if (!task?.id) return;
+      try {
+        const res = await axios.get(`http://localhost:3030/api/subtasks/${task.id}`);
+        if (res.data) {
+          setFormData(prev => ({
+            ...prev,
+            subtask_name: res.data.subtask_name || '',
+            subtask_description: res.data.description || '',
+            subtask_status: res.data.status === 'Open' || res.data.status === true,
+          }));
+        }
+      } catch (err) {
+        console.warn('No subtask found or fetch failed:', err.message);
+      }
+    };
+
+    if (tabIndex === 1) {
+      fetchSubtask();
     }
-    if (task?.subtask_name) {
-      fetchSubtaskDescription();
-    }
-  }, [task.task_name, task.subtask_name]);
+  }, [tabIndex, task?.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleTaskStatusToggle = () => {
-    setFormData((prev) => ({ ...prev, taskstatus: !prev.taskstatus }));
+    setFormData(prev => ({ ...prev, task_status: !prev.task_status }));
   };
 
   const handleSubtaskStatusToggle = () => {
-    setFormData((prev) => ({ ...prev, subtaskstatus: !prev.subtaskstatus }));
+    setFormData(prev => ({ ...prev, subtask_status: !prev.subtask_status }));
   };
 
-  const handleUpdate = async () => {
-    if (!task?.id) {
-      console.error('❌ id is undefined. Cannot proceed with update.');
-      return;
-    }
-
-    const updatedTask = {
-      project_name: formData.project,
-      task_name: formData.taskname,
-      description: formData.description,
-      task_status: formData.taskstatus ? 'Open' : 'Closed',
+  const handleUpdate = async (task) => {
+    if (!task?.task_id) return;
+    const payload = {
+      task_name: formData.task_name,
+      task_description: formData.task_description,
+      task_status: formData.task_status ? 'Open' : 'Closed',
     };
-
+    
     try {
-      await axios.put(`http://localhost:3030/api/update-task/${task.id}`, updatedTask);
-      console.log('✅ Task updated successfully');
-      onClose?.();
+      const response = await axios.put(`http://localhost:3030/api/update-task/${task.task_id}`, payload);
+      setSnackbar({ open: true, message: 'Task updated successfully', severity: 'success' });
+      if (onClose) onClose(); // Close the modal after update
     } catch (error) {
-      console.error('❌ Error updating task:', error);
+      console.error('Update failed:', error);
+      setSnackbar({ open: true, message: 'Task update failed', severity: 'error' });
     }
   };
 
   const handleSubtaskSubmit = async () => {
-    const newSubtask = {
-      project_name: formData.project,
-      subtask_name: formData.subtaskname,
-      description: formData.subtaskdescription,
-      subtask_status: formData.subtaskstatus ? 'Open' : 'Closed',
+    if (!task?.task_id) {
+      setSnackbar({ open: true, message: 'Task ID missing for subtask update', severity: 'error' });
+      return;
+    }
+  
+    const payload = {
+      subtask_name: formData.subtask_name,
+      description: formData.subtask_description,
+      status: formData.subtask_status ? 'Open' : 'Closed',
     };
-
+  
     try {
-      await axios.post('http://localhost:3030/api/create-subtask', newSubtask);
-      console.log('✅ Subtask submitted successfully');
-      onClose?.();
+      const response = await axios.put(
+        `http://localhost:3030/api/subtasks/${task.task_id}`,
+        payload
+      );
+      setSnackbar({ open: true, message: 'Subtask updated successfully', severity: 'success' });
+      if (onClose) onClose();
     } catch (error) {
-      console.error('❌ Error submitting subtask:', error);
+      console.error('Subtask update failed:', error);
+      setSnackbar({ open: true, message: 'Subtask update failed', severity: 'error' });
     }
   };
-
+  
   const renderStatusToggle = (status, onClick) => (
     <Box
       onClick={onClick}
@@ -204,10 +202,7 @@ const ActionView = ({ task = {}, onClose }) => {
         sx={{
           borderBottom: 1,
           borderColor: 'white',
-          '& .MuiTab-root': {
-            textTransform: 'none',
-            fontWeight: 500,
-          },
+          '& .MuiTab-root': { textTransform: 'none', fontWeight: 500 },
         }}
       >
         <Tab label="Edit Task" />
@@ -216,25 +211,24 @@ const ActionView = ({ task = {}, onClose }) => {
       </Tabs>
 
       <Box sx={{ p: 2, flex: 1, overflowY: 'auto', ml: 2.5 }}>
+        {/* Tab 0: Edit Task */}
         {tabIndex === 0 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <TextField
-                fullWidth
                 label="Project"
                 name="project"
                 value={formData.project}
-                onChange={handleChange}
                 size="small"
-                sx={{ width: '252px' }}
+                InputProps={{ readOnly: true }}
+                sx={{ width: '252px', backgroundColor: '#FBECEC' }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                fullWidth
                 label="Task Name"
-                name="taskname"
-                value={formData.taskname}
+                name="task_name"
+                value={formData.task_name}
                 onChange={handleChange}
                 size="small"
                 sx={{ width: '252px' }}
@@ -242,10 +236,9 @@ const ActionView = ({ task = {}, onClose }) => {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                fullWidth
                 label="Task Description"
-                name="description"
-                value={formData.description}
+                name="task_description"
+                value={formData.task_description}
                 onChange={handleChange}
                 size="small"
                 multiline
@@ -256,13 +249,12 @@ const ActionView = ({ task = {}, onClose }) => {
             <Grid item xs={12}>
               <TextField
                 label="Task Status"
-                variant="outlined"
-                value={formData.taskstatus ? 'Open' : 'Closed'}
+                value={formData.task_status ? 'Open' : 'Closed'}
                 InputProps={{
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
-                      {renderStatusToggle(formData.taskstatus, handleTaskStatusToggle)}
+                      {renderStatusToggle(formData.task_status, handleTaskStatusToggle)}
                     </InputAdornment>
                   ),
                 }}
@@ -270,10 +262,10 @@ const ActionView = ({ task = {}, onClose }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Box display="flex" justifyContent="center">
+              <Box display="flex" justifyContent="center" mt={4}>
                 <Button
                   variant="contained"
-                  onClick={handleUpdate}
+                  onClick={() => handleUpdate(task)}
                   sx={{
                     px: 6,
                     py: 1.5,
@@ -281,11 +273,7 @@ const ActionView = ({ task = {}, onClose }) => {
                     borderRadius: 2,
                     textTransform: 'none',
                     fontWeight: 600,
-                    ml: 28,
-                    mt: 15,
-                    '&:hover': {
-                      backgroundColor: '#0D1640',
-                    },
+                    '&:hover': { backgroundColor: '#0D1640' },
                   }}
                 >
                   Update
@@ -295,25 +283,24 @@ const ActionView = ({ task = {}, onClose }) => {
           </Grid>
         )}
 
+        {/* Tab 1: Sub-Task */}
         {tabIndex === 1 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <TextField
-                fullWidth
                 label="Project"
                 name="project"
                 value={formData.project}
-                InputProps={{ readOnly: true }}
                 size="small"
+                InputProps={{ readOnly: true }}
                 sx={{ width: '252px', backgroundColor: '#FBECEC' }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                fullWidth
                 label="SubTask Name"
-                name="subtaskname"
-                value={formData.subtaskname}
+                name="subtask_name"
+                value={formData.subtask_name}
                 onChange={handleChange}
                 size="small"
                 sx={{ width: '252px' }}
@@ -321,10 +308,9 @@ const ActionView = ({ task = {}, onClose }) => {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                fullWidth
                 label="SubTask Description"
-                name="subtaskdescription"
-                value={formData.subtaskdescription}
+                name="subtask_description"
+                value={formData.subtask_description}
                 onChange={handleChange}
                 size="small"
                 multiline
@@ -335,13 +321,12 @@ const ActionView = ({ task = {}, onClose }) => {
             <Grid item xs={12}>
               <TextField
                 label="SubTask Status"
-                variant="outlined"
-                value={formData.subtaskstatus ? 'Open' : 'Closed'}
+                value={formData.subtask_status ? 'Open' : 'Closed'}
                 InputProps={{
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
-                      {renderStatusToggle(formData.subtaskstatus, handleSubtaskStatusToggle)}
+                      {renderStatusToggle(formData.subtask_status, handleSubtaskStatusToggle)}
                     </InputAdornment>
                   ),
                 }}
@@ -349,7 +334,7 @@ const ActionView = ({ task = {}, onClose }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Box display="flex" justifyContent="center">
+              <Box display="flex" justifyContent="center" mt={4}>
                 <Button
                   variant="contained"
                   onClick={handleSubtaskSubmit}
@@ -360,11 +345,7 @@ const ActionView = ({ task = {}, onClose }) => {
                     borderRadius: 2,
                     textTransform: 'none',
                     fontWeight: 600,
-                    ml: 28,
-                    mt: 15,
-                    '&:hover': {
-                      backgroundColor: '#0D1640',
-                    },
+                    '&:hover': { backgroundColor: '#0D1640' },
                   }}
                 >
                   Submit
@@ -374,16 +355,17 @@ const ActionView = ({ task = {}, onClose }) => {
           </Grid>
         )}
 
+        {/* Tab 2: Task Details */}
         {tabIndex === 2 && (
           <Grid container spacing={3}>
             {[
               ['Project', 'project'],
-              ['Task Name', 'taskname'],
-              ['Task Description', 'description'],
-              ['Sub Task Name', 'subtaskname'],
-              ['Sub Task Description', 'subtaskdescription'],
-              ['Task Status', 'taskstatus'],
-              ['Sub Task Status', 'subtaskstatus'],
+              ['Task Name', 'task_name'],
+              ['Task Description', 'task_description'],
+              ['Sub Task Name', 'subtask_name'],
+              ['Sub Task Description', 'subtask_description'],
+              ['Task Status', 'task_status'],
+              ['Sub Task Status', 'subtask_status'],
             ].map(([label, key]) => (
               <Grid item xs={12} key={key}>
                 <TextField
@@ -399,16 +381,19 @@ const ActionView = ({ task = {}, onClose }) => {
                       : formData[key]
                   }
                   InputProps={{ readOnly: true }}
-                  size="small"
-                  multiline
-                  rows={1}
-                  sx={{ width: '252px' }}
                 />
               </Grid>
             ))}
           </Grid>
         )}
       </Box>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        message={snackbar.message}
+      />
     </Paper>
   );
 };
