@@ -24,6 +24,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import MuiAlert from '@mui/material/Alert';
 import dateIcon from '../assets/date.png';
 
+
+
 const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
   const [adminOptions, setAdminOptions] = useState([]);
@@ -60,20 +62,23 @@ const AddProject = ({ onClose, onSubmit }) => {
 
     const fetchProjectId = async () => {
       try {
-        const res = await fetch('http://localhost:3030/api/projects/new-id');
-        const data = await res.json();
-        setFormData((prev) => ({
-          ...prev,
-          projectId: data.project_unique_id,
-        }));
-      } catch (err) {
-        console.error('Failed to fetch project ID', err);
+          const response = await fetch('http://localhost:3030/api/projects/new-id');
+          if (!response.ok) {
+              throw new Error('Failed to fetch project ID');
+          }
+          const data = await response.json();
+          console.log(data); // Check the structure of the returned data
+          // Assuming the returned data has the project_unique_id
+          setFormData({ ...formData, projectId: data.project_unique_id });
+      } catch (error) {
+          console.error('Error fetching project ID:', error);
       }
-    };
+  };
 
     fetchAdmins();
     fetchProjectId();
   }, []);
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -223,15 +228,16 @@ const AddProject = ({ onClose, onSubmit }) => {
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3.5}>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  name="projectId"
-                  label="Project ID"
-                  variant="outlined"
-                  fullWidth
-                  value={formData.projectId || ''}
-                  disabled
-                  sx={inputStyle}
-                />
+              <TextField
+  name="projectId"
+  label="Project ID"
+  variant="outlined"
+  fullWidth
+  value={formData.projectId || ''}
+  disabled
+  sx={inputStyle}
+/>
+
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField

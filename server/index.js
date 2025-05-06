@@ -10,7 +10,7 @@ const PORT = 3030;
 // CORS Middleware
 // ----------------------------------------------
 const corsOptions = {
-  origin: 'http://localhost:5173',  // Allow requests from React (Vite)
+  origin: 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
@@ -114,14 +114,17 @@ app.get('/getCrmLogId/:agent_id', checkDbConnection, async (req, res) => {
   }
 });
 
-app.get('/validate-session', (req, res) => {
-  if (req.session && req.session.user) {
-    res.status(200).json({ message: 'Session valid' });
-  } else {
-    res.status(401).json({ message: 'Session invalid' });
+// ----------------------------------------------
+// PROJECTS
+// ----------------------------------------------
+app.get('/api/projects', checkDbConnection, async (req, res) => {
+  try {
+    const [projects] = await db.execute('SELECT * FROM main_project WHERE is_active = 1 ORDER BY created_date ASC');
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
-
 app.get('/api/projects/new-id', checkDbConnection, async (req, res) => {
   try {
     const nextProjectId = await getNextProjectId();
@@ -130,7 +133,6 @@ app.get('/api/projects/new-id', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
-
 const getNextProjectId = async () => {
   const [rows] = await db.execute("SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1");
   if (rows.length > 0) {
@@ -140,10 +142,36 @@ const getNextProjectId = async () => {
     return "P0001";
   }
 };
+app.put('/api/projects/:id', checkDbConnection, async (req, res) => {
+  const projectId = req.params.id;
+  const updatedData = req.body;
 
-// ----------------------------------------------
-// PROJECTS
-// ----------------------------------------------
+  try {
+    const [result] = await db.execute(
+      'UPDATE main_project SET project_name = ?, department = ?, lob = ?, start_date = ?, end_date = ?, expected_date = ?, budget = ?, allocated_executives = ? WHERE project_unique_id = ?',
+      [
+        updatedData.project_name,
+        updatedData.department,
+        updatedData.lob,
+        updatedData.start_date,
+        updatedData.end_date,
+        updatedData.expected_date,
+        updatedData.budget,
+        JSON.stringify(updatedData.allocated_executives),
+        projectId,
+      ]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: 'Project updated successfully' });
+    } else {
+      res.status(400).json({ message: 'Failed to update project' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 app.post('/api/projects', checkDbConnection, async (req, res) => {
   try {
     const {
@@ -189,69 +217,19 @@ app.post('/api/projects', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
-
-app.put('/api/projects/:id', checkDbConnection, async (req, res) => {
-  const projectId = req.params.id;
-  const updatedData = req.body;
-
+app.get('/api/admins', async (req, res) => {
   try {
-    const [result] = await db.execute(
-      'UPDATE main_project SET project_name = ?, department = ?, lob = ?, start_date = ?, end_date = ?, expected_date = ?, budget = ?, allocated_executives = ? WHERE project_unique_id = ?',
-      [
-        updatedData.project_name,
-        updatedData.department,
-        updatedData.lob,
-        updatedData.start_date,
-        updatedData.end_date,
-        updatedData.expected_date,
-        updatedData.budget,
-        JSON.stringify(updatedData.allocated_executives),
-        projectId,
-      ]
-    );
-
-    if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'Project updated successfully' });
-    } else {
-      res.status(400).json({ message: 'Failed to update project' });
-    }
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-app.get('/api/projects', checkDbConnection, async (req, res) => {
-  try {
-    const [projects] = await db.execute('SELECT * FROM main_project WHERE is_active = 1 ORDER BY created_date ASC');
-    res.json(projects);
+    const [rows] = await db.execute('SELECT crm_log_id, name FROM crm_admin');
+    res.json(rows);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    console.error('Error fetching admins:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
 // ----------------------------------------------
 // TASKS
 // ----------------------------------------------
-app.put('/api/tasks/:id', checkDbConnection, async (req, res) => {
-  const taskId = req.params.id;
-  const { status } = req.body; // Get the updated status from the request body
-
-  try {
-    const [result] = await db.execute(
-      'UPDATE main_task SET status = ? WHERE id = ?',
-      [status, taskId]
-    );
-
-    if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'Task status updated successfully' });
-    } else {
-      res.status(400).json({ message: 'Failed to update task status' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
 app.post('/api/tasks', checkDbConnection, async (req, res) => {
   const {
     project_name,
@@ -281,7 +259,7 @@ app.post('/api/tasks', checkDbConnection, async (req, res) => {
       project_id,
       task_name,
       description,
-      status,  // Make sure the status is being correctly passed as 'Open' or 'Closed'
+      status,
       created_by,
       modified_by
     ]);
@@ -290,6 +268,30 @@ app.post('/api/tasks', checkDbConnection, async (req, res) => {
   } catch (error) {
     console.error('❌ Error adding task:', error.message);
     res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+app.put('/api/update-task/:taskId', checkDbConnection, async (req, res) => {
+  const { taskId } = req.params; // fetch taskId from the URL parameter
+
+  const { task_name, task_description, task_status } = req.body; // other task details
+ 
+  try {
+    const [result] = await db.execute(`
+      UPDATE main_task 
+      SET task_name = ?, description = ?, status = ? 
+      WHERE id = ? AND is_active = 1
+    `, [task_name, task_description, task_status, taskId]);
+  
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Task not found or already inactive.' });
+    }
+
+    res.status(200).json({ message: 'Task updated successfully' });
+  } catch (error) {
+    console.error('❌ Error updating task:', error.message);
+    res.status(500).json({ error: 'Failed to update task.' });
   }
 });
 
@@ -308,12 +310,10 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
   } = req.body;
 
   try {
-    // Check if the required parameters are passed
     if (!project_name || !task_name || !sub_task_name || !description || !status) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
 
-    // Get project_id based on project_name
     const [projectRows] = await db.execute(
       'SELECT id FROM main_project WHERE project_name = ? AND is_active = 1',
       [project_name]
@@ -325,7 +325,6 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
 
     const project_id = projectRows[0].id;
 
-    // Get task_id based on task_name and project_id
     const [taskRows] = await db.execute(
       'SELECT id FROM main_task WHERE task_name = ? AND project_id = ? AND is_active = 1',
       [task_name, project_id]
@@ -337,7 +336,6 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
 
     const task_id = taskRows[0].id;
 
-    // Insert subtask into database
     await db.execute(`INSERT INTO main_sub_task (
       project_id, task_id, subtask_name, description, status,
       created_by, modified_by, created_date, modified_date, is_active
@@ -362,10 +360,15 @@ app.get('/api/tasks', checkDbConnection, async (req, res) => {
   try {
     const [tasks] = await db.execute(`
       SELECT 
+        st.task_id,
+        st.id as sub_task_id,
+        t.project_id,
         p.project_name, 
         t.task_name, 
         st.subtask_name, 
-        t.description AS task_description, 
+        t.description AS task_description,
+        st.description AS subtask_description,
+        t.status AS task_status,
         st.status AS subtask_status
       FROM main_project p
       JOIN main_task t ON t.project_id = p.id
@@ -378,165 +381,64 @@ app.get('/api/tasks', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
-
-//Description is based on task_name
-app.get('/api/main-task/:task_name', checkDbConnection, async (req, res) => {
-  const { task_name } = req.params; // Extract task_name from the request parameters
-
-  try {
-    const [rows] = await db.execute(
-      'SELECT task_name, description, status FROM main_task WHERE task_name = ? AND is_active = 1',
-      [task_name]
-    );
-
-    if (rows.length > 0) {
-      res.json({
-        task_name: rows[0].task_name,
-        description: rows[0].description,
-        task_status: rows[0].status
-      });
-    } else {
-      res.status(404).json({ error: 'Task not found.' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
-  }
-});
-//id will be based on project_id and task_name
-app.get('/api/task-id/:project_id/:task_name', checkDbConnection, async (req, res) => {
-  const { project_id, task_name } = req.params; // Extract project_id and task_name from request params
-
-  try {
-    const [rows] = await db.execute(
-      'SELECT id FROM main_task WHERE project_id = ? AND task_name = ? AND is_active = 1',
-      [project_id, task_name]
-    );
-
-    if (rows.length > 0) {
-      res.json({ task_id: rows[0].id });
-    } else {
-      res.status(404).json({ error: 'Task not found.' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
-  }
-});
-//fetch the data in main_sub_task
-app.get('/api/subtasks/:project_id/:task_name', checkDbConnection, async (req, res) => {
-  const { project_id, task_name } = req.params;
-
-  try {
-    // Step 1: Get task_id based on project_id and task_name
-    const [taskRows] = await db.execute(
-      'SELECT id FROM main_task WHERE project_id = ? AND task_name = ? AND is_active = 1',
-      [project_id, task_name]
-    );
-
-    if (taskRows.length === 0) {
-      return res.status(404).json({ error: 'Task not found for the specified project.' });
-    }
-
-    const task_id = taskRows[0].id;
-
-    // Step 2: Fetch subtasks using task_id and project_id
-    const [subtasks] = await db.execute(
-      `SELECT subtask_name, description, status, created_by, modified_by, created_date, modified_date
-       FROM main_sub_task 
-       WHERE project_id = ? AND task_id = ? AND is_active = 1
-       ORDER BY created_date ASC`,
-      [project_id, task_id]
-    );
-
-    if (subtasks.length > 0) {
-      res.json(subtasks);
-    } else {
-      res.status(404).json({ error: 'No subtasks found for the specified task.' });
-    }
-  } catch (error) {
-    console.error('❌ Error fetching subtasks:', error.message);
-    res.status(500).json({ error: 'Internal server error.' });
-  }
-});
-//Description is based on subtask_name
-app.get('/api/main-subtask', checkDbConnection, async (req, res) => {
-  const { subtask_name } = req.query;
+app.put('/api/subtasks/:task_id', async (req, res) => {
+  const { task_id } = req.params;
+  const { subtask_name, description, status } = req.body;
 
   if (!subtask_name) {
-    return res.status(400).json({ error: 'Subtask name is required.' });
+    return res.status(400).json({ error: 'Subtask name is required' });
   }
 
-  try {
-    const [result] = await db.execute('SELECT description FROM main_sub_task WHERE subtask_name = ?', [subtask_name]);
+  const query = `
+    UPDATE main_sub_task
+    SET subtask_name = ?, description = ?, status = ?
+    WHERE task_id = ?
+  `;
 
-    if (result.length > 0) {
-      return res.json(result[0]); // Return the description of the first matching subtask
-    } else {
-      return res.status(404).json({ error: 'Subtask not found.' });
-    }
+  try {
+    await db.execute(query, [
+      subtask_name ?? null,
+      description ?? null,
+      status ?? 'Open',
+      task_id,
+    ]);
+    res.status(200).json({ message: 'Subtask updated successfully' });
   } catch (error) {
-    console.error('❌ Error fetching subtask description:', error.message);
-    return res.status(500).json({ error: 'Internal server error.' });
+    console.error('Error updating subtask:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Update Task in main_task Table
-app.put('/api/tasks/:id', checkDbConnection, async (req, res) => {
-  const taskId = req.params.id;
-  const updatedData = req.body;
+
+
+app.get('/api/main-task/:id/:project_id', checkDbConnection, async (req, res) => {
+  const { id, project_id } = req.params;
 
   try {
-    const [result] = await db.execute(
-      'UPDATE main_task SET task_name = ?, description = ?, status = ?, modified_by = ?, modified_date = NOW() WHERE id = ? AND is_active = 1',
-      [
-        updatedData.task_name,
-        updatedData.description,
-        updatedData.status,
-        updatedData.modified_by,
-        taskId,
-      ]
-    );
+    const [task] = await db.execute(`
+      SELECT t.id, t.task_name, t.description AS task_description, t.status, p.project_name
+      FROM main_task t
+      JOIN main_project p ON p.id = t.project_id
+      WHERE t.id = ? AND t.project_id = ? AND t.is_active = 1
+    `, [id, project_id]);
 
-    if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'Task updated successfully' });
-    } else {
-      res.status(400).json({ message: 'Failed to update task. Task might not exist.' });
+    if (task.length === 0) {
+      return res.status(404).json({ error: 'Task not found.' });
     }
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
 
-// Update Subtask in main_sub_task Table
-app.put('/api/subtasks/:id', checkDbConnection, async (req, res) => {
-  const subtaskId = req.params.id;
-  const updatedData = req.body;
+    const [subtasks] = await db.execute(`
+      SELECT subtask_name, description AS subtask_description, status
+      FROM main_sub_task
+      WHERE task_id = ? AND is_active = 1
+    `, [id]);
 
-  try {
-    const [result] = await db.execute(
-      'UPDATE main_sub_task SET subtask_name = ?, description = ?, status = ?, modified_by = ?, modified_date = NOW() WHERE id = ? AND is_active = 1',
-      [
-        updatedData.subtask_name,
-        updatedData.description,
-        updatedData.status,
-        updatedData.modified_by,
-        subtaskId,
-      ]
-    );
-
-    if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'Subtask updated successfully' });
-    } else {
-      res.status(400).json({ message: 'Failed to update subtask. Subtask might not exist.' });
-    }
+    res.json({ task: task[0], subtasks });
   } catch (error) {
-    console.error('❌ Error updating subtask:', error.message);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Server error.' });
   }
 });
 
-
-
-// Start server
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
