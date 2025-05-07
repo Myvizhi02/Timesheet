@@ -17,11 +17,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import MuiAlert from '@mui/material/Alert';
 import dateIcon from '../assets/date.png';
 
 
@@ -62,23 +62,23 @@ const AddProject = ({ onClose, onSubmit }) => {
 
     const fetchProjectId = async () => {
       try {
-          const response = await fetch('http://localhost:3030/api/projects/new-id');
-          if (!response.ok) {
-              throw new Error('Failed to fetch project ID');
-          }
-          const data = await response.json();
-          console.log(data); // Check the structure of the returned data
-          // Assuming the returned data has the project_unique_id
-          setFormData({ ...formData, projectId: data.project_unique_id });
+        const response = await fetch('http://localhost:3030/api/projects/new-id');
+        if (!response.ok) {
+          throw new Error('Failed to fetch project ID');
+        }
+        const data = await response.json();
+        console.log(data); // Check the structure of the returned data
+        // Assuming the returned data has the project_unique_id
+        setFormData({ ...formData, projectId: data.project_unique_id });
       } catch (error) {
-          console.error('Error fetching project ID:', error);
+        console.error('Error fetching project ID:', error);
       }
-  };
+    };
 
     fetchAdmins();
     fetchProjectId();
   }, []);
-  
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -92,11 +92,15 @@ const AddProject = ({ onClose, onSubmit }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmitProject = async (e) => {
     e.preventDefault();
+    console.log('Form is being submitted');
+
+    // Prevent multiple submissions
     if (isSubmitting) return;
 
-    setIsSubmitting(true);
+    setIsSubmitting(true);  // Set to true to prevent further submissions
+
     const createdBy = localStorage.getItem('crm_log_id') || 'default_admin';
 
     const data = {
@@ -128,9 +132,11 @@ const AddProject = ({ onClose, onSubmit }) => {
     } catch (err) {
       setSnackbar({ open: true, message: '❌ Failed to add project. Please try again.', severity: 'error' });
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false);  // Reset to false after the submission process is complete
     }
   };
+
+
 
   const isFormValid =
     formData.projectName && formData.lob && formData.domain && startDate && endDate;
@@ -225,18 +231,18 @@ const AddProject = ({ onClose, onSubmit }) => {
         </DialogTitle>
 
         <DialogContent sx={{ padding: '1.5em', mt: 5 }}>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmitProject}>
             <Grid container spacing={3.5}>
               <Grid item xs={12} sm={6}>
-              <TextField
-  name="projectId"
-  label="Project ID"
-  variant="outlined"
-  fullWidth
-  value={formData.projectId || ''}
-  disabled
-  sx={inputStyle}
-/>
+                <TextField
+                  name="projectId"
+                  label="Project ID"
+                  variant="outlined"
+                  fullWidth
+                  value={formData.projectId || ''}
+                  disabled
+                  sx={inputStyle}
+                />
 
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -361,6 +367,8 @@ const AddProject = ({ onClose, onSubmit }) => {
                     backgroundColor: '#213E9A',
                   },
                 }}
+                disabled={isSubmitting}  // Disable the button while submitting
+
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </Button>

@@ -69,11 +69,19 @@ app.post('/login', checkDbConnection, async (req, res) => {
     const user = results[0];
 
     if (user.password === password) {
+      let redirectTo = '';
+
+      if (user.admin_flag === 2) {
+        redirectTo = '/dashboard';
+      } else if (user.admin_flag === 1 || user.admin_flag === 0) {
+        redirectTo = '/spenttime';
+      }
+
       return res.json({
         message: 'Login successful',
         name: user.name,
         crm_log_id: user.crm_log_id,
-        redirectTo: '/dashboard',
+        redirectTo,
       });
     } else {
       return res.status(401).json({ error: 'Incorrect password.' });
@@ -133,6 +141,7 @@ app.get('/api/projects/new-id', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
 const getNextProjectId = async () => {
   const [rows] = await db.execute("SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1");
   if (rows.length > 0) {
@@ -230,6 +239,66 @@ app.get('/api/admins', async (req, res) => {
 // ----------------------------------------------
 // TASKS
 // ----------------------------------------------
+// 
+app.get('/api/tasks', checkDbConnection, async (req, res) => {
+  const { project_id, task_name } = req.query;
+
+  try {
+    if (project_id && task_name) {
+      // Return subtasks for a specific project and task
+      const [taskRows] = await db.execute(
+        'SELECT id FROM main_task WHERE project_id = ? AND task_name = ?',
+        [project_id, task_name]
+      );
+
+      if (taskRows.length === 0) {
+        return res.status(404).json({ error: 'Task not found.' });
+      }
+
+      const task_id = taskRows[0].id;
+
+      const [subtasks] = await db.execute(
+        'SELECT * FROM main_sub_task WHERE task_id = ? AND project_id = ?',
+        [task_id, project_id]
+      );
+
+      return res.json(subtasks);
+    } else if (project_id) {
+      // Return all tasks for a specific project
+      const [tasks] = await db.execute(
+        'SELECT * FROM main_task WHERE project_id = ?',
+        [project_id]
+      );
+      return res.json(tasks);
+    } else {
+      // Return all tasks with project and subtask info
+      const [tasks] = await db.execute(`
+        SELECT 
+          st.task_id,
+          st.id as sub_task_id,
+          t.project_id,
+          p.project_name, 
+          t.task_name, 
+          st.subtask_name, 
+          t.description AS task_description,
+          st.description AS subtask_description,
+          t.status AS task_status,
+          st.status AS subtask_status
+        FROM main_project p
+        JOIN main_task t ON t.project_id = p.id
+        LEFT JOIN main_sub_task st ON st.task_id = t.id
+        WHERE p.is_active = 1 AND t.is_active = 1
+        ORDER BY p.created_date ASC
+      `);
+      return res.json(tasks);
+    }
+  } catch (error) {
+    console.error('❌ Error fetching tasks:', error.message);
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+
 app.post('/api/tasks', checkDbConnection, async (req, res) => {
   const {
     project_name,
@@ -270,51 +339,36 @@ app.post('/api/tasks', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
-app.get('/api/tasks', checkDbConnection, async (req, res) => {
-  try {
-    const [tasks] = await db.execute(`
-      SELECT 
-        st.task_id,
-        st.id as sub_task_id,
-        t.project_id,
-        p.project_name, 
-        t.task_name, 
-        st.subtask_name, 
-        t.description AS task_description,
-        st.description AS subtask_description,
-        t.status AS task_status,
-        st.status AS subtask_status
-      FROM main_project p
-      JOIN main_task t ON t.project_id = p.id
-      LEFT JOIN main_sub_task st ON st.task_id = t.id
-      WHERE p.is_active = 1 AND t.is_active = 1
-      ORDER BY p.created_date ASC
-    `);
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
-  }
-});
+
 // to fetch all subtasks
-app.get('/api/subtasks', async (req, res) => {
-  const { taskId } = req.query;
+app.get('/api/subtasks', checkDbConnection, async (req, res) => {
+  const { task_id, project_id } = req.query;
 
-  // Ensure the taskId is provided
-  if (!taskId) {
-    return res.status(400).json({ error: 'Task ID is required' });
+  // Validate input
+  if (!task_id || !project_id) {
+    return res.status(400).json({ error: 'Both Task ID and Project ID are required' });
   }
 
   try {
-    // Query the database to fetch subtasks for the given taskId
-    const [rows] = await pool.promise().query('SELECT * FROM main_sub_task WHERE task_id = ?', [taskId]);
+    // Fetch subtasks based on both task_id and project_id
+    const [results] = await db.execute(
+      'SELECT * FROM main_sub_task WHERE task_id = ? AND project_id = ?',
+      [task_id, project_id]
+    );
 
-    // Send the fetched subtasks as a response
-    res.json(rows);
+    // Return results
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      res.status(404).json({ message: 'No subtasks found for the provided task_id and project_id' });
+    }
   } catch (error) {
-    console.error('Error fetching subtasks:', error);
-    res.status(500).json({ error: 'Error fetching subtasks' });
+    console.error('❌ Error fetching subtasks:', error.message);
+    res.status(500).json({ error: 'Database error' });
   }
 });
+
+
 app.put('/api/update-task/:taskId', checkDbConnection, async (req, res) => {
   const { taskId } = req.params; // fetch taskId from the URL parameter
 
@@ -342,6 +396,84 @@ app.put('/api/update-task/:taskId', checkDbConnection, async (req, res) => {
 // ----------------------------------------------
 // SUBTASKS
 // ----------------------------------------------
+// Route to fetch task by task_name and project_id
+// GET all tasks (with optional project filter)
+// app.get('/api/tasks', checkDbConnection, async (req, res) => {
+//   const { project_id } = req.query;
+
+//   if (project_id) {
+//     try {
+//       const [tasks] = await db.execute('SELECT * FROM main_task WHERE project_id = ?', [project_id]);
+//       return res.json(tasks);
+//     } catch (err) {
+//       return res.status(500).json({ error: 'Database error' });
+//     }
+//   } else {
+//     try {
+//       const [tasks] = await db.execute(`
+//         SELECT 
+//           st.task_id,
+//           st.id as sub_task_id,
+//           t.project_id,
+//           p.project_name, 
+//           t.task_name, 
+//           st.subtask_name, 
+//           t.description AS task_description,
+//           st.description AS subtask_description,
+//           t.status AS task_status,
+//           st.status AS subtask_status
+//         FROM main_project p
+//         JOIN main_task t ON t.project_id = p.id
+//         LEFT JOIN main_sub_task st ON st.task_id = t.id
+//         WHERE p.is_active = 1 AND t.is_active = 1
+//         ORDER BY p.created_date ASC
+//       `);
+//       return res.json(tasks);
+//     } catch (error) {
+//       return res.status(500).json({ error: 'Internal server error.' });
+//     }
+//   }
+// });
+
+// GET subtasks by project_id and task_name
+app.get('/api/tasks/by-name', checkDbConnection, async (req, res) => {
+  const { project_id, task_name } = req.query;
+
+  if (!project_id || !task_name) {
+    return res.status(400).json({ error: 'Both project_id and task_name are required.' });
+  }
+
+  try {
+    const [tasks] = await db.execute(`
+      SELECT id 
+      FROM main_task 
+      WHERE project_id = ? AND task_name = ?
+    `, [project_id, task_name]);
+
+    if (tasks.length === 0) {
+      return res.status(404).json({ error: 'Task not found.' });
+    }
+
+    const task_id = tasks[0].id;
+
+    const [subtasks] = await db.execute(`
+      SELECT subtask_name 
+      FROM main_sub_task 
+      WHERE task_id = ? AND project_id = ?
+    `, [task_id, project_id]);
+
+    if (subtasks.length === 0) {
+      return res.status(404).json({ error: 'No subtasks found.' });
+    }
+
+    return res.json(subtasks);
+  } catch (error) {
+    console.error('❌ Error fetching subtasks:', error.message);
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+
 app.post('/api/subtasks', checkDbConnection, async (req, res) => {
   const {
     project_name,
