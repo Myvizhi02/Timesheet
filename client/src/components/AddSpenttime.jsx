@@ -25,12 +25,16 @@ const AddSpenttime = ({ open, onClose }) => {
   const [selectedTask, setSelectedTask] = useState('');
   const [selectedTaskId, setSelectedTaskId] = useState('');
   const [selectedSubTask, setSelectedSubTask] = useState('');
+  const [selectedSubTaskId, setSelectedSubTaskId] = useState('');
   const [startDateTime, setStartDateTime] = useState(null);
   const [endDateTime, setEndDateTime] = useState(null);
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [subTaskError, setSubTaskError] = useState(false);
   const [showExtraField, setShowExtraField] = useState(false);
+  const [comments, setComments] = useState('');
+const crmLogId = localStorage.getItem('crm_log_id'); // assuming it's stored in localStorage
+
 
   // Fetch agent name on load
   useEffect(() => {
@@ -159,33 +163,84 @@ const handleTaskChange = async (e) => {
   }, [open]);
 
   const handleSaveTime = async () => {
-    if (!selectedSubTask || !startDateTime || !endDateTime) {
+    console.log('Dropdown selected name:', selectedSubTask);
+    console.log('Available subTasks:', subTasks);
+  
+    // Check for required fields
+    if (!selectedSubTask || !startDateTime || !endDateTime || !comments) {
       alert('Please fill in all fields.');
       return;
     }
-
+  
+    // selectedSubTask is already the subtask id now
+    const selectedSubTaskId = selectedSubTask;
+    console.log('Converted sub_task_id:', selectedSubTaskId);
+  
+    if (!selectedSubTaskId) {
+      alert('Invalid sub-task selected.');
+      return;
+    }
+  
+    if (!selectedProjectId || !selectedTaskId || !crmLogId) {
+      alert('Invalid project, task, or user.');
+      return;
+    }
+  
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  
+    const start = new Date(startDateTime);
+    const end = new Date(endDateTime);
+  
+    // Validate start and end times
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      alert('Invalid date or time format.');
+      return;
+    }
+  
+    const hours = ((end - start) / (1000 * 60 * 60)).toFixed(2); // in hours
+  
+    // Avoid negative or zero hours
+    if (hours <= 0) {
+      alert('End time should be after start time.');
+      return;
+    }
+  
+    const payload = {
+      project_id: selectedProjectId,
+      task_id: selectedTaskId,
+      sub_task_id: selectedSubTaskId,
+      user_id: crmLogId,
+      start_date: formattedDate,
+      end_date: formattedDate,
+      start_time: start.toTimeString().split(' ')[0],
+      end_time: end.toTimeString().split(' ')[0],
+      hours,
+      created_by: crmLogId,
+      modified_by: crmLogId,
+      created_date: formattedDate,
+      is_active: 1,
+      comments
+    };
+  
     try {
-      console.log('Submitting:', {
-        project_id: selectedProjectId,
-        task_id: selectedTaskId,
-        subtask_id: selectedSubTask
-      });
-      
-      await axios.post('http://localhost:3030/api/spenttime', {
-        agent_name: agentName,
-        project_id: selectedProjectId,
-        task_id: selectedTaskId,
-        subtask_id: selectedSubTask,
-        start_time: startDateTime,
-        end_time: endDateTime
-      });
+      const response = await axios.post('http://localhost:3030/api/spenttime', payload);
+      console.log('Response:', response);  // Log the response
       alert('Time saved successfully!');
-      onClose();
+      onClose();  // Close the dialog
     } catch (error) {
       console.error('Error saving time:', error);
-      alert('Failed to save time.');
+      
+      // Improved error handling: Check if the error has a response from the server
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        alert(`Error: ${error.response.data.message || 'Failed to save time.'}`);
+      } else {
+        alert('Failed to save time.');
+      }
     }
   };
+  
   const handleAddSubTask = () => {
     if (!selectedSubTask) {
       setSubTaskError(true);
@@ -320,9 +375,10 @@ const handleTaskChange = async (e) => {
     <option value="" disabled></option>
     {subTasks.length > 0 ? (
       subTasks.map((subtask) => (
-        <option key={subtask.task_id} value={subtask.task_id}>
-          {subtask.subtask_name}
-        </option>
+        <option key={subtask.id} value={subtask.id}>
+  {subtask.subtask_name}
+</option>
+
       ))
     ) : (
       <option value="" disabled>No subtasks available</option> // Message when no subtasks found
@@ -427,17 +483,20 @@ const handleTaskChange = async (e) => {
               />
             </Grid>
             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-                <TextField
-                  label="Enter Comments"
-                  multiline
-                  variant="outlined"
-                  sx={{
-                    width: '33rem',
-                    '& .MuiInputBase-root': {
-                      minHeight: '6.25rem',
-                    },
-                  }}
-                />
+            <TextField
+  label="Enter Comments"
+  multiline
+  variant="outlined"
+  value={comments}
+  onChange={(e) => setComments(e.target.value)}
+  sx={{
+    width: '33rem',
+    '& .MuiInputBase-root': {
+      minHeight: '6.25rem',
+    },
+  }}
+/>
+
               </Grid>
 
             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
