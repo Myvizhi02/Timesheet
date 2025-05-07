@@ -19,14 +19,6 @@ import dateIcon from '../assets/date.png';
 
 const AddSpenttime = ({ open, onClose }) => {
   const [subTasks, setSubTasks] = useState([]);
-  const [project, setProject] = useState('');
-  const [projectsList, setProjectsList] = useState([]);
-  const [tasksList, setTasksList] = useState([]);
-const [selectedTask, setSelectedTask] = useState('');
-const [subtaskOptions, setSubtaskOptions] = useState([]);
-const [selectedSubtask, setSelectedSubtask] = useState('');
-
-
   const [startDateTime, setStartDateTime] = useState(null);
   const [endDateTime, setEndDateTime] = useState(null);
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
@@ -47,25 +39,6 @@ const [selectedSubtask, setSelectedSubtask] = useState('');
 
     fetchAgentName();
   }, []);
-   
-  
-    useEffect(() => {
-      fetch('http://localhost:3030/api/projects')
-        .then(res => res.json())
-        .then(data => {
-          setProjectsList(data);
-        })
-        .catch(err => {
-          console.error('Error fetching project list:', err);
-        });
-    }, []);
-    useEffect(() => {
-      fetch('http://localhost:3030/api/tasks')
-        .then(res => res.json())
-        .then(data => setTasksList(data))
-        .catch(err => console.error('Error fetching task list:', err));
-    }, []);
-    
 
   useEffect(() => {
     if (open) {
@@ -76,34 +49,52 @@ const [selectedSubtask, setSelectedSubtask] = useState('');
     }
   }, [open]);
   
-  const handleTaskChange = async (e) => {
-    const taskName = e.target.value;
-    setSelectedTask(taskName);
-    
-    // Find task_id from task name
-    const selected = tasksList.find(t => t.task_name === taskName);
-    const taskId = selected?.task_id;
-  
-    if (taskId) {
-      try {
-        const response = await fetch(`http://localhost:3030/api/subtasks?taskId=${taskId}`);
-        const data = await response.json();
-        setSubtaskOptions(data);
-      } catch (err) {
-        console.error('Error fetching subtasks:', err);
-      }
-    }
-  };
-  
+
   const handleAddSubTask = () => {
-    if (subTasks.length === 0) {
-      setSubTasks(['']);
-    }
+    setSubTasks([...subTasks, '']);
   };
-  
 
   return (
     <>
+      {/* Header Section
+      <Box
+        sx={{
+          backgroundColor: 'white',
+          width: '100%',
+          height: '70px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '0 20px',
+          boxSizing: 'border-box',
+          position: 'sticky', // Keep the header fixed on top
+          top: 0,
+          zIndex: 10, // Ensures the header stays on top of other content
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton>
+            <NavIcon sx={{ width: 26 }} />
+          </IconButton>
+          <IconButton>
+            <HomeIcon sx={{ width: 24 }} />
+          </IconButton>
+          <IconButton>
+            <ArrowIcon sx={{ width: 26 }} />
+          </IconButton>
+          <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Spent Time</Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>{agentName}</Typography>
+          <img
+            src={DimgIcon}
+            alt="User Icon"
+            style={{ width: '36px', height: '36px', borderRadius: '50%' }}
+          />
+        </Box>
+      </Box> */}
+
       {/* Modal (Popup) */}
       <Dialog
         open={open} // controlled by parent
@@ -152,56 +143,23 @@ const [selectedSubtask, setSelectedSubtask] = useState('');
           }}
         >
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Grid container spacing={2} justifyContent="center">
+            <Grid container spacing={4} justifyContent="center">
               <Grid item>
                 <TextField
-                              select
-                              label="Select Project"
-                              fullWidth
-                              value={project}
-                              onChange={(e) => setProject(e.target.value)}
-                              SelectProps={{ native: true }}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  width: '247px',
-                                  height: '40px',
-                                },
-                              }}
-                            >
-                              <option value="" disabled></option>
-                              {projectsList.map((proj) => (
-                                <option key={proj.project_unique_id} value={proj.project_name}>
-                                  {proj.project_name}
-                                </option>
-                              ))}
-                            </TextField>
+                  label="Select Project"
+                  variant="outlined"
+                  size="small"
+                  sx={{ width: '15rem', height: '2.5rem' }}
+                />
               </Grid>
 
               <Grid item>
-              <TextField
-  select
-  label="Select Task"
-  fullWidth
-  value={selectedTask}
-  onChange={handleTaskChange}
-  SelectProps={{ native: true }}
-  sx={{
-    width: '16rem',
-    height: '2.5rem',
-    '& .MuiOutlinedInput-root': {
-      height: '40px',
-    },
-  }}
->
-  <option value="" disabled></option>
-  {tasksList.map((task) => (
-    <option key={task.task_id} value={task.task_name}>
-      {task.task_name}
-    </option>
-  ))}
-</TextField>
-
-
+                <TextField
+                  label="Select Task"
+                  variant="outlined"
+                  size="small"
+                  sx={{ width: '16rem', height: '2.5rem' }}
+                />
               </Grid>
 
               <Grid
@@ -213,29 +171,16 @@ const [selectedSubtask, setSelectedSubtask] = useState('');
                 sx={{ flexWrap: 'nowrap' }}
               >
                 <Grid item>
-                <TextField
-  select
-  label="Select SubTask"
-  fullWidth
-  value={selectedSubtask}
-  onChange={(e) => setSelectedSubtask(e.target.value)}
-  SelectProps={{ native: true }}
-  sx={{
-    width: '26.5rem',
-    height: '2.5rem',
-    '& .MuiOutlinedInput-root': {
-      height: '40px',
-    },
-  }}
->
-  <option value="" disabled></option>
-  {subtaskOptions.map((sub) => (
-    <option key={sub.subtask_id} value={sub.subtask_name}>
-      {sub.subtask_name}
-    </option>
-  ))}
-</TextField>
-
+                  <TextField
+                    label="Select SubTask"
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      width: '27.5rem',
+                      height: '2.5rem',
+                      backgroundColor: subTasks.length > 0 ? '#f8d7da' : 'transparent',
+                    }}
+                  />
                 </Grid>
                 <Grid item>
                   <Button
@@ -261,77 +206,106 @@ const [selectedSubtask, setSelectedSubtask] = useState('');
                     label={`Enter Sub Task ${index + 1}`}
                     variant="outlined"
                     size="small"
-                    sx={{ width: '32rem', height: '2.5rem' }}
+                    sx={{ width: '33rem', height: '2.5rem' }}
                   />
                 </Grid>
               ))}
 
-              <Grid item xs={12} sm={6}>
-              <TimePicker
-  label="Start Time"
-  value={startDateTime}
-  onChange={(newValue) => setStartDateTime(newValue)}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      fullWidth
-      sx={{
-        width: '247px', // Set the width to 247px
-        height: '40px', // Set the height to 40px
-      }}
-      InputProps={{
-        ...params.InputProps,
-        endAdornment: (
-          <InputAdornment position="end">
-            <img
-              src={dateIcon}
-              alt="Date Icon"
-              style={{ width: '1.25rem', cursor: 'pointer' }}
-              onClick={() => {
-                params.inputProps?.onClick?.();
-              }}
-            />
-          </InputAdornment>
-        ),
-      }}
+<Grid container spacing={4}>
+  <Grid item xs={12} sm={6}>
+    <TimePicker
+      label="Start Time"
+      value={startDateTime}
+      onChange={(newValue) => setStartDateTime(newValue)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          size="small" // 🔹 Key to making it compact
+          sx={{
+            width: '27.5rem',
+            '& .MuiInputBase-root': {
+              height: '2.2rem', // 🔹 controls the visible input box
+              fontSize: '0.75rem',
+            },
+            '& input': {
+              padding: '4px 8px', // 🔹 reduce top/bottom padding
+              fontSize: '0.75rem',
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '0.7rem',
+              top: '-5px',
+            },
+            '& .MuiSvgIcon-root': {
+              fontSize: '1rem',
+            },
+          }}
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <InputAdornment position="end">
+                <img
+                  src={dateIcon}
+                  alt="Date Icon"
+                  style={{ width: '1rem', cursor: 'pointer' }}
+                  onClick={() => params.inputProps?.onClick?.()}
+                />
+              </InputAdornment>
+            
+      
+            ),
+          }}
+        />
+      )}
     />
-  )}
-/>
+  </Grid>
 
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-              <TimePicker
-  label="Start Time"
-  value={startDateTime}
-  onChange={(newValue) => setStartDateTime(newValue)}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      fullWidth
-      sx={{
-        width: '257px',
-        height: '40px',}}
-      InputProps={{
-        ...params.InputProps,
-        endAdornment: (
-          <InputAdornment position="end">
-            <img
-              src={dateIcon}
-              alt="Date Icon"
-              style={{ width: '1.25rem', cursor: 'pointer' }}
-              onClick={() => {
-                params.inputProps?.onClick?.();
-              }}
-            />
-          </InputAdornment>
-        ),
-      }}
+  <Grid item xs={12} sm={6}>
+    <TimePicker
+      label="End Time"
+      value={endDateTime}
+      onChange={(newValue) => setEndDateTime(newValue)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          size="small" // 🔹 Key to making it compact
+          sx={{
+            width: '27.5rem',
+            '& .MuiInputBase-root': {
+              height: '2.2rem', // 🔹 controls the visible input box
+              fontSize: '0.75rem',
+            },
+            '& input': {
+              padding: '4px 8px', // 🔹 reduce top/bottom padding
+              fontSize: '0.75rem',
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '0.7rem',
+              top: '-5px',
+            },
+            '& .MuiSvgIcon-root': {
+              fontSize: '1rem',
+            },
+          }}
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <InputAdornment position="end">
+                <img
+                  src={dateIcon}
+                  alt="Date Icon"
+                  style={{ width: '1rem', cursor: 'pointer' }}
+                  onClick={() => params.inputProps?.onClick?.()}
+                />
+              </InputAdornment>
+            ),
+          }}
+        />
+      )}
+      
     />
-  )}
-/>
+  </Grid>
+</Grid>
 
-              </Grid>
 
               <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
                 <TextField
