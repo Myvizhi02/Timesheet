@@ -589,6 +589,60 @@ app.get('/api/main-task/:id/:project_id', checkDbConnection, async (req, res) =>
     res.status(500).json({ error: 'Server error.' });
   }
 });
+// ----------------------------------------------
+// SPENT TIME - Save Time Endpoint
+// ----------------------------------------------
+app.post('/api/spenttime', checkDbConnection, async (req, res) => {
+  console.log('Received data:', req.body);
+  const {
+    project_id,
+    task_id,
+    sub_task_id,
+    user_id,
+    start_date,
+    end_date,
+    start_time,
+    end_time,
+    hours,
+    created_by,
+    modified_by,
+    created_date,
+    is_active,
+    comments
+  } = req.body;
+
+  try {
+    // Check if the sub_task_id exists in the main_sub_task table
+    const [subTaskExists] = await db.execute(`
+      SELECT COUNT(*) AS count FROM main_sub_task WHERE id = ?
+    `, [sub_task_id]);  // Corrected: Use sub_task_id instead of id
+
+    if (subTaskExists[0].count === 0) {
+      return res.status(400).json({ error: 'Sub-task ID does not exist.' });
+    }
+
+    // Insert the spent time record into the database
+    await db.execute(`
+      INSERT INTO main_spent_time (
+        project_id, task_id, sub_task_id, user_id,
+        start_date, end_date, start_time, end_time,
+        hours, created_by, modified_by, created_date,
+        is_active, comments
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      project_id, task_id, sub_task_id, user_id,
+      start_date, end_date, start_time, end_time,
+      hours, created_by, modified_by, created_date,
+      is_active, comments
+    ]);
+
+    res.status(201).json({ message: 'Spent time saved successfully.' });
+  } catch (error) {
+    console.error('❌ Error inserting spent time:', error.message);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 
 // Start the server
 app.listen(PORT, () => {
