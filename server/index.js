@@ -643,6 +643,32 @@ app.post('/api/spenttime', checkDbConnection, async (req, res) => {
   }
 });
 
+// Route to fetch task, subtask, project, and spent time details with admin names
+app.get('/api/spent-time-details', async (req, res) => {
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        t.task_name, 
+        st.subtask_name, 
+        p.project_name, 
+        mst.start_date,
+        mst.hours,
+        ca.name 
+      FROM crm_admin ca
+      LEFT JOIN main_spent_time mst ON ca.crm_log_id = mst.user_id
+      LEFT JOIN main_task t ON t.id = mst.task_id
+      LEFT JOIN main_sub_task st ON st.id = mst.sub_task_id
+      LEFT JOIN main_project p ON p.id = mst.project_id
+      ORDER BY mst.start_date ASC;
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching spent time details:", err);  // << See this in your terminal
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+
 
 // Start the server
 app.listen(PORT, () => {
