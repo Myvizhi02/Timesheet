@@ -273,22 +273,8 @@ app.get('/api/tasks', checkDbConnection, async (req, res) => {
     } else {
       // Return all tasks with project and subtask info
       const [tasks] = await db.execute(`
-        SELECT 
-          st.task_id,
-          st.id as sub_task_id,
-          t.project_id,
-          p.project_name, 
-          t.task_name, 
-          st.subtask_name, 
-          t.description AS task_description,
-          st.description AS subtask_description,
-          t.status AS task_status,
-          st.status AS subtask_status
-        FROM main_project p
-        JOIN main_task t ON t.project_id = p.id
-        LEFT JOIN main_sub_task st ON st.task_id = t.id
-        WHERE p.is_active = 1 AND t.is_active = 1
-        ORDER BY p.created_date ASC
+       SELECT st.task_id, st.id AS sub_task_id, t.project_id, p.project_name, t.task_name, st.subtask_name, t.description AS task_description, st.description AS subtask_description, t.status AS task_status, st.status AS subtask_status, p.start_date AS project_start_date, p.end_date AS project_end_date, mst.start_time, mst.end_time, p.allocated_executives AS people_worked, mst.comments FROM main_project p JOIN main_task t ON t.project_id = p.id LEFT JOIN main_sub_task st ON st.task_id = t.id LEFT JOIN main_spent_time mst ON mst.sub_task_id = st.id WHERE p.is_active = 1 AND t.is_active = 1 ORDER BY p.created_date ASC;
+
       `);
       return res.json(tasks);
     }
@@ -667,6 +653,42 @@ app.get('/api/spent-time-details', async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+
+// app.get('/api/spent-time-Id/:spentTimeId', async (req, res) => {
+//   const { spentTimeId } = req.params;  // Extract spentTimeId from URL parameter
+
+//   const query = `
+//     SELECT 
+//       a.name,
+//       a.crm_log_id AS empId,
+//       s.start_time,
+//       p.start_date,
+//       s.end_time,
+//       p.end_date,
+//       t.status,
+//       p.allocated_executives AS peopleWorked,
+//       s.comments
+//     FROM main_spent_time s
+//     JOIN crm_admin a ON s.user_id = a.crm_log_id
+//     JOIN main_project p ON s.project_id = p.id
+//     JOIN main_task t ON s.task_id = t.id
+//     WHERE s.id = ?
+//   `;
+
+//   try {
+//     const [rows] = await db.execute(query, [spentTimeId]);
+
+//     if (rows.length === 0) {
+//       return res.status(404).json({ message: 'Data not found' });
+//     }
+
+//     res.json(rows[0]);  // Send the first row of the result (because we are querying for a specific `spentTimeId`)
+//   } catch (error) {
+//     console.error('Error fetching spent time details:', error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// });
+
 
 
 

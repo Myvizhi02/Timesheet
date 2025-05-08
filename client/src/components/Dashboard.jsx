@@ -128,7 +128,7 @@ const Dashboard = () => {
     <>
       {/* Top Section */}
       <Box sx={{ margin: 4, backgroundColor: 'white', padding: 4, borderRadius: 2 }}>
-        <Typography variant="h5" sx={{ pl: 2 }}>
+        <Typography variant="h5" sx={{ pl: 2, pb: 4 }}>
           Welcome to {agentName}.
         </Typography>
 
@@ -179,9 +179,15 @@ const Dashboard = () => {
               <Button variant="contained" sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={foldereyeIcon} alt="Project" width="20" />} onClick={handleViewProjectPage}>
                 View Project
               </Button>
-              <Button variant="contained" sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={addIcon} alt="Add" width="20" />} onClick={handleOpenSpentModal}>
-                Add Spent Time
-              </Button>
+              <Button
+                        variant="contained"
+                        startIcon={<img src={addIcon} alt="Add" width="20" />}
+                        onClick={handleOpenSpentModal}
+                        sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none'  }}
+                      >
+                        Add Spent Time
+                      </Button>
+
             </Box>
           </Grid>
         </Grid>
@@ -232,10 +238,10 @@ const Dashboard = () => {
                     <TableCell>{detail.subtask_name}</TableCell>
                     <TableCell>{new Date(detail.start_date).toLocaleDateString()}</TableCell>
                     <TableCell>{detail.hours}</TableCell>
-                    <TableCell>
-                      <IconButton>
-                        <img src={visibility2Icon} alt="View" style={{ width: 24 }} />
-                      </IconButton>
+                    <TableCell align="center">
+                    <IconButton onClick={() => handleViewClick(detail.id)}>
+      <img src={visibility2Icon} alt="View" style={{ width: 24 }} />
+    </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -246,8 +252,8 @@ const Dashboard = () => {
 
       {/* Modals */}
       <View show={showModal} data={selectedTask} onClose={closeModal} />
-      {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
       {showProjectModal && <Project onClose={handleCloseProjectModal} />}
+      {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
     </>
   );
 };
