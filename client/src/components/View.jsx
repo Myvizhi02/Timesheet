@@ -9,10 +9,44 @@ import {
   Typography
 } from '@mui/material';
 import { Grid } from '@mui/system';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
 
 const View = ({ show, onClose, data }) => {
   if (!show) return null;
+  const [tasks, setTasks] = useState([]); // State to store task data
+  const [formData, setFormData] = useState({
+    task_status: data?.task_status === 'Open' || data?.task_status === true,
+    start_date: data?.start_date || '',
+    end_date: data?.end_date || '',
+    start_time: data?.start_time || '',
+    end_time: data?.end_time || '',
+    allocated_executives: data?.allocated_executives || '',
+    comments: data?.comments || '',
+  });
+  
+  
+    // Fetch tasks from backend API
+    useEffect(() => {
+      const fetchTasks = async () => {
+        try {
+          const response = await axios.get('http://localhost:3030/api/tasks'); // Make sure the URL matches your backend
+          console.log('Tasks==>'); // Log the response for debugging
+          console.log(response.data); // Log the response for debugging
+          if (Array.isArray(response.data)) {
+            setTasks(response.data); // Set tasks data if it's an array
+          } else {
+            console.error('Expected an array of tasks, but got:', response.data);
+          }
+        } catch (error) {
+          console.error('Error fetching tasks:', error);
+        }
+      };
+    
+      fetchTasks();
+    }, []);
+    
 
   return (
     <Grid container>
@@ -86,52 +120,56 @@ const View = ({ show, onClose, data }) => {
         </DialogTitle>
 
         {/* Dialog Content */}
-        <DialogContent sx={{ p: 3, mt:5 }}>
-          <Typography variant="body1" fontSize="1rem" fontWeight="bold" mb={2}>
-            Task Details
-          </Typography>
+        <DialogContent sx={{ p: 3, mt: 5 }}>
+  <Typography variant="body1" fontSize="1rem" fontWeight="bold" mb={2}>
+    Task Details
+  </Typography>
 
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography fontSize="0.9rem">
-              Start Time: <strong>{data?.startTime || '9:50 am'}</strong>
-            </Typography>
-            <Typography fontSize="0.9rem">
-              Start Date: <strong>{data?.startDate || '12/2/2025'}</strong>
-            </Typography>
-          </Box>
+  <Box display="flex" justifyContent="space-between" mb={2}>
+    <Typography fontSize="0.9rem">
+      Start Time: <strong>{formData.start_time || 'N/A'}</strong>
+    </Typography>
+    <Typography fontSize="0.9rem">
+      Start Date: <strong>{formData.start_date || 'N/A'}</strong>
+    </Typography>
+  </Box>
 
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography fontSize="0.9rem">
-              End Time: <strong>{data?.endTime || '13:00 pm'}</strong>
-            </Typography>
-            <Typography fontSize="0.9rem">
-              End Date: <strong>{data?.endDate || '12/2/2025'}</strong>
-            </Typography>
-          </Box>
+  <Box display="flex" justifyContent="space-between" mb={2}>
+    <Typography fontSize="0.9rem">
+      End Time: <strong>{formData.end_time || 'N/A'}</strong>
+    </Typography>
+    <Typography fontSize="0.9rem">
+      End Date: <strong>{formData.end_date || 'N/A'}</strong>
+    </Typography>
+  </Box>
 
-          <Typography fontSize="0.9rem" mb={2}>
-            Task Status: <strong>{data?.status || 'Open'}</strong>
-          </Typography>
+  <Typography fontSize="0.9rem" mb={2}>
+    Task Status: <strong>{formData.task_status ? 'Open' : 'Closed'}</strong>
+  </Typography>
 
-          <Typography fontSize="0.9rem" mb={2}>
-            People Worked: {data?.peopleWorked || 'Employee 1(K025689), Employee 3(K0123456)'}
-          </Typography>
+  <Typography fontSize="0.9rem" mb={2}>
+    People Worked: <strong>{formData.allocated_executives || 'N/A'}</strong>
+  </Typography>
 
-          <Box>
-            <Typography fontSize="0.9rem" mb={1}>
-              Comments:
-            </Typography>
-            <TextField
-              id="comments"
-              multiline
-              rows={5}
-              fullWidth
-              variant="outlined"
-              placeholder="Enter comments..."
-              sx={{ backgroundColor: '#ffffff' }}
-            />
-          </Box>
-        </DialogContent>
+  <Box>
+    <Typography fontSize="0.9rem" mb={1}>
+      Comments:
+    </Typography>
+    <TextField
+      id="comments"
+      multiline
+      rows={5}
+      fullWidth
+      variant="outlined"
+      value={formData.comments}
+      InputProps={{
+        readOnly: true,
+      }}
+      sx={{ backgroundColor: '#ffffff' }}
+    />
+  </Box>
+</DialogContent>
+
       </Dialog>
     </Grid>
   );
