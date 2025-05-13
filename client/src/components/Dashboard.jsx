@@ -32,41 +32,44 @@ import View from './View';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
   const [activeTab, setActiveTab] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [showSpentModal, setShowSpentModal] = useState(false);
-  const [showProjectModal, setShowProjectModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [project, setProject] = useState('');
-  const [projects, setProjects] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [taskName, setTaskName] = useState('');
   const [admins, setAdmins] = useState([]);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const agentName = localStorage.getItem('name') || 'Agent';
+  const [projects, setProjects] = useState([]);
   const [spentTimeDetails, setSpentTimeDetails] = useState([]);
 
-  const agentName = localStorage.getItem('name') || 'Agent';
-
-  // Fetch admins
   useEffect(() => {
     axios.get('http://localhost:3030/api/admins')
-      .then((res) => setAdmins(res.data))
-      .catch((err) => console.error('Error fetching admins:', err));
+      .then((response) => setAdmins(response.data))
+      .catch((error) => console.error('Error fetching admins:', error));
   }, []);
 
-  // Fetch projects
+  useEffect(() => {
+    axios.get('http://localhost:3030/api/tasks')
+      .then((response) => setEmployees(response.data))
+      .catch((error) => console.error('Error fetching task data:', error));
+  }, []);
+
   useEffect(() => {
     axios.get('http://localhost:3030/api/projects')
-      .then((res) => setProjects(res.data))
-      .catch((err) => console.error('Error fetching projects:', err));
+      .then((response) => setProjects(response.data))
+      .catch((error) => console.error('Error fetching projects:', error));
   }, []);
 
-  // Function to fetch spent time details
   const fetchSpentTimeDetails = () => {
     axios.get('http://localhost:3030/api/spent-time-details')
-      .then((res) => setSpentTimeDetails(res.data))
-      .catch((err) => {
-        console.error('Error fetching spent-time-details:', err);
-        alert(`Error: ${err.response?.data?.details || 'An unknown error occurred'}`);
+      .then((response) => setSpentTimeDetails(response.data))
+      .catch((error) => {
+        console.error('Error fetching spent-time-details:', error);
+        alert(`Error: ${error.response?.data?.details || 'An unknown error occurred'}`);
       });
   };
 
@@ -74,10 +77,21 @@ const Dashboard = () => {
     fetchSpentTimeDetails();
   }, []);
 
-  const handleViewClick = (taskId) => {
-    setSelectedTask(taskId);
+  const handleViewClick = (task) => {
+    setSelectedTask(task);
     setShowModal(true);
   };
+
+  const closeModal = () => setShowModal(false);
+  const handleOpenSpentModal = () => setShowSpentModal(true);
+  const handleCloseSpentModal = () => {
+    setShowSpentModal(false);
+    fetchSpentTimeDetails();
+  };
+  const handleOpenProjectModal = () => setShowProjectModal(true);
+  const handleCloseProjectModal = () => setShowProjectModal(false);
+  const handleViewProjectPage = () => navigate('/project');
+  const handleViewTaskPage = () => navigate('/task');
 
   const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
     <Box
@@ -131,18 +145,7 @@ const Dashboard = () => {
                 customInput={<CustomInput placeholder="Select Start Date" />}
               />
 
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  border: '1px solid #ccc',
-                  borderRadius: 2,
-                  backgroundColor: 'white',
-                  width: 191,
-                  height: 42,
-                  paddingLeft: 1,
-                }}
-              >
+              <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 2, backgroundColor: 'white', width: 191, height: 42, paddingLeft: 1 }}>
                 <img src={selectionIcon} alt="Select Project" style={{ width: 20, marginRight: 8 }} />
                 <Select
                   value={project}
@@ -168,34 +171,19 @@ const Dashboard = () => {
 
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: { xs: 'center', md: 'flex-end' }, ml: { xs: 0, md: '90px' } }}>
-              <Button
-                variant="contained"
-                color="success"
-                sx={{ minWidth: 150, height: 42, textTransform: 'none' }}
-                startIcon={<img src={shareIcon} alt="Share" width="20" />}
-              >
+              <Button variant="contained" color="success" sx={{ minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={shareIcon} alt="Share" width="20" />}>
                 Export to Excel
               </Button>
-              <Button
-                variant="contained"
-                sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
-                startIcon={<img src={visibilityIcon} alt="View" width="20" />}
-                onClick={() => navigate('/task')}
-              >
+              <Button variant="contained" sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={visibilityIcon} alt="View" width="20" />} onClick={handleViewTaskPage}>
                 View Task
               </Button>
-              <Button
-                variant="contained"
-                sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
-                startIcon={<img src={foldereyeIcon} alt="Project" width="20" />}
-                onClick={() => navigate('/project')}
-              >
+              <Button variant="contained" sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={foldereyeIcon} alt="Project" width="20" />} onClick={handleViewProjectPage}>
                 View Project
               </Button>
               <Button
                 variant="contained"
                 startIcon={<img src={addIcon} alt="Add" width="20" />}
-                onClick={() => setShowSpentModal(true)}
+                onClick={handleOpenSpentModal}
                 sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
               >
                 Add Spent Time
@@ -205,24 +193,20 @@ const Dashboard = () => {
         </Grid>
       </Box>
 
-      {/* Tab Buttons */}
+      {showSpentModal && <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} />}
+
       <Box sx={{ mt: 8, mx: { xs: 2, md: 6 } }}>
         <Box sx={{ backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, display: 'flex', width: { xs: '100%', md: '99%' }, p: 1 }}>
           <Button onClick={() => setActiveTab('all')} sx={{ flex: 1, bgcolor: activeTab === 'all' ? '#ffffff' : '#CDCDCD80', borderRadius: 2, p: 1 }}>
             All Executive
           </Button>
           {admins.map((admin, idx) => (
-            <Button
-              key={admin.admin_id || idx}
-              onClick={() => setActiveTab(admin.name)}
-              sx={{ flex: 1, bgcolor: activeTab === admin.name ? '#ffffff' : '#CDCDCD80', borderRadius: 2, p: 1, textTransform: 'none' }}
-            >
+            <Button key={admin.admin_id || idx} onClick={() => setActiveTab(admin.name)} sx={{ flex: 1, bgcolor: activeTab === admin.name ? '#ffffff' : '#CDCDCD80', borderRadius: 2, p: 1, textTransform: 'none' }}>
               {admin.name}
             </Button>
           ))}
         </Box>
 
-        {/* Spent Time Table */}
         <TableContainer component={Paper} sx={{ mb: 8, boxShadow: 3, borderRadius: 2 }}>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
@@ -266,10 +250,8 @@ const Dashboard = () => {
         </TableContainer>
       </Box>
 
-      {/* Modals */}
-      <View show={showModal} data={selectedTask} onClose={() => setShowModal(false)} />
-      {showProjectModal && <Project onClose={() => setShowProjectModal(false)} />}
-      {showSpentModal && <AddSpenttime onClose={() => setShowSpentModal(false)} />}
+      <View show={showModal} data={selectedTask} onClose={closeModal} />
+      {showProjectModal && <Project onClose={handleCloseProjectModal} />}
     </>
   );
 };
