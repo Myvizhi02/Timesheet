@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Box, Paper, Typography, TextField, Button, CircularProgress } from "@mui/material";
+import { Box, Button, CircularProgress, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import timeIcon from "../assets/time.png";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import backgroundImg from "../assets/bgimg.png";
+import timeIcon from "../assets/time.png";
 
 // Custom styled TextField
 const StyledTextField = styled(TextField)({
@@ -68,14 +68,17 @@ const Login = () => {
         password: password.trim(),
       });
 
-      const { crm_log_id, name, redirectTo } = res.data;
+     // In your handleLogin success block
+const { crm_log_id, name, redirectTo, admin_flag } = res.data;
 
-      if (crm_log_id && name) {
-        localStorage.setItem('crm_log_id', crm_log_id);
-        localStorage.setItem('name', name);
-        localStorage.setItem('agentId', agentId.trim());
-        navigate(redirectTo || '/dashboard');
-      } else {
+if (crm_log_id && name) {
+  localStorage.setItem('crm_log_id', crm_log_id);
+  localStorage.setItem('name', name);
+  localStorage.setItem('agentId', agentId.trim());
+  localStorage.setItem('admin_flag', admin_flag); // Store admin_flag
+  navigate(redirectTo || '/dashboard');
+}
+ else {
         alert('Invalid login details.');
       }
     } catch (err) {

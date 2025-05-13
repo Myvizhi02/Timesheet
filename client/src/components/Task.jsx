@@ -1,4 +1,5 @@
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Box,
   Button,
@@ -12,42 +13,38 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import axios from 'axios'; // Ensure you have axios installed
-import React, { useEffect, useState } from 'react';
-import addIcon from '../assets/add.png'; // Check your image path!
+import VisibilityIcon from '@mui/icons-material/Visibility';
+
+import addIcon from '../assets/add.png';
 import ActionView from './ActionView';
-import AddTask from './AddTask'; // Make sure the path is correct
+import AddTask from './AddTask';
 
 const Task = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [openActionView, setOpenActionView] = useState(false);
-  const [tasks, setTasks] = useState([]); // State to store task data
+  const [tasks, setTasks] = useState([]);
 
-  // Fetch tasks from backend API
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get('http://localhost:3030/api/tasks'); // Make sure the URL matches your backend
-        console.log('Tasks==>'); // Log the response for debugging
-        console.log(response.data); // Log the response for debugging
+        const response = await axios.get('http://localhost:3030/api/tasks');
         if (Array.isArray(response.data)) {
-          setTasks(response.data); // Set tasks data if it's an array
+          setTasks(response.data);
         } else {
-          console.error('Expected an array of tasks, but got:', response.data);
+          console.error('Expected an array of tasks');
         }
       } catch (error) {
         console.error('Error fetching tasks:', error);
       }
     };
-  
+
     fetchTasks();
   }, []);
-  
 
   const handleCreateTask = (data) => {
-    console.log('New Task:', data);
     setShowPopup(false);
+    // Optional: Refresh the task list after creation if needed
   };
 
   const handleOpenActionView = (task) => {
@@ -67,11 +64,7 @@ const Task = () => {
           <Button
             variant="contained"
             startIcon={
-              <img
-                src={addIcon}
-                alt="Add Icon"
-                style={{ width: 20, height: 20 }}
-              />
+              <img src={addIcon} alt="Add Icon" style={{ width: 20, height: 20 }} />
             }
             sx={{
               backgroundColor: '#3D6BFA',
@@ -81,9 +74,7 @@ const Task = () => {
               height: '44px',
               fontSize: '14px',
               textTransform: 'none',
-              '&:hover': {
-                backgroundColor: '#3159d6'
-              }
+              '&:hover': { backgroundColor: '#3159d6' }
             }}
             onClick={() => setShowPopup(true)}
           >
@@ -105,21 +96,15 @@ const Task = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {(Array.isArray(tasks) ? tasks : []).map((task, index) => (
+              {tasks.map((task, index) => (
                 <TableRow key={index}>
                   <TableCell align="center">{index + 1}</TableCell>
                   <TableCell align="center">{task.project_name}</TableCell>
                   <TableCell align="center">{task.task_name}</TableCell>
                   <TableCell align="center">{task.subtask_name}</TableCell>
-                  {/* Display the main task description here */}
                   <TableCell align="center">{task.task_description}</TableCell>
                   <TableCell align="center">
-                    <Typography
-                      sx={{
-                        color: task.subtask_status === 'Open' ? 'green' : 'red',
-                        fontWeight: 500
-                      }}
-                    >
+                    <Typography sx={{ color: task.subtask_status === 'Open' ? 'green' : 'red', fontWeight: 500 }}>
                       {task.subtask_status}
                     </Typography>
                   </TableCell>
@@ -135,17 +120,12 @@ const Task = () => {
         </TableContainer>
       </Box>
 
-      {/* ActionView popup */}
       {openActionView && (
         <ActionView task={selectedTask} onClose={handleCloseActionView} />
       )}
 
-      {/* AddTask popup */}
       {showPopup && (
-        <AddTask
-          onClose={() => setShowPopup(false)}
-          onSubmit={handleCreateTask}
-        />
+        <AddTask onClose={() => setShowPopup(false)} onSubmit={handleCreateTask} />
       )}
     </>
   );

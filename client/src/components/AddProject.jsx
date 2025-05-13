@@ -24,8 +24,6 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import dateIcon from '../assets/date.png';
 
-
-
 const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
   const [adminOptions, setAdminOptions] = useState([]);
@@ -42,7 +40,6 @@ const AddProject = ({ onClose, onSubmit }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [actualEndDate, setActualEndDate] = useState(null);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -63,13 +60,9 @@ const AddProject = ({ onClose, onSubmit }) => {
     const fetchProjectId = async () => {
       try {
         const response = await fetch('http://localhost:3030/api/projects/new-id');
-        if (!response.ok) {
-          throw new Error('Failed to fetch project ID');
-        }
+        if (!response.ok) throw new Error('Failed to fetch project ID');
         const data = await response.json();
-        console.log(data); // Check the structure of the returned data
-        // Assuming the returned data has the project_unique_id
-        setFormData({ ...formData, projectId: data.project_unique_id });
+        setFormData(prev => ({ ...prev, projectId: data.project_unique_id }));
       } catch (error) {
         console.error('Error fetching project ID:', error);
       }
@@ -78,7 +71,6 @@ const AddProject = ({ onClose, onSubmit }) => {
     fetchAdmins();
     fetchProjectId();
   }, []);
-
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -92,54 +84,59 @@ const AddProject = ({ onClose, onSubmit }) => {
     });
   };
 
-  const handleSubmitProject = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form is being submitted');
+    setIsSubmitting(true);
 
-    // Prevent multiple submissions
-    if (isSubmitting) return;
+    // Create a name → crm_log_id map
+    const nameToIdMap = {};
+    adminOptions.forEach(admin => {
+      nameToIdMap[admin.name] = admin.crm_log_id;
+    });
 
-    setIsSubmitting(true);  // Set to true to prevent further submissions
+    // Convert names to crm_log_ids if needed
+    const crmIds = formData.addPeople.map(person =>
+      nameToIdMap[person] ? nameToIdMap[person] : person // support both names and IDs
+    );
 
-    const createdBy = localStorage.getItem('crm_log_id') || 'default_admin';
-
-    const data = {
+    const projectData = {
+      project_unique_id: formData.projectId,
       project_name: formData.projectName,
       lob: formData.lob,
-      start_date: startDate ? startDate.toISOString().split('T')[0] : null,
-      end_date: endDate ? endDate.toISOString().split('T')[0] : null,
-      expected_date: actualEndDate ? actualEndDate.toISOString().split('T')[0] : null,
+      start_date: startDate,
+      end_date: endDate,
+      expected_date: actualEndDate,
       budget: formData.budget,
-      created_by: createdBy,
-      modified_by: createdBy,
+      created_by: crmIds[0], // assuming first selected person is the creator
+      modified_by: crmIds[0],
+      created_date: new Date().toISOString(),
+      modified_date: new Date().toISOString(),
+      is_active: 1,
       department: formData.domain,
-      allocated_executives: formData.addPeople,
+      allocated_executives: crmIds, // final mapped IDs
     };
 
     try {
       const response = await fetch('http://localhost:3030/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(projectData),
       });
 
-      if (!response.ok) throw new Error('Failed to add project');
+      const data = await response.json();
 
-      const result = await response.json();
-      setSnackbar({ open: true, message: '✅ Project added successfully!', severity: 'success' });
-      onSubmit && onSubmit(data);
-      onClose();
-    } catch (err) {
-      setSnackbar({ open: true, message: '❌ Failed to add project. Please try again.', severity: 'error' });
+      if (response.ok) {
+        setSnackbar({ open: true, message: 'Project added successfully!', severity: 'success' });
+        onSubmit(); // Refresh or close dialog
+      } else {
+        setSnackbar({ open: true, message: data.message || 'Failed to add project', severity: 'error' });
+      }
+    } catch (error) {
+      setSnackbar({ open: true, message: 'An error occurred while adding the project', severity: 'error' });
     } finally {
-      setIsSubmitting(false);  // Reset to false after the submission process is complete
+      setIsSubmitting(false);
     }
   };
-
-
-
-  const isFormValid =
-    formData.projectName && formData.lob && formData.domain && startDate && endDate;
 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -151,13 +148,11 @@ const AddProject = ({ onClose, onSubmit }) => {
     },
   };
 
-  function getStyles(name, selected, theme) {
-    return {
-      fontWeight: selected.includes(name)
-        ? theme.typography.fontWeightMedium
-        : theme.typography.fontWeightRegular,
-    };
-  }
+  const getStyles = (name, selected, theme) => ({
+    fontWeight: selected.includes(name)
+      ? theme.typography.fontWeightMedium
+      : theme.typography.fontWeightRegular,
+  });
 
   const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
     <Box
@@ -196,7 +191,7 @@ const AddProject = ({ onClose, onSubmit }) => {
   return (
     <>
       <Dialog
-        open={open}
+        open
         onClose={onClose}
         fullWidth={false}
         PaperProps={{
@@ -204,10 +199,10 @@ const AddProject = ({ onClose, onSubmit }) => {
             width: '37.625rem',
             height: '37.5rem',
             position: 'absolute',
-            top: 'calc(50% + 35px)', // Move it slightly down to avoid header overlap
+            top: 'calc(50% + 35px)',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            zIndex: 1300, // LOWER than the header
+            zIndex: 1300,
           },
         }}
       >
@@ -231,7 +226,7 @@ const AddProject = ({ onClose, onSubmit }) => {
         </DialogTitle>
 
         <DialogContent sx={{ padding: '1.5em', mt: 5 }}>
-          <form onSubmit={handleSubmitProject}>
+          <form onSubmit={handleSubmit}>
             <Grid container spacing={3.5}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -243,7 +238,6 @@ const AddProject = ({ onClose, onSubmit }) => {
                   disabled
                   sx={inputStyle}
                 />
-
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -339,8 +333,8 @@ const AddProject = ({ onClose, onSubmit }) => {
                       adminOptions.map((admin) => (
                         <MenuItem
                           key={admin.crm_log_id}
-                          value={admin.crm_log_id}
-                          style={getStyles(admin.crm_log_id, formData.addPeople, theme)}
+                          value={admin.name}
+                          style={getStyles(admin.name, formData.addPeople, theme)}
                         >
                           {admin.name}
                         </MenuItem>
@@ -367,10 +361,9 @@ const AddProject = ({ onClose, onSubmit }) => {
                     backgroundColor: '#213E9A',
                   },
                 }}
-                disabled={isSubmitting}  // Disable the button while submitting
-
+                //disabled={isSubmitting}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+                {isSubmitting ? 'Submit' : 'Submit'}
               </Button>
             </Box>
           </form>

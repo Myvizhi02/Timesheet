@@ -10,6 +10,9 @@ import {
 } from '@mui/material';
 
 const SubTaskTab = () => {
+  const [project, setProject] = useState('Winfast');
+  const [taskName, setTaskName] = useState('Merge JD and Core');
+  const [description, setDescription] = useState('Uniting Core and JD');
   const [status, setStatus] = useState(true);
 
   const handleStatusChange = () => {
@@ -17,12 +20,17 @@ const SubTaskTab = () => {
   };
 
   const handleSubmit = () => {
-    console.log('Submit Sub-Task', {
-      project: 'Winfast',
-      taskName: 'Merge JD and Core',
-      description: 'Uniting Core and JD',
+    const subtaskData = {
+      project,
+      taskName,
+      description,
       status: status ? 'Open' : 'Closed',
-    });
+    };
+
+    // You can send this to the API here
+    // axios.post('/api/subtasks', subtaskData)
+
+    alert('Sub-Task submitted successfully');
   };
 
   return (
@@ -34,25 +42,27 @@ const SubTaskTab = () => {
         <Grid item xs={12} sm={6}>
           <TextField
             label="Project"
-            value="Winfast"
+            value={project}
+            onChange={(e) => setProject(e.target.value)}
             fullWidth
-            disabled
           />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
             label="Task Name"
-            value="Merge JD and Core"
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
             fullWidth
-            disabled
           />
         </Grid>
         <Grid item xs={12}>
           <TextField
             label="Description"
-            value="Uniting Core and JD"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             fullWidth
-            disabled
+            multiline
+            rows={3}
           />
         </Grid>
         <Grid item xs={12}>

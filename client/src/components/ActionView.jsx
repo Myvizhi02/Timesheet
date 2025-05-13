@@ -16,8 +16,6 @@ import axios from 'axios';
 import React, { useState } from 'react';
 
 const ActionView = ({ task = {}, onClose }) => {
-  console.log('checked')
-  console.log(task)
   const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
     project: task.project_name || '',
@@ -43,20 +41,19 @@ const ActionView = ({ task = {}, onClose }) => {
     setFormData(prev => ({ ...prev, subtask_status: !prev.subtask_status }));
   };
 
-  const handleUpdate = async (task) => {
+  const handleUpdate = async () => {
     if (!task?.task_id) return;
     const payload = {
       task_name: formData.task_name,
       task_description: formData.task_description,
       task_status: formData.task_status ? 'Open' : 'Closed',
     };
-    
+
     try {
-      const response = await axios.put(`http://localhost:3030/api/update-task/${task.task_id}`, payload);
+      await axios.put(`http://localhost:3030/api/update-task/${task.task_id}`, payload);
       setSnackbar({ open: true, message: 'Task updated successfully', severity: 'success' });
-      if (onClose) onClose(); // Close the modal after update
+      if (onClose) onClose();
     } catch (error) {
-      console.error('Update failed:', error);
       setSnackbar({ open: true, message: 'Task update failed', severity: 'error' });
     }
   };
@@ -66,26 +63,22 @@ const ActionView = ({ task = {}, onClose }) => {
       setSnackbar({ open: true, message: 'Task ID missing for subtask update', severity: 'error' });
       return;
     }
-  
+
     const payload = {
       subtask_name: formData.subtask_name,
       description: formData.subtask_description,
       status: formData.subtask_status ? 'Open' : 'Closed',
     };
-  
+
     try {
-      const response = await axios.put(
-        `http://localhost:3030/api/subtasks/${task.task_id}`,
-        payload
-      );
+      await axios.put(`http://localhost:3030/api/subtasks/${task.task_id}`, payload);
       setSnackbar({ open: true, message: 'Subtask updated successfully', severity: 'success' });
       if (onClose) onClose();
     } catch (error) {
-      console.error('Subtask update failed:', error);
       setSnackbar({ open: true, message: 'Subtask update failed', severity: 'error' });
     }
   };
-  
+
   const renderStatusToggle = (status, onClick) => (
     <Box
       onClick={onClick}
@@ -166,7 +159,6 @@ const ActionView = ({ task = {}, onClose }) => {
       </Tabs>
 
       <Box sx={{ p: 2, flex: 1, overflowY: 'auto', ml: 2.5 }}>
-        {/* Tab 0: Edit Task */}
         {tabIndex === 0 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
@@ -220,7 +212,7 @@ const ActionView = ({ task = {}, onClose }) => {
               <Box display="flex" justifyContent="center" mt={4}>
                 <Button
                   variant="contained"
-                  onClick={() => handleUpdate(task)}
+                  onClick={handleUpdate}
                   sx={{
                     px: 6,
                     py: 1.5,
@@ -238,7 +230,6 @@ const ActionView = ({ task = {}, onClose }) => {
           </Grid>
         )}
 
-        {/* Tab 1: Sub-Task */}
         {tabIndex === 1 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
@@ -310,7 +301,6 @@ const ActionView = ({ task = {}, onClose }) => {
           </Grid>
         )}
 
-        {/* Tab 2: Task Details */}
         {tabIndex === 2 && (
           <Grid container spacing={3}>
             {[
@@ -330,9 +320,7 @@ const ActionView = ({ task = {}, onClose }) => {
                   variant="standard"
                   value={
                     typeof formData[key] === 'boolean'
-                      ? formData[key]
-                        ? 'Open'
-                        : 'Closed'
+                      ? formData[key] ? 'Open' : 'Closed'
                       : formData[key]
                   }
                   InputProps={{ readOnly: true }}

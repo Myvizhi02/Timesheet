@@ -28,9 +28,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     end_date: '',
     expected_date: '',
     budget: '',
-    allocated_executives: Array.isArray(project.allocated_executives)
-    ? project.allocated_executives
-    :  [],
+    allocated_executives: [],
   });
 
   const [adminOptions, setAdminOptions] = useState([]);
@@ -48,7 +46,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
         end_date: project.end_date || '',
         expected_date: project.expected_date || '',
         budget: project.budget || '',
-        allocated_executives: [], // Will be filled after fetching admins
+        allocated_executives: [],
       }));
     }
   }, [project]);
@@ -59,28 +57,24 @@ const EditProject = ({ project, onClose, onUpdate }) => {
         const res = await fetch('http://localhost:3030/api/admins');
         const data = await res.json();
         setAdminOptions(data);
-    
+
         if (project?.allocated_executives?.length > 0) {
+          const ids = project.allocated_executives.map(name => {
+            const admin = data.find(a => a.name === name);
+            return admin?.crm_log_id;
+          }).filter(Boolean);
           setFormData((prev) => ({
             ...prev,
-            allocated_executives: Array.isArray(project.allocated_executives)
-              ? project.allocated_executives
-              : [], // Ensure it's always an array
+            allocated_executives: ids
           }));
         }
       } catch (err) {
         console.error('Failed to fetch admin names:', err);
       }
     };
-  
+
     fetchAdmins();
   }, [project]);
-  
-  const allocated_ids = formData.allocated_executives.map(name => {
-    const match = adminOptions.find(admin => admin.name === name);
-    return match ? match.crm_log_id : null;
-  }).filter(Boolean);
-  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -93,49 +87,35 @@ const EditProject = ({ project, onClose, onUpdate }) => {
   const handleEmployeeChange = (e) => {
     setFormData((prev) => ({
       ...prev,
-      allocated_executives: e.target.value, // Store the crm_log_ids
+      allocated_executives: e.target.value,
     }));
   };
-  
 
-  const handleChipDelete = (chipToDelete) => {
+  const handleChipDelete = (chipId) => {
     setFormData((prev) => ({
       ...prev,
-      allocated_executives: prev.allocated_executives.filter((name) => name !== chipToDelete),
+      allocated_executives: prev.allocated_executives.filter((id) => id !== chipId),
     }));
   };
 
   const handleSubmit = async () => {
-    const allocated_ids = formData.allocated_executives.map((id) => {
-      const match = adminOptions.find((admin) => admin.crm_log_id === id);
-      return match ? match.crm_log_id : null;
-    }).filter(Boolean);
-  
     const updatedData = {
       ...formData,
-      allocated_executives: allocated_ids,
+      allocated_executives: formData.allocated_executives.filter(Boolean),
     };
-  
+
+    if (!formData.project_unique_id) return;
+
     try {
-      // Check if project_unique_id is available
-      if (!formData.project_unique_id) {
-        console.error("Project ID is missing");
-        return;
-      }
-  
       const res = await fetch(`http://localhost:3030/api/projects/${formData.project_unique_id}`, {
-        method: 'PUT', // Use PUT method for updating project data
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
       });
-  
+
       if (res.ok) {
-        const responseData = await res.json();
-        console.log('Project updated successfully:', responseData);
-        onUpdate(updatedData); // Notify the parent about the update
-        onClose(); // Close the dialog
+        onUpdate(updatedData);
+        onClose();
       } else {
         console.error('Failed to update project:', res.statusText);
       }
@@ -143,8 +123,6 @@ const EditProject = ({ project, onClose, onUpdate }) => {
       console.error('Error updating project:', err);
     }
   };
-  
-  
 
   const getStyles = (name, selectedValues, theme) => ({
     fontWeight: selectedValues.includes(name)
@@ -169,8 +147,8 @@ const EditProject = ({ project, onClose, onUpdate }) => {
         sx: {
           width: '650px',
           height: '793px',
-          borderRadius: '10px'
-        }
+          borderRadius: '10px',
+        },
       }}
     >
       <Box
@@ -181,7 +159,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
           px: 1,
           py: 0,
           mt: 0,
-          ml: -1
+          ml: -1,
         }}
       >
         <DialogTitle
@@ -294,48 +272,44 @@ const EditProject = ({ project, onClose, onUpdate }) => {
           </Grid>
 
           <Grid item xs={12}>
-          <FormControl fullWidth>
-  <InputLabel>Add People</InputLabel>
-  <Select
-    multiple
-    value={formData.allocated_executives}
-    onChange={handleEmployeeChange}
-    sx={{
-      width: '270px',
-      height: '40px',
-    }}
-  >
-    {adminOptions.map((admin) => (
-      <MenuItem
-        key={admin.crm_log_id}
-        value={admin.crm_log_id}
-        style={getStyles(admin.name, formData.allocated_executives, theme)}
-      >
-        {admin.name}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+            <FormControl fullWidth>
+              <InputLabel>Add People</InputLabel>
+              <Select
+                multiple
+                value={formData.allocated_executives}
+                onChange={handleEmployeeChange}
+                sx={{ width: '270px', height: '40px' }}
+              >
+                {adminOptions.map((admin) => (
+                  <MenuItem
+                    key={admin.crm_log_id}
+                    value={admin.crm_log_id}
+                    style={getStyles(admin.name, formData.allocated_executives, theme)}
+                  >
+                    {admin.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 2 }}>
-  {formData.allocated_executives.map((id) => {
-    const admin = adminOptions.find((admin) => admin.crm_log_id === id);
-    return (
-      admin && (
-        <Chip
-          key={id}
-          label={admin.name}
-          onDelete={() => handleChipDelete(id)}  // Pass crm_log_id for deletion
-          sx={{
-            backgroundColor: '#A3EAFD',
-            color: '#000',
-          }}
-        />
-      )
-    );
-  })}
-</Box>
-
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 2 }}>
+              {formData.allocated_executives.map((id) => {
+                const admin = adminOptions.find((admin) => admin.crm_log_id === id);
+                return (
+                  admin && (
+                    <Chip
+                      key={id}
+                      label={admin.name}
+                      onDelete={() => handleChipDelete(id)}
+                      sx={{
+                        backgroundColor: '#A3EAFD',
+                        color: '#000',
+                      }}
+                    />
+                  )
+                );
+              })}
+            </Box>
           </Grid>
         </Grid>
 

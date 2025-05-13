@@ -76,13 +76,16 @@ app.post('/login', checkDbConnection, async (req, res) => {
       } else if (user.admin_flag === 1 || user.admin_flag === 0) {
         redirectTo = '/spenttime';
       }
-
+      
       return res.json({
         message: 'Login successful',
         name: user.name,
         crm_log_id: user.crm_log_id,
         redirectTo,
+        admin_flag: user.admin_flag, // send this to frontend
       });
+      
+      
     } else {
       return res.status(401).json({ error: 'Incorrect password.' });
     }
@@ -181,9 +184,86 @@ app.put('/api/projects/:id', checkDbConnection, async (req, res) => {
   }
 });
 
-app.post('/api/projects', checkDbConnection, async (req, res) => {
-  try {
-    const {
+// app.post('/api/projects', checkDbConnection, async (req, res) => {
+//   try {
+//     const {
+//       project_name,
+//       lob,
+//       start_date,
+//       end_date,
+//       expected_date,
+//       budget,
+//       created_by,
+//       modified_by,
+//       department,
+//       allocated_executives,
+//     } = req.body;
+
+//     const [lastProject] = await db.execute('SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1');
+
+//     const newProjectId = lastProject.length > 0
+//       ? `P${(parseInt(lastProject[0].project_unique_id.replace('P', '')) + 1).toString().padStart(4, '0')}`
+//       : 'P0001';
+
+//     await db.execute(`INSERT INTO main_project (
+//       project_unique_id, project_name, lob, start_date, end_date,
+//       expected_date, budget, created_by, modified_by,
+//       created_date, modified_date, is_active, department, allocated_executives
+//     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 1, ?, ?)`, [
+//       newProjectId,
+//       project_name,
+//       lob,
+//       start_date,
+//       end_date,
+//       expected_date,
+//       budget,
+//       created_by,
+//       modified_by,
+//       department,
+//       JSON.stringify(allocated_executives),
+//     ]);
+
+//     res.status(201).json({ message: 'Project created successfully.', project_unique_id: newProjectId });
+//   } catch (error) {
+//     console.error('❌ Error creating project:', error.message);
+//     res.status(500).json({ error: 'Internal server error.' });
+//   }
+// });
+
+app.post('/api/projects', async (req, res) => {
+  const {
+    project_unique_id,
+    project_name,
+    lob,
+    start_date,
+    end_date,
+    expected_date,
+    budget,
+    created_by,
+    modified_by,
+    created_date,
+    modified_date,
+    is_active,
+    department,
+    allocated_executives,
+  } = req.body;
+
+  // Format the date to remove the time part
+  const formatDate = (date) => {
+    const newDate = new Date(date);
+    return newDate.toISOString().split('T')[0]; // Extract date part (YYYY-MM-DD)
+  };
+
+  // Format the dates
+  const formattedStartDate = formatDate(start_date);
+  const formattedEndDate = formatDate(end_date);
+  const formattedExpectedDate = formatDate(expected_date);
+  const formattedCreatedDate = formatDate(created_date);
+  const formattedModifiedDate = formatDate(modified_date);
+
+  const query = `
+    INSERT INTO main_project (
+      project_unique_id,
       project_name,
       lob,
       start_date,
@@ -192,40 +272,40 @@ app.post('/api/projects', checkDbConnection, async (req, res) => {
       budget,
       created_by,
       modified_by,
+      created_date,
+      modified_date,
+      is_active,
       department,
-      allocated_executives,
-    } = req.body;
+      allocated_executives
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    const [lastProject] = await db.execute('SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1');
+  const values = [
+    project_unique_id,
+    project_name,
+    lob,
+    formattedStartDate, // Use formatted date
+    formattedEndDate,   // Use formatted date
+    formattedExpectedDate, // Use formatted date
+    budget,
+    created_by,
+    modified_by,
+    formattedCreatedDate, // Use formatted date
+    formattedModifiedDate, // Use formatted date
+    is_active,
+    department,
+    JSON.stringify(allocated_executives),
+  ];
 
-    const newProjectId = lastProject.length > 0
-      ? `P${(parseInt(lastProject[0].project_unique_id.replace('P', '')) + 1).toString().padStart(4, '0')}`
-      : 'P0001';
-
-    await db.execute(`INSERT INTO main_project (
-      project_unique_id, project_name, lob, start_date, end_date,
-      expected_date, budget, created_by, modified_by,
-      created_date, modified_date, is_active, department, allocated_executives
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 1, ?, ?)`, [
-      newProjectId,
-      project_name,
-      lob,
-      start_date,
-      end_date,
-      expected_date,
-      budget,
-      created_by,
-      modified_by,
-      department,
-      JSON.stringify(allocated_executives),
-    ]);
-
-    res.status(201).json({ message: 'Project created successfully.', project_unique_id: newProjectId });
-  } catch (error) {
-    console.error('❌ Error creating project:', error.message);
-    res.status(500).json({ error: 'Internal server error.' });
-  }
+  db.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Error inserting project:', err);
+      return res.status(500).json({ message: 'Failed to add project' });
+    }
+    res.status(201).json({ message: 'Project added successfully', projectId: results.insertId });
+  });
 });
+
+
 app.get('/api/admins', async (req, res) => {
   try {
     const [rows] = await db.execute('SELECT crm_log_id, name FROM crm_admin');

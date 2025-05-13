@@ -11,17 +11,16 @@ import dayjs from 'dayjs';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import addIcon from '../assets/add.png';
-import AddSpenttime from './AddSpenttime'; // Ensure path is correct
+import AddSpenttime from './AddSpenttime';
 
 const SpentTimeTable = () => {
-  const [selectedDate, setSelectedDate] = useState(dayjs());  // Store selected date
+  const [selectedDate, setSelectedDate] = useState(dayjs());
   const [showSpentModal, setShowSpentModal] = useState(false);
   const [spentTimeData, setSpentTimeData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);  // Store filtered data
+  const [filteredData, setFilteredData] = useState([]);
   const [error, setError] = useState('');
-  const [selectedDate2, setSelectedDate2] = useState(null);  // Ensure this is declared before use.
+  const [selectedDate2, setSelectedDate2] = useState(null);
 
-  // Fetch data based on selectedDate2
   useEffect(() => {
     if (selectedDate2) {
       axios.get('/api/spent-time', {
@@ -30,17 +29,16 @@ const SpentTimeTable = () => {
         .then(response => {
           setSpentTimeData(response.data);
         })
-        .catch(err => {
-          console.error("Error fetching data", err);
+        .catch(() => {
+          setError('Error fetching data');
         });
     }
-  }, [selectedDate2]);  // Dependency on selectedDate2
+  }, [selectedDate2]);
 
-  // Fetch spent time data based on selectedDate
   useEffect(() => {
     const crmLogId = localStorage.getItem('crm_log_id');
     const formattedDate = selectedDate.format('YYYY-MM-DD');
-  
+
     if (crmLogId) {
       axios.get('http://localhost:3030/api/spent-time', {
         headers: {
@@ -49,30 +47,24 @@ const SpentTimeTable = () => {
         params: { date: formattedDate },
       })
         .then(response => {
-          console.log("API Response Data:", response.data);  // Add this line
           setSpentTimeData(response.data);
           filterDataByDate(response.data, formattedDate);
         })
-        .catch(err => {
+        .catch(() => {
           setError('Error fetching employee data');
-          console.error(err);
         });
     } else {
       setError('No crm_log_id found in local storage');
     }
   }, [selectedDate]);
-  
 
-  // Function to filter the data by selected date
   const filterDataByDate = (data, date) => {
     const filtered = data.filter((row) => {
-      const rowDate = dayjs(row.start_time); // Parse the start_time
-      console.log("Row Date:", rowDate.format('YYYY-MM-DD'), "Selected Date:", date);  // Add this line to debug
-      return rowDate.isSame(date, 'day'); // Compare only the date (ignore time)
+      const rowDate = dayjs(row.start_time);
+      return rowDate.isSame(date, 'day');
     });
     setFilteredData(filtered);
   };
-  
 
   const handleOpenSpentModal = () => {
     setShowSpentModal(true);
@@ -82,15 +74,12 @@ const SpentTimeTable = () => {
     setShowSpentModal(false);
   };
 
-  // Handle date change in DatePicker
   const handleDateChange = (newDate) => {
     setSelectedDate(newDate);
-    setSelectedDate2(newDate.format('YYYY-MM-DD')); // Ensure this is the correct format
-    filterDataByDate(spentTimeData, newDate);  // Filter data based on selected date
+    setSelectedDate2(newDate.format('YYYY-MM-DD'));
+    filterDataByDate(spentTimeData, newDate);
   };
-  
 
-  // Calculate total worked hours
   const totalWorkedHours = spentTimeData.reduce((total, row) => total + parseFloat(row.hours || 0), 0);
 
   return (
@@ -99,7 +88,7 @@ const SpentTimeTable = () => {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
             value={selectedDate}
-            onChange={handleDateChange}  // Trigger date change handler
+            onChange={handleDateChange}
             format="DD-MM-YYYY"
             slotProps={{
               textField: {
@@ -155,25 +144,23 @@ const SpentTimeTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-  {spentTimeData.map((row, index) => (
-    <TableRow key={index}>
-      <TableCell>{index + 1}</TableCell>
-      <TableCell>{row.project_name}</TableCell>
-      <TableCell>{row.task_name}</TableCell>
-      <TableCell>{row.subtask_name}</TableCell>
-      <TableCell>{row.start_time}</TableCell>
-      <TableCell>{row.end_time}</TableCell>
-      <TableCell>{row.comments}</TableCell>
-      <TableCell>{row.hours}</TableCell>
-    </TableRow>
-  ))}
-</TableBody>
-
+              {spentTimeData.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{row.project_name}</TableCell>
+                  <TableCell>{row.task_name}</TableCell>
+                  <TableCell>{row.subtask_name}</TableCell>
+                  <TableCell>{row.start_time}</TableCell>
+                  <TableCell>{row.end_time}</TableCell>
+                  <TableCell>{row.comments}</TableCell>
+                  <TableCell>{row.hours}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
         </TableContainer>
       </Stack>
 
-      {/* Spent Time Modal */}
       <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} />
     </Box>
   );

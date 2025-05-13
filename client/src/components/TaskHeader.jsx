@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
 import {
   AppBar,
   Avatar,
@@ -24,11 +23,13 @@ const TaskHeader = () => {
         const agentId = localStorage.getItem('agentId');
         if (agentId) {
           const response = await axios.get(`http://localhost:3030/api/agents/${agentId}`);
-          setAgentName(response.data.name);
-          localStorage.setItem('name', response.data.name);
+          if (response.data?.name) {
+            setAgentName(response.data.name);
+            localStorage.setItem('name', response.data.name);
+          }
         }
       } catch (error) {
-        console.error('Error fetching agent name:', error);
+        // Optional: handle error display or silent fail
       }
     };
 
@@ -53,14 +54,20 @@ const TaskHeader = () => {
           <img src={navIcon} alt="Navigation Icon" width={26} height={26} />
           <img src={homeIcon} alt="Home Icon" width={24} height={24} />
           <img src={arrowIcon} alt="Arrow Icon" width={26} height={26} />
-          <Typography variant="h6" sx={{ fontWeight: 500, fontSize: '1.2rem', color: '#000' }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 500, fontSize: '1.2rem', color: '#000' }}
+          >
             Task
           </Typography>
         </Box>
 
         {/* Right Side */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 500, fontSize: '1.2rem', color: '#000' }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 500, fontSize: '1.2rem', color: '#000' }}
+          >
             {agentName}
           </Typography>
           <IconButton>
