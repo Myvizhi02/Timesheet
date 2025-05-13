@@ -16,6 +16,11 @@ const AddSubTask = ({ onClose, onSubmit, project, taskName }) => {
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(true);
   const [subtask, setSubtask] = useState('');
+  const handleSpenttimeSubmit = () => {
+    setShowSpentModal(false);
+    navigate('/spenttime'); // move to spent time page
+  };
+  
 
   const handleSubmit = async () => {
     if (!subtask || !description) {

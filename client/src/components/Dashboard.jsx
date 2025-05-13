@@ -45,6 +45,7 @@ const Dashboard = () => {
   const [admins, setAdmins] = useState([]);
   const [spentTimeDetails, setSpentTimeDetails] = useState([]);
 
+<<<<<<< HEAD
   const agentName = localStorage.getItem('name') || 'Agent';
 
   // Fetch admins
@@ -52,23 +53,42 @@ const Dashboard = () => {
     axios.get('http://localhost:3030/api/admins')
       .then((res) => setAdmins(res.data))
       .catch((err) => console.error('Error fetching admins:', err));
+=======
+  useEffect(() => {
+    axios.get('http://localhost:3030/api/admins')
+      .then((response) => setAdmins(response.data))
+      .catch((error) => console.error('Error fetching admins:', error));
   }, []);
 
-  // Fetch projects
+  useEffect(() => {
+    axios.get('http://localhost:3030/api/tasks')
+      .then((response) => setEmployees(response.data))
+      .catch((error) => console.error('Error fetching task data:', error));
+>>>>>>> 65db5f81fcf9ca9dd4aea02fb2d81041e70fb644
+  }, []);
+
   useEffect(() => {
     axios.get('http://localhost:3030/api/projects')
       .then((res) => setProjects(res.data))
       .catch((err) => console.error('Error fetching projects:', err));
   }, []);
 
+<<<<<<< HEAD
   // Fetch spent-time details
   useEffect(() => {
+=======
+  const fetchSpentTimeDetails = () => {
+>>>>>>> 65db5f81fcf9ca9dd4aea02fb2d81041e70fb644
     axios.get('http://localhost:3030/api/spent-time-details')
       .then((res) => setSpentTimeDetails(res.data))
       .catch((err) => {
         console.error('Error fetching spent-time-details:', err);
         alert(`Error: ${err.response?.data?.details || 'An unknown error occurred'}`);
       });
+  };
+
+  useEffect(() => {
+    fetchSpentTimeDetails();
   }, []);
 
   const handleViewClick = (taskId) => {
@@ -76,6 +96,20 @@ const Dashboard = () => {
     setShowModal(true);
   };
 
+<<<<<<< HEAD
+=======
+  const closeModal = () => setShowModal(false);
+  const handleOpenSpentModal = () => setShowSpentModal(true);
+  const handleCloseSpentModal = () => {
+    setShowSpentModal(false);
+    fetchSpentTimeDetails();
+  };
+  const handleOpenProjectModal = () => setShowProjectModal(true);
+  const handleCloseProjectModal = () => setShowProjectModal(false);
+  const handleViewProjectPage = () => navigate('/project');
+  const handleViewTaskPage = () => navigate('/task');
+
+>>>>>>> 65db5f81fcf9ca9dd4aea02fb2d81041e70fb644
   const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
     <Box
       onClick={onClick}
@@ -112,7 +146,6 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* Top Section */}
       <Box sx={{ margin: 4, backgroundColor: 'white', padding: 4, borderRadius: 2 }}>
         <Typography variant="h5" sx={{ pl: 2, pb: 4 }}>
           Welcome to {agentName}.
@@ -193,7 +226,11 @@ const Dashboard = () => {
               <Button
                 variant="contained"
                 startIcon={<img src={addIcon} alt="Add" width="20" />}
+<<<<<<< HEAD
                 onClick={() => setShowSpentModal(true)}
+=======
+                onClick={handleOpenSpentModal}
+>>>>>>> 65db5f81fcf9ca9dd4aea02fb2d81041e70fb644
                 sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
               >
                 Add Spent Time
@@ -203,7 +240,12 @@ const Dashboard = () => {
         </Grid>
       </Box>
 
+<<<<<<< HEAD
       {/* Tab Buttons */}
+=======
+      {showSpentModal && <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} />}
+
+>>>>>>> 65db5f81fcf9ca9dd4aea02fb2d81041e70fb644
       <Box sx={{ mt: 8, mx: { xs: 2, md: 6 } }}>
         <Box sx={{ backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, display: 'flex', width: { xs: '100%', md: '99%' }, p: 1 }}>
           <Button onClick={() => setActiveTab('all')} sx={{ flex: 1, bgcolor: activeTab === 'all' ? '#ffffff' : '#CDCDCD80', borderRadius: 2, p: 1 }}>
@@ -220,7 +262,10 @@ const Dashboard = () => {
           ))}
         </Box>
 
+<<<<<<< HEAD
         {/* Spent Time Table */}
+=======
+>>>>>>> 65db5f81fcf9ca9dd4aea02fb2d81041e70fb644
         <TableContainer component={Paper} sx={{ mb: 8, boxShadow: 3, borderRadius: 2 }}>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
@@ -264,11 +309,16 @@ const Dashboard = () => {
         </TableContainer>
       </Box>
 
+<<<<<<< HEAD
       {/* Modals */}
       <View show={showModal} data={selectedTask} onClose={() => setShowModal(false)} />
       {showProjectModal && <Project onClose={() => setShowProjectModal(false)} />}
 {showSpentModal && <AddSpenttime onClose={() => setShowSpentModal(false)} />}
 
+=======
+      <View show={showModal} data={selectedTask} onClose={closeModal} />
+      {showProjectModal && <Project onClose={handleCloseProjectModal} />}
+>>>>>>> 65db5f81fcf9ca9dd4aea02fb2d81041e70fb644
     </>
   );
 };
