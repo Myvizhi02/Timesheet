@@ -132,7 +132,8 @@ const handleTaskChange = async (e) => {
   
   const fetchTaskAndSubtasks = async (taskId, projectId) => {
     try {
-      const response = await axios.get(`Fapi/subtasks`, {
+      const response = await axios.get(`http://localhost:3030/api/subtasks`, {
+
         params: { task_id: taskId, project_id: projectId }
       });
   
