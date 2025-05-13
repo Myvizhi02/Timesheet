@@ -127,7 +127,7 @@ const AddProject = ({ onClose, onSubmit }) => {
 
       const result = await response.json();
       setSnackbar({ open: true, message: '✅ Project added successfully!', severity: 'success' });
-      onSubmit && onSubmit(data);
+      
       onClose();
     } catch (err) {
       setSnackbar({ open: true, message: '❌ Failed to add project. Please try again.', severity: 'error' });
