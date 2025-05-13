@@ -46,35 +46,35 @@ const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [spentTimeDetails, setSpentTimeDetails] = useState([]);
 
-  // Fetch admins
   useEffect(() => {
     axios.get('http://localhost:3030/api/admins')
       .then((response) => setAdmins(response.data))
       .catch((error) => console.error('Error fetching admins:', error));
   }, []);
 
-  // Fetch tasks
   useEffect(() => {
     axios.get('http://localhost:3030/api/tasks')
       .then((response) => setEmployees(response.data))
       .catch((error) => console.error('Error fetching task data:', error));
   }, []);
 
-  // Fetch projects
   useEffect(() => {
     axios.get('http://localhost:3030/api/projects')
       .then((response) => setProjects(response.data))
       .catch((error) => console.error('Error fetching projects:', error));
   }, []);
 
-  // Fetch spent time details
-  useEffect(() => {
+  const fetchSpentTimeDetails = () => {
     axios.get('http://localhost:3030/api/spent-time-details')
       .then((response) => setSpentTimeDetails(response.data))
       .catch((error) => {
         console.error('Error fetching spent-time-details:', error);
         alert(`Error: ${error.response?.data?.details || 'An unknown error occurred'}`);
       });
+  };
+
+  useEffect(() => {
+    fetchSpentTimeDetails();
   }, []);
 
   const handleViewClick = (task) => {
@@ -84,7 +84,10 @@ const Dashboard = () => {
 
   const closeModal = () => setShowModal(false);
   const handleOpenSpentModal = () => setShowSpentModal(true);
-  const handleCloseSpentModal = () => setShowSpentModal(false);
+  const handleCloseSpentModal = () => {
+    setShowSpentModal(false);
+    fetchSpentTimeDetails();
+  };
   const handleOpenProjectModal = () => setShowProjectModal(true);
   const handleCloseProjectModal = () => setShowProjectModal(false);
   const handleViewProjectPage = () => navigate('/project');
@@ -126,7 +129,6 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* Top Section */}
       <Box sx={{ margin: 4, backgroundColor: 'white', padding: 4, borderRadius: 2 }}>
         <Typography variant="h5" sx={{ pl: 2, pb: 4 }}>
           Welcome to {agentName}.
@@ -167,7 +169,6 @@ const Dashboard = () => {
             </Box>
           </Grid>
 
-          {/* Action Buttons */}
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: { xs: 'center', md: 'flex-end' }, ml: { xs: 0, md: '90px' } }}>
               <Button variant="contained" color="success" sx={{ minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={shareIcon} alt="Share" width="20" />}>
@@ -180,20 +181,20 @@ const Dashboard = () => {
                 View Project
               </Button>
               <Button
-                        variant="contained"
-                        startIcon={<img src={addIcon} alt="Add" width="20" />}
-                        onClick={handleOpenSpentModal}
-                        sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none'  }}
-                      >
-                        Add Spent Time
-                      </Button>
-
+                variant="contained"
+                startIcon={<img src={addIcon} alt="Add" width="20" />}
+                onClick={handleOpenSpentModal}
+                sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
+              >
+                Add Spent Time
+              </Button>
             </Box>
           </Grid>
         </Grid>
       </Box>
 
-      {/* Tabs */}
+      {showSpentModal && <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} />}
+
       <Box sx={{ mt: 8, mx: { xs: 2, md: 6 } }}>
         <Box sx={{ backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, display: 'flex', width: { xs: '100%', md: '99%' }, p: 1 }}>
           <Button onClick={() => setActiveTab('all')} sx={{ flex: 1, bgcolor: activeTab === 'all' ? '#ffffff' : '#CDCDCD80', borderRadius: 2, p: 1 }}>
@@ -206,7 +207,6 @@ const Dashboard = () => {
           ))}
         </Box>
 
-        {/* Table */}
         <TableContainer component={Paper} sx={{ mb: 8, boxShadow: 3, borderRadius: 2 }}>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
@@ -239,9 +239,9 @@ const Dashboard = () => {
                     <TableCell>{new Date(detail.start_date).toLocaleDateString()}</TableCell>
                     <TableCell>{detail.hours}</TableCell>
                     <TableCell align="center">
-                    <IconButton onClick={() => handleViewClick(detail.id)}>
-      <img src={visibility2Icon} alt="View" style={{ width: 24 }} />
-    </IconButton>
+                      <IconButton onClick={() => handleViewClick(detail.id)}>
+                        <img src={visibility2Icon} alt="View" style={{ width: 24 }} />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -250,10 +250,8 @@ const Dashboard = () => {
         </TableContainer>
       </Box>
 
-      {/* Modals */}
       <View show={showModal} data={selectedTask} onClose={closeModal} />
       {showProjectModal && <Project onClose={handleCloseProjectModal} />}
-      {showSpentModal && <AddSpenttime onClose={handleCloseSpentModal} />}
     </>
   );
 };
