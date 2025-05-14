@@ -22,19 +22,22 @@ const AddSubTask = ({ onClose, onSubmit, project, taskName }) => {
       alert("⚠️ Please fill all the required fields.");
       return;
     }
-
+  
     const crm_log_id = localStorage.getItem('crm_log_id');
-
+  
+    // Convert the status to 1 (Open) or 0 (Closed)
+    const statusValue = status ? 1 : 0;
+  
     const subTaskData = {
       project_name: project,
       task_name: taskName,
       sub_task_name: subtask,
       description,
-      status: status ? 'Open' : 'Closed',
+      status: statusValue,  // Store 1 for Open, 0 for Closed
       created_by: crm_log_id,
       modified_by: crm_log_id,
     };
-
+  
     try {
       const res = await fetch('http://localhost:3030/api/subtasks', {
         method: 'POST',
@@ -43,9 +46,9 @@ const AddSubTask = ({ onClose, onSubmit, project, taskName }) => {
         },
         body: JSON.stringify(subTaskData),
       });
-
+  
       const result = await res.json();
-
+  
       if (res.ok) {
         alert('✅ Subtask added successfully!');
         onSubmit(subTaskData);
@@ -57,6 +60,7 @@ const AddSubTask = ({ onClose, onSubmit, project, taskName }) => {
       alert('❌ Error occurred while saving subtask.');
     }
   };
+  
 
   return (
     <Dialog

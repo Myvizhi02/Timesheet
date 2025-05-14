@@ -106,37 +106,46 @@ const Project = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {projects.map((proj, index) => (
-              <TableRow key={proj.id}>
-                <TableCell align="center">{index + 1}</TableCell>
-                <TableCell align="center">{proj.project_name}</TableCell>
-                <TableCell align="center">{proj.department}</TableCell>
-                <TableCell align="center">{proj.lob}</TableCell>
-                <TableCell align="center">{proj.start_date}</TableCell>
-                <TableCell align="center">{proj.end_date}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleEditClick(proj)}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      fontWeight: 500,
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      backgroundColor: '#F9E49261',
-                      borderColor: '#F9E49261',
-                      color: 'black',
-                    }}
-                  >
-                    <img src={editIcon} alt="Edit" width="16" />
-                    Edit Project
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+  {projects.length === 0 ? (
+    <TableRow>
+      <TableCell colSpan={7} align="center" sx={{ fontStyle: 'italic', color: '#888' }}>
+        No data found
+      </TableCell>
+    </TableRow>
+  ) : (
+    projects.map((proj, index) => (
+      <TableRow key={proj.id}>
+        <TableCell align="center">{index + 1}</TableCell>
+        <TableCell align="center">{proj.project_name}</TableCell>
+        <TableCell align="center">{proj.department}</TableCell>
+        <TableCell align="center">{proj.lob}</TableCell>
+        <TableCell align="center">{proj.start_date}</TableCell>
+        <TableCell align="center">{proj.end_date}</TableCell>
+        <TableCell align="center">
+          <Button
+            variant="outlined"
+            onClick={() => handleEditClick(proj)}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontWeight: 500,
+              padding: '6px 12px',
+              borderRadius: '4px',
+              backgroundColor: '#F9E49261',
+              borderColor: '#F9E49261',
+              color: 'black',
+            }}
+          >
+            <img src={editIcon} alt="Edit" width="16" />
+            Edit Project
+          </Button>
+        </TableCell>
+      </TableRow>
+    ))
+  )}
+</TableBody>
+
         </Table>
       </TableContainer>
 

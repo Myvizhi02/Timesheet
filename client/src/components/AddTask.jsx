@@ -17,7 +17,7 @@ const AddTask = ({ onClose, onSubmit }) => {
   const [project, setProject] = useState('');
   const [taskName, setTaskName] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState(true);
+  const [status, setStatus] = useState(true); // True for Open, False for Closed
   const [showSubTaskModal, setShowSubTaskModal] = useState(false);
   const [projectsList, setProjectsList] = useState([]);
 
@@ -25,33 +25,33 @@ const AddTask = ({ onClose, onSubmit }) => {
     fetch('http://localhost:3030/api/projects')
       .then(res => res.json())
       .then(data => setProjectsList(data))
-      .catch(() => alert('❌ Failed to fetch projects.'));
+      //.catch(() => alert('❌ Failed to fetch projects.'));
   }, []);
 
   const taskPayload = () => ({
     project_name: project,
     task_name: taskName,
     description,
-    status: status ? 'Open' : 'Closed',
+    status: status ? 1 : 0,  // Store 1 for Open (status is true) and 0 for Closed (status is false)
     created_by: localStorage.getItem('crm_log_id'),
     modified_by: localStorage.getItem('crm_log_id'),
   });
-
+  
   const handleSubmit = async () => {
     if (!project || !taskName || !description) {
       alert('⚠️ Please fill in all the required fields.');
       return;
     }
-
+  
     try {
       const res = await fetch('http://localhost:3030/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(taskPayload())
       });
-
+  
       const result = await res.json();
-
+  
       if (res.ok) {
         alert('✅ Task added successfully!');
         onSubmit(taskPayload());
@@ -63,6 +63,7 @@ const AddTask = ({ onClose, onSubmit }) => {
       alert('❌ Something went wrong while submitting the task.');
     }
   };
+  
 
   const handleAddSubTask = async () => {
     if (!project || !taskName || !description) {
@@ -89,6 +90,17 @@ const AddTask = ({ onClose, onSubmit }) => {
     }
   };
 
+  useEffect(() => {
+    fetch('http://localhost:3030/api/tasks')
+      .then(res => res.json())
+      .then(data => {
+        // Filter out tasks with status 0 (Closed tasks)
+        const activeTasks = data.filter(task => task.status !== 0);
+        setTasks(activeTasks);
+      })
+      .catch(() => alert('❌ Failed to fetch tasks.'));
+  }, []);
+  
   return (
     <>
       <Dialog open onClose={onClose} PaperProps={{

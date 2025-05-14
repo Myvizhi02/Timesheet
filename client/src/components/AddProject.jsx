@@ -88,15 +88,13 @@ const AddProject = ({ onClose, onSubmit }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Create a name → crm_log_id map
     const nameToIdMap = {};
     adminOptions.forEach(admin => {
       nameToIdMap[admin.name] = admin.crm_log_id;
     });
 
-    // Convert names to crm_log_ids if needed
     const crmIds = formData.addPeople.map(person =>
-      nameToIdMap[person] ? nameToIdMap[person] : person // support both names and IDs
+      nameToIdMap[person] ? nameToIdMap[person] : person
     );
 
     const projectData = {
@@ -107,13 +105,13 @@ const AddProject = ({ onClose, onSubmit }) => {
       end_date: endDate,
       expected_date: actualEndDate,
       budget: formData.budget,
-      created_by: crmIds[0], // assuming first selected person is the creator
+      created_by: crmIds[0],
       modified_by: crmIds[0],
       created_date: new Date().toISOString(),
       modified_date: new Date().toISOString(),
       is_active: 1,
       department: formData.domain,
-      allocated_executives: crmIds, // final mapped IDs
+      allocated_executives: crmIds,
     };
 
     try {
@@ -123,16 +121,34 @@ const AddProject = ({ onClose, onSubmit }) => {
         body: JSON.stringify(projectData),
       });
 
-      const data = await response.json();
-
       const result = await response.json();
-      setSnackbar({ open: true, message: '✅ Project added successfully!', severity: 'success' });
-      
-      onClose();
+
+      if (response.ok) {
+        setSnackbar({ open: true, message: '✅ Project added successfully!', severity: 'success' });
+      } else {
+        setSnackbar({
+          open: true,
+          message: `❌ Failed to add project: ${result.error || 'Unknown error'}`,
+          severity: 'error',
+        });
+      }
     } catch (err) {
-      setSnackbar({ open: true, message: '❌ Failed to add project. Please try again.', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: '❌ Something went wrong while submitting the project.',
+        severity: 'error',
+      });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+
+    if (snackbar.severity === 'success') {
+      onSubmit();
+      onClose();
     }
   };
 
@@ -226,7 +242,7 @@ const AddProject = ({ onClose, onSubmit }) => {
         <DialogContent sx={{ padding: '1.5em', mt: 4 }}>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3.5}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={8}>
                 <TextField
                   name="projectId"
                   label="Project ID"
@@ -347,6 +363,7 @@ const AddProject = ({ onClose, onSubmit }) => {
               <Button
                 type="submit"
                 variant="contained"
+                disabled={isSubmitting}
                 sx={{
                   backgroundColor: '#213E9A',
                   color: 'white',
@@ -359,9 +376,8 @@ const AddProject = ({ onClose, onSubmit }) => {
                     backgroundColor: '#213E9A',
                   },
                 }}
-                //disabled={isSubmitting}
               >
-                {isSubmitting ? 'Submit' : 'Submit'}
+                Submit
               </Button>
             </Box>
           </form>
@@ -370,8 +386,9 @@ const AddProject = ({ onClose, onSubmit }) => {
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        sx={{ zIndex: 2000 }}
       >
         <MuiAlert elevation={6} variant="filled" severity={snackbar.severity}>
           {snackbar.message}
