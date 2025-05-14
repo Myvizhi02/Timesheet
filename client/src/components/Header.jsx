@@ -1,23 +1,21 @@
 import { AppBar, Avatar, Box, IconButton, Toolbar, Typography } from '@mui/material';
-import axios from 'axios'; // Axios for API call
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import DimgIcon from '../assets/Dimg.png';
 import homeIcon from '../assets/home.png';
 import navIcon from '../assets/navigation.png';
 
 const Header = () => {
-  
-  
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
 
   useEffect(() => {
     const fetchAgentName = async () => {
       try {
-        const agentId = localStorage.getItem('agentId'); // Get agentId from localStorage
+        const agentId = localStorage.getItem('agentId');
         if (agentId) {
           const response = await axios.get(`http://localhost:3030/api/agents/${agentId}`);
-          setAgentName(response.data.name); // ✅ Update UI immediately
-        localStorage.setItem('name', response.data.name);
+          setAgentName(response.data.name);
+          localStorage.setItem('name', response.data.name);
         }
       } catch (error) {
         console.error('Error fetching agent name:', error);
@@ -93,7 +91,7 @@ const Header = () => {
               display: { xs: 'none', sm: 'block' },
             }}
           >
-             {agentName}
+            {agentName}
           </Typography>
           <Avatar
             alt="User"
