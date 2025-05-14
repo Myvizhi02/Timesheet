@@ -376,6 +376,12 @@ app.post('/api/tasks', checkDbConnection, async (req, res) => {
   } = req.body;
 
   try {
+    // Validate status
+    if (![0, 1].includes(status)) {
+      return res.status(400).json({ error: 'Invalid task status.' });
+    }
+
+    // Fetch project ID based on the project name
     const [projectRow] = await db.execute(
       'SELECT id FROM main_project WHERE project_name = ? AND is_active = 1',
       [project_name]
@@ -387,6 +393,17 @@ app.post('/api/tasks', checkDbConnection, async (req, res) => {
 
     const { id: project_id } = projectRow[0];
 
+    // Check if the task already exists in the project
+    const [existingTaskRow] = await db.execute(
+      'SELECT * FROM main_task WHERE project_id = ? AND task_name = ? AND is_active = 1',
+      [project_id, task_name]
+    );
+
+    if (existingTaskRow.length > 0) {
+      return res.status(400).json({ error: 'Task with this name already exists in the selected project.' });
+    }
+
+    // Insert the new task into the database
     await db.execute(`INSERT INTO main_task (
       project_id, task_name, description, status,
       created_by, modified_by, created_date, modified_date, is_active
@@ -399,7 +416,19 @@ app.post('/api/tasks', checkDbConnection, async (req, res) => {
       modified_by
     ]);
 
-    res.status(201).json({ message: 'Task added successfully.' });
+    // Fetch the ID of the newly inserted task
+    const [newTaskRow] = await db.execute('SELECT LAST_INSERT_ID() as task_id');
+    const task_id = newTaskRow[0].task_id;
+
+    res.status(201).json({
+      message: 'Task added successfully.',
+      task_id,
+      project_name,
+      task_name,
+      description,
+      status
+    });
+
   } catch (error) {
     console.error('❌ Error adding task:', error.message);
     res.status(500).json({ error: 'Internal server error.' });
@@ -462,45 +491,6 @@ app.put('/api/update-task/:taskId', checkDbConnection, async (req, res) => {
 // ----------------------------------------------
 // SUBTASKS
 // ----------------------------------------------
-// Route to fetch task by task_name and project_id
-// GET all tasks (with optional project filter)
-// app.get('/api/tasks', checkDbConnection, async (req, res) => {
-//   const { project_id } = req.query;
-
-//   if (project_id) {
-//     try {
-//       const [tasks] = await db.execute('SELECT * FROM main_task WHERE project_id = ?', [project_id]);
-//       return res.json(tasks);
-//     } catch (err) {
-//       return res.status(500).json({ error: 'Database error' });
-//     }
-//   } else {
-//     try {
-//       const [tasks] = await db.execute(`
-//         SELECT 
-//           st.task_id,
-//           st.id as sub_task_id,
-//           t.project_id,
-//           p.project_name, 
-//           t.task_name, 
-//           st.subtask_name, 
-//           t.description AS task_description,
-//           st.description AS subtask_description,
-//           t.status AS task_status,
-//           st.status AS subtask_status
-//         FROM main_project p
-//         JOIN main_task t ON t.project_id = p.id
-//         LEFT JOIN main_sub_task st ON st.task_id = t.id
-//         WHERE p.is_active = 1 AND t.is_active = 1
-//         ORDER BY p.created_date ASC
-//       `);
-//       return res.json(tasks);
-//     } catch (error) {
-//       return res.status(500).json({ error: 'Internal server error.' });
-//     }
-//   }
-// });
-
 // GET subtasks by project_id and task_name
 app.get('/api/tasks/by-name', checkDbConnection, async (req, res) => {
   const { project_id, task_name } = req.query;
@@ -552,7 +542,7 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
   } = req.body;
 
   try {
-    if (!project_name || !task_name || !sub_task_name || !description || !status) {
+    if (!project_name || !task_name || !sub_task_name || !description || status === undefined) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
 
@@ -578,17 +568,19 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
 
     const task_id = taskRows[0].id;
 
+    // Insert the subtask, adjusting the status for active/inactive
     await db.execute(`INSERT INTO main_sub_task (
       project_id, task_id, subtask_name, description, status,
       created_by, modified_by, created_date, modified_date, is_active
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 1)`, [
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?)`, [
       project_id,
       task_id,
       sub_task_name,
       description,
-      status,
+      status,  // status should be 1 (Open) or 0 (Closed)
       created_by,
-      modified_by
+      modified_by,
+      status === 0 ? 0 : 1,  // if status is 0, set is_active to 0 (inactive), otherwise 1 (active)
     ]);
 
     res.status(201).json({ message: 'Subtask added successfully.' });
@@ -599,35 +591,25 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
 });
 
 
-app.put('/api/subtasks/:task_id', async (req, res) => {
-  const { task_id } = req.params;
-  const { subtask_name, description, status } = req.body;
 
-  if (!subtask_name) {
-    return res.status(400).json({ error: 'Subtask name is required' });
-  }
+app.put('/api/update-task/:id', (req, res) => {
+  const { id } = req.params;
+  const { task_name, task_description, task_status } = req.body;
 
-  const query = `
-    UPDATE main_sub_task
-    SET subtask_name = ?, description = ?, status = ?
+  const sql = `
+    UPDATE main_task 
+    SET task_name = ?, task_description = ?, task_status = ? 
     WHERE task_id = ?
   `;
 
-  try {
-    await db.execute(query, [
-      subtask_name ?? null,
-      description ?? null,
-      status ?? 'Open',
-      task_id,
-    ]);
-    res.status(200).json({ message: 'Subtask updated successfully' });
-  } catch (error) {
-    console.error('Error updating subtask:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  db.query(sql, [task_name, task_description, task_status, id], (err, result) => {
+    if (err) {
+      console.error("Error updating task:", err);
+      return res.status(500).json({ error: 'Failed to update task' });
+    }
+    res.json({ message: 'Task updated successfully' });
+  });
 });
-
-
 
 app.get('/api/main-task/:id/:project_id', checkDbConnection, async (req, res) => {
   const { id, project_id } = req.params;
@@ -655,6 +637,34 @@ app.get('/api/main-task/:id/:project_id', checkDbConnection, async (req, res) =>
     res.status(500).json({ error: 'Server error.' });
   }
 });
+app.put('/api/subtasks/:id', async (req, res) => {
+  const { id } = req.params;
+  const { subtask_name, description, status } = req.body;
+
+  if (!subtask_name) {
+    return res.status(400).json({ error: 'Subtask name is required' });
+  }
+
+  const query = `
+    UPDATE main_sub_task
+    SET subtask_name = ?, description = ?, status = ?
+    WHERE id = ?
+  `;
+
+  try {
+    await db.execute(query, [
+      subtask_name ?? null,
+      description ?? null,
+      status ?? 'Open',
+      id,
+    ]);
+    res.status(200).json({ message: 'Subtask updated successfully' });
+  } catch (error) {
+    console.error('Error updating subtask:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // ----------------------------------------------
 // SPENT TIME - Save Time Endpoint
 // ----------------------------------------------

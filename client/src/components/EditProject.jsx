@@ -16,7 +16,7 @@ import {
   Typography
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const EditProject = ({ project, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
         end_date: project.end_date || '',
         expected_date: project.expected_date || '',
         budget: project.budget || '',
-        allocated_executives: [],
+        allocated_executives: JSON.parse(project.allocated_executives) || [],
       }));
     }
   }, [project]);
