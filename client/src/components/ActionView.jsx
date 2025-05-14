@@ -26,7 +26,7 @@ const ActionView = ({ task = {}, onClose }) => {
     task_status: task.task_status === "1" || task.task_status === 'Open' || task.task_status === true,
     subtask_status: task.subtask_status === "1" || task.subtask_status === 'Open' || task.subtask_status === true,
   });
-  console.log(task)
+  
 
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -37,53 +37,37 @@ const ActionView = ({ task = {}, onClose }) => {
 
   const handleTaskStatusToggle = async () => {
     const newStatus = !formData.task_status;
-    const updatedData = {
-      ...formData,
-      task_status: newStatus,
-      ...(newStatus ? {} : { task_name: '', task_description: '' }),
-    };
-    setFormData(updatedData);
-
+   
+setFormData(prev => ({
+    ...prev,
+    task_status: newStatus,
+  }));
     const payload = {
-      task_name: updatedData.task_name,
-      task_description: updatedData.task_description,
+    
       task_status: newStatus ? 'Open' : 'Closed',
     };
 
-    try {
-      await axios.put(`http://localhost:3030/api/update-task/${task.task_id}`, payload);
-      setSnackbar({ open: true, message: 'Task updated successfully', severity: 'success' });
-    } catch (error) {
-      setSnackbar({ open: true, message: 'Task update failed', severity: 'error' });
-    }
+   
   };
 
   const handleSubtaskStatusToggle = async () => {
     const newStatus = !formData.subtask_status;
-    const updatedData = {
-      ...formData,
-      subtask_status: newStatus,
-      ...(newStatus ? {} : { subtask_name: '', subtask_description: '' }),
-    };
-    setFormData(updatedData);
-
-    if (!task?.subtask_id) {
+    
+setFormData(prev => ({
+    ...prev,
+    subtask_status: newStatus,
+  }));
+    if (!task?.sub_task_id) {
       setSnackbar({ open: true, message: 'Subtask ID missing for update', severity: 'error' });
       return;
     }
 
     const payload = {
-      subtask_name: updatedData.subtask_name,
-      description: updatedData.subtask_description,
+    
       status: newStatus ? 'Open' : 'Closed',
     };
 
-    try {
-      await axios.put(`http://localhost:3030/api/subtasks/${task.subtask_id}`, payload);
-      setSnackbar({ open: true, message: 'Subtask status updated successfully', severity: 'success' });
-    } catch (error) {
-      setSnackbar({ open: true, message: 'Subtask update failed', severity: 'error' });
-    }
+   
   };
 
   const handleUpdate = async () => {
@@ -98,17 +82,17 @@ const ActionView = ({ task = {}, onClose }) => {
     try {
       await axios.put(`http://localhost:3030/api/update-task/${task.task_id}`, payload);
       setSnackbar({ open: true, message: 'Task updated successfully', severity: 'success' });
-      if (onClose) onClose();
     } catch (error) {
       setSnackbar({ open: true, message: 'Task update failed', severity: 'error' });
     }
   };
 
   const handleSubtaskSubmit = async () => {
-    if (!task?.subtask_id) {
+    if (!task?.sub_task_id) {
       setSnackbar({ open: true, message: 'Subtask ID missing for update', severity: 'error' });
       return;
     }
+    console.log(task.sub_task_id)
 
     const payload = {
       subtask_name: formData.subtask_name,
@@ -117,9 +101,8 @@ const ActionView = ({ task = {}, onClose }) => {
     };
 
     try {
-      await axios.put(`http://localhost:3030/api/subtasks/${task.subtask_id}`, payload);
-      setSnackbar({ open: true, message: 'Subtask updated successfully', severity: 'success' });
-      if (onClose) onClose();
+      await axios.put(`http://localhost:3030/api/subtasks/${task.sub_task_id}`, payload);
+      setSnackbar({ open: true, message: 'Subtask status updated successfully', severity: 'success' });
     } catch (error) {
       setSnackbar({ open: true, message: 'Subtask update failed', severity: 'error' });
     }

@@ -46,7 +46,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
         end_date: project.end_date || '',
         expected_date: project.expected_date || '',
         budget: project.budget || '',
-        allocated_executives: JSON.parse(project.allocated_executives) || [],
+        allocated_executives:JSON.parse(project.allocated_executives) || [],
       }));
     }
   }, [project]);
@@ -136,7 +136,9 @@ const EditProject = ({ project, onClose, onUpdate }) => {
       height: '40px',
     },
   };
-
+console.log('adaksmkamsk');
+console.log(formData);
+console.log(adminOptions);
   return (
     <Dialog
       open
@@ -173,6 +175,8 @@ const EditProject = ({ project, onClose, onUpdate }) => {
           </IconButton>
         </DialogTitle>
       </Box>
+
+      
 
       <DialogContent dividers sx={{ px: 3, py: 5 }}>
         <Grid container spacing={5}>

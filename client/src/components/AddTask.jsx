@@ -25,7 +25,7 @@ const AddTask = ({ onClose, onSubmit }) => {
     fetch('http://localhost:3030/api/projects')
       .then(res => res.json())
       .then(data => setProjectsList(data))
-      //.catch(() => alert('❌ Failed to fetch projects.'));
+      
   }, []);
 
   const taskPayload = () => ({
@@ -49,7 +49,7 @@ const AddTask = ({ onClose, onSubmit }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(taskPayload())
       });
-  
+  console.log("tryyy")
       const result = await res.json();
   
       if (res.ok) {
