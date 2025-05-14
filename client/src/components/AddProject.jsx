@@ -84,7 +84,9 @@ const AddProject = ({ onClose, onSubmit }) => {
     });
   };
 
+
   const handleSubmit = async (e) => {
+    console.log("submitted")
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -113,38 +115,46 @@ const AddProject = ({ onClose, onSubmit }) => {
       department: formData.domain,
       allocated_executives: crmIds,
     };
+    console.log(projectData)
 
-    try {
-      const response = await fetch('http://localhost:3030/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSnackbar({
-          open: true,
-          message: '✅ Project added successfully!',
-          severity: 'success',
+    fetch('http://localhost:3030/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(projectData),
+    })
+      .then(response => {
+        console.log('1'); // This will now run
+        return response.json().then(result => {
+          if (response.ok) {
+            console.log('IF');
+            setSnackbar({
+              open: true,
+              message: '✅ Project added successfully!',
+              severity: 'success',
+            });
+          } else {
+            console.log('ELSE');
+            setSnackbar({
+              open: true,
+              message: `❌ Failed to add project: ${result.error || 'Unknown error'}`,
+              severity: 'error',
+            });
+          }
         });
-      } else {
+      })
+      .catch(error => {
+        console.log('error');
         setSnackbar({
           open: true,
-          message: `❌ Failed to add project: ${result.error || 'Unknown error'}`,
+          message: '❌ Something went wrong while submitting the project.',
           severity: 'error',
         });
-      }
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: '❌ Something went wrong while submitting the project.',
-        severity: 'error',
+      })
+      .finally(() => {
+        console.log('finally');
+        setIsSubmitting(false);
       });
-    } finally {
-      setIsSubmitting(false);
-    }
+
   };
 
   const handleSnackbarClose = () => {
@@ -245,7 +255,7 @@ const AddProject = ({ onClose, onSubmit }) => {
         </DialogTitle>
 
         <DialogContent sx={{ padding: '1.5em', mt: 4 }}>
-          <form onSubmit={handleSubmit}>
+          <form >
             <Grid container spacing={3.5}>
               <Grid item xs={12} sm={8}>
                 <TextField
@@ -366,7 +376,7 @@ const AddProject = ({ onClose, onSubmit }) => {
 
             <Box textAlign="center" mt={4}>
               <Button
-                type="submit"
+                onClick={handleSubmit}
                 variant="contained"
                 disabled={isSubmitting}
                 sx={{
