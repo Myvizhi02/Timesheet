@@ -130,6 +130,7 @@ app.get('/getCrmLogId/:agent_id', checkDbConnection, async (req, res) => {
 // ----------------------------------------------
 app.get('/api/projects', checkDbConnection, async (req, res) => {
   try {
+    console.log("111111")
     const [projects] = await db.execute('SELECT * FROM main_project WHERE is_active = 1 ORDER BY created_date ASC');
     res.json(projects);
   } catch (error) {
@@ -231,6 +232,7 @@ app.put('/api/projects/:id', checkDbConnection, async (req, res) => {
 // });
 
 app.post('/api/projects', async (req, res) => {
+  console.log("Received body:", req.body);
   const {
     project_unique_id,
     project_name,
@@ -248,13 +250,12 @@ app.post('/api/projects', async (req, res) => {
     allocated_executives,
   } = req.body;
 
-  // Format the date to remove the time part
   const formatDate = (date) => {
+    if (!date) return null;
     const newDate = new Date(date);
-    return newDate.toISOString().split('T')[0]; // Extract date part (YYYY-MM-DD)
+    return newDate.toISOString().split('T')[0];
   };
 
-  // Format the dates
   const formattedStartDate = formatDate(start_date);
   const formattedEndDate = formatDate(end_date);
   const formattedExpectedDate = formatDate(expected_date);
@@ -283,27 +284,32 @@ app.post('/api/projects', async (req, res) => {
     project_unique_id,
     project_name,
     lob,
-    formattedStartDate, // Use formatted date
-    formattedEndDate,   // Use formatted date
-    formattedExpectedDate, // Use formatted date
+    formattedStartDate,
+    formattedEndDate,
+    formattedExpectedDate,
     budget,
     created_by,
     modified_by,
-    formattedCreatedDate, // Use formatted date
-    formattedModifiedDate, // Use formatted date
+    formattedCreatedDate,
+    formattedModifiedDate,
     is_active,
     department,
     JSON.stringify(allocated_executives),
   ];
 
-  db.query(query, values, (err, results) => {
-    if (err) {
-      console.error('Error inserting project:', err);
-      return res.status(500).json({ message: 'Failed to add project' });
-    }
-    res.status(201).json({ message: 'Project added successfully', projectId: results.insertId });
-  });
+  try {
+
+    const [result] = await db.execute(query, values);
+    console.log(result)
+    res.status(201).json({ message: 'Project added successfully', projectId: result.insertId });
+  } catch (err) {
+    console.error('Error inserting project:', err);
+    res.status(500).json({ message: 'Failed to add project' });
+  }
 });
+
+
+
 
 
 app.get('/api/admins', async (req, res) => {
@@ -377,7 +383,7 @@ app.post('/api/tasks', checkDbConnection, async (req, res) => {
 
   try {
     // Validate status
-    if (![0, 1].includes(status)) {
+    if (![2, 1].includes(status)) {
       return res.status(400).json({ error: 'Invalid task status.' });
     }
 
@@ -580,7 +586,7 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
       status,  // status should be 1 (Open) or 0 (Closed)
       created_by,
       modified_by,
-      status === 0 ? 0 : 1,  // if status is 0, set is_active to 0 (inactive), otherwise 1 (active)
+      status === 0 ? 1 : 2,  // if status is 0, set is_active to 0 (inactive), otherwise 1 (active)
     ]);
 
     res.status(201).json({ message: 'Subtask added successfully.' });
@@ -668,6 +674,37 @@ app.put('/api/subtasks/:id', async (req, res) => {
 // ----------------------------------------------
 // SPENT TIME - Save Time Endpoint
 // ----------------------------------------------
+// Check for existing time range
+app.get('/api/spenttime/partial-check', (req, res) => {
+  const { start_date, start_time, end_time } = req.query;
+
+  if (!start_time || !end_time || !start_date) {
+    return res.status(400).json({ error: 'Missing start_date, start_time, or end_time' });
+  }
+
+  const query = `
+    SELECT start_time, end_time 
+    FROM main_spent_time 
+    WHERE start_date = ? AND (? < end_time AND ? > start_time)
+  `;
+
+  db.query(query, [start_date, start_time, end_time], (err, results) => {
+    if (err) {
+      console.error('Error checking time overlap:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (results.length > 0) {
+      res.json({ exists: true, conflicts: results });
+    } else {
+      res.json({ exists: false });
+    }
+  });
+});
+
+
+
+// Existing POST endpoint to save spent time
 app.post('/api/spenttime', checkDbConnection, async (req, res) => {
   console.log('Received data:', req.body);
   const {
@@ -688,16 +725,14 @@ app.post('/api/spenttime', checkDbConnection, async (req, res) => {
   } = req.body;
 
   try {
-    // Check if the sub_task_id exists in the main_sub_task table
     const [subTaskExists] = await db.execute(`
       SELECT COUNT(*) AS count FROM main_sub_task WHERE id = ?
-    `, [sub_task_id]);  // Corrected: Use sub_task_id instead of id
+    `, [sub_task_id]);
 
     if (subTaskExists[0].count === 0) {
       return res.status(400).json({ error: 'Sub-task ID does not exist.' });
     }
 
-    // Insert the spent time record into the database
     await db.execute(`
       INSERT INTO main_spent_time (
         project_id, task_id, sub_task_id, user_id,
@@ -718,6 +753,7 @@ app.post('/api/spenttime', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
 app.get('/api/spent-time-details', async (req, res) => {
   try {
     const [rows] = await db.execute(`

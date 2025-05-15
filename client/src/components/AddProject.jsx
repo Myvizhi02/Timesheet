@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -12,12 +13,12 @@ import {
   InputLabel,
   MenuItem,
   OutlinedInput,
+  Portal,
   Select,
   Snackbar,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
@@ -43,6 +44,11 @@ const AddProject = ({ onClose, onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+  const showSnackbar = (message, severity = 'success') => {
+    console.log('Showing snackbar:', message, severity);
+    setSnackbar({ open: true, message, severity });
+  };
+
   useEffect(() => {
     const fetchAdmins = async () => {
       setLoadingAdmins(true);
@@ -51,7 +57,7 @@ const AddProject = ({ onClose, onSubmit }) => {
         const data = await res.json();
         setAdminOptions(data);
       } catch (err) {
-        setSnackbar({ open: true, message: 'Failed to load admins', severity: 'error' });
+        showSnackbar('Failed to load admins', 'error');
       } finally {
         setLoadingAdmins(false);
       }
@@ -88,7 +94,7 @@ const AddProject = ({ onClose, onSubmit }) => {
   const handleSubmit = async (e) => {
     console.log("submitted")
     e.preventDefault();
-    setIsSubmitting(true);
+    //setIsSubmitting(true);
 
     const nameToIdMap = {};
     adminOptions.forEach(admin => {
@@ -117,6 +123,7 @@ const AddProject = ({ onClose, onSubmit }) => {
     };
     console.log(projectData)
 
+<<<<<<< HEAD
     fetch('http://localhost:3030/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -144,6 +151,47 @@ const AddProject = ({ onClose, onSubmit }) => {
       })
       .catch(error => {
         console.log('error');
+=======
+    try {
+<<<<<<< HEAD
+      console.log("Handle submit")
+      const res = await fetch('http://localhost:3030/api/projects', {
+=======
+      const response = await fetch('http://localhost:3030/api/projects', {
+>>>>>>> 44cde0cba9295cc83e824c2b3d5c52446092f120
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(projectData),
+      });
+      console.log(res)
+      if (res.ok) {
+  showSnackbar('✅ Project added successfully!', 'success');
+  setTimeout(() => {
+    if (onSubmit) onSubmit(projectData);
+  }, 1000);
+
+<<<<<<< HEAD
+  // Delay close until snackbar is dismissed (4s)
+  setTimeout(() => {
+    onClose();
+  }, 3000); // match or exceed Snackbar's autoHideDuration
+}
+else {
+        const result = await res.json();
+        showSnackbar(`❌ Failed to add project: ${result.error || 'Unknown error'}`, 'error');
+      }
+    } catch (error) {
+      showSnackbar('❌ Failed to add project: Network error or server is down', 'error');
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+=======
+      const result = await response.json();
+
+      if (response.ok) {
+        setSnackbar({ open: true, message: '✅ Project added successfully!', severity: 'success' });
+      } else {
+>>>>>>> a5a2437c1611c44c14c1130edcda03ff489d65dd
         setSnackbar({
           open: true,
           message: '❌ Something went wrong while submitting the project.',
@@ -164,8 +212,10 @@ const AddProject = ({ onClose, onSubmit }) => {
     if (snackbar.severity === 'success') {
       onSubmit();
       onClose();
+>>>>>>> 44cde0cba9295cc83e824c2b3d5c52446092f120
     }
   };
+//console.log(snackbar)
 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -219,6 +269,10 @@ const AddProject = ({ onClose, onSubmit }) => {
 
   return (
     <>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> a5a2437c1611c44c14c1130edcda03ff489d65dd
       <Dialog
         open
         onClose={onClose}
@@ -255,6 +309,7 @@ const AddProject = ({ onClose, onSubmit }) => {
         </DialogTitle>
 
         <DialogContent sx={{ padding: '1.5em', mt: 4 }}>
+<<<<<<< HEAD
   <form>
     <Grid container spacing={3.5}>
       {/* Project ID */}
@@ -311,6 +366,33 @@ const AddProject = ({ onClose, onSubmit }) => {
   
 
 
+=======
+          <form>
+            <Grid container spacing={3.5}>
+              <Grid item xs={12} sm={8}>
+                <TextField
+                  name="projectId"
+                  label="Project ID"
+                  variant="outlined"
+                  fullWidth
+                  value={formData.projectId || ''}
+                  disabled
+                  sx={inputStyle}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  name="projectName"
+                  label="Project Name"
+                  variant="outlined"
+                  fullWidth
+                  onChange={handleChange}
+                  value={formData.projectName}
+                  required
+                  sx={inputStyle}
+                />
+              </Grid>
+>>>>>>> a5a2437c1611c44c14c1130edcda03ff489d65dd
               <Grid item xs={12} sm={6}>
                 <TextField
                   name="domain"
@@ -429,17 +511,37 @@ const AddProject = ({ onClose, onSubmit }) => {
           </form>
         </DialogContent>
       </Dialog>
+<<<<<<< HEAD
 
+=======
+<Portal>
+=======
+      {/* Dialog + Form JSX */}
+      {/* Your full JSX remains unchanged */}
+      {/* ... */}
+      {/* Snackbar */}
+>>>>>>> 44cde0cba9295cc83e824c2b3d5c52446092f120
+>>>>>>> a5a2437c1611c44c14c1130edcda03ff489d65dd
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        sx={{ zIndex: 2000 }}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+       sx={{
+    '& .MuiSnackbarContent-root': {
+      zIndex: 2500, // Ensure it's well above Dialog
+    },
+  }}
       >
-        <MuiAlert elevation={6} variant="filled" severity={snackbar.severity}>
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
-        </MuiAlert>
+        </Alert>
       </Snackbar>
+</Portal>
     </>
   );
 };

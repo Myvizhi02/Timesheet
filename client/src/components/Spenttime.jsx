@@ -14,57 +14,41 @@ import addIcon from '../assets/add.png';
 import AddSpenttime from './AddSpenttime';
 
 const SpentTimeTable = () => {
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  // Set default date to today's date
+  const [selectedDate, setSelectedDate] = useState(dayjs()); // Default to current date
   const [showSpentModal, setShowSpentModal] = useState(false);
   const [spentTimeData, setSpentTimeData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [error, setError] = useState('');
-  const [selectedDate2, setSelectedDate2] = useState(null);
 
-  useEffect(() => {
-    if (selectedDate2) {
-      axios.get('/api/spent-time', {
-        params: { date: selectedDate2 }
-      })
-        .then(response => {
-          setSpentTimeData(response.data);
-        })
-        .catch(() => {
-          setError('Error fetching data');
-        });
-    }
-  }, [selectedDate2]);
-
-  useEffect(() => {
+  // Fetch spent time data for the current date or selected date
+  const fetchSpentTimeData = (dateString) => {
     const crmLogId = localStorage.getItem('crm_log_id');
-    const formattedDate = selectedDate.format('YYYY-MM-DD');
-
-    if (crmLogId) {
-      axios.get('http://localhost:3030/api/spent-time', {
-        headers: {
-          'Authorization': `Bearer ${crmLogId}`,
-        },
-        params: { date: formattedDate },
-      })
-        .then(response => {
-          setSpentTimeData(response.data);
-          filterDataByDate(response.data, formattedDate);
-        })
-        .catch(() => {
-          setError('Error fetching employee data');
-        });
-    } else {
+    if (!crmLogId) {
       setError('No crm_log_id found in local storage');
+      setSpentTimeData([]);
+      return;
     }
-  }, [selectedDate]);
 
-  const filterDataByDate = (data, date) => {
-    const filtered = data.filter((row) => {
-      const rowDate = dayjs(row.start_time);
-      return rowDate.isSame(date, 'day');
-    });
-    setFilteredData(filtered);
+    axios.get('http://localhost:3030/api/spent-time', {
+      headers: {
+        'Authorization': `Bearer ${crmLogId}`,
+      },
+      params: { date: dateString },
+    })
+      .then(response => {
+        setSpentTimeData(response.data || []);
+        setError('');
+      })
+      .catch(() => {
+        setError('Error fetching employee data');
+        setSpentTimeData([]);
+      });
   };
+
+  // Trigger fetching of spent time data for the current date initially
+  useEffect(() => {
+    fetchSpentTimeData(selectedDate.format('YYYY-MM-DD')); // Fetch data for current date when component mounts
+  }, []);
 
   const handleOpenSpentModal = () => {
     setShowSpentModal(true);
@@ -76,11 +60,16 @@ const SpentTimeTable = () => {
 
   const handleDateChange = (newDate) => {
     setSelectedDate(newDate);
-    setSelectedDate2(newDate.format('YYYY-MM-DD'));
-    filterDataByDate(spentTimeData, newDate);
+    if (newDate) {
+      fetchSpentTimeData(newDate.format('YYYY-MM-DD')); // Fetch data for selected date
+    }
   };
 
+  // Calculate total worked hours
   const totalWorkedHours = spentTimeData.reduce((total, row) => total + parseFloat(row.hours || 0), 0);
+
+  // Check if the selected date is today
+  const isToday = selectedDate.isSame(dayjs(), 'day');
 
   return (
     <Box p={4} sx={{ backgroundColor: '#f4f6f9', minHeight: '100vh' }}>
@@ -104,14 +93,17 @@ const SpentTimeTable = () => {
           />
         </LocalizationProvider>
 
-        <Button
-          variant="contained"
-          startIcon={<img src={addIcon} alt="Add" width="20" />}
-          onClick={handleOpenSpentModal}
-          sx={{ backgroundColor: '#3D6BFA', textTransform: 'none', borderRadius: 2 }}
-        >
-          Add Spent Time
-        </Button>
+        {/* Conditionally render the Add Spent Time button based on whether the selected date is today */}
+        {isToday && (
+          <Button
+            variant="contained"
+            startIcon={<img src={addIcon} alt="Add" width="20" />}
+            onClick={handleOpenSpentModal}
+            sx={{ backgroundColor: '#3D6BFA', textTransform: 'none', borderRadius: 2 }}
+          >
+            Add Spent Time
+          </Button>
+        )}
       </Stack>
 
       <Stack direction="column" justifyContent="space-between" alignItems="flex-start" mt={3}>
@@ -144,18 +136,26 @@ const SpentTimeTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {spentTimeData.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{row.project_name}</TableCell>
-                  <TableCell>{row.task_name}</TableCell>
-                  <TableCell>{row.subtask_name}</TableCell>
-                  <TableCell>{row.start_time}</TableCell>
-                  <TableCell>{row.end_time}</TableCell>
-                  <TableCell>{row.comments}</TableCell>
-                  <TableCell>{row.hours}</TableCell>
+              {spentTimeData.length > 0 ? (
+                spentTimeData.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{row.project_name}</TableCell>
+                    <TableCell>{row.task_name}</TableCell>
+                    <TableCell>{row.subtask_name}</TableCell>
+                    <TableCell>{row.start_time}</TableCell>
+                    <TableCell>{row.end_time}</TableCell>
+                    <TableCell>{row.comments}</TableCell>
+                    <TableCell>{row.hours}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">
+                    {selectedDate ? 'No data found for this date.' : 'Please select a date to view data.'}
+                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>

@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -12,13 +13,21 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Snackbar,
   TextField,
-  Typography
+  Typography,Portal
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 
+
+
 const EditProject = ({ project, onClose, onUpdate }) => {
+  const showSnackbar = (message, severity = 'success') => {
+    console.log('Showing snackbar:', message, severity);
+    setSnackbar({ open: true, message, severity });
+  };
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [formData, setFormData] = useState({
     project_unique_id: '',
     project_name: '',
@@ -30,13 +39,17 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     budget: '',
     allocated_executives: [],
   });
+const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [adminOptions, setAdminOptions] = useState([]);
   const theme = useTheme();
 
   useEffect(() => {
     if (project) {
+      console.log("allocated_executives:", project.allocated_executives);
+
       setFormData((prev) => ({
+
         ...prev,
         project_unique_id: project.project_unique_id || '',
         project_name: project.project_name || '',
@@ -46,7 +59,7 @@ const EditProject = ({ project, onClose, onUpdate }) => {
         end_date: project.end_date || '',
         expected_date: project.expected_date || '',
         budget: project.budget || '',
-        allocated_executives:JSON.parse(project.allocated_executives) || [],
+        allocated_executives: JSON.parse(project.allocated_executives) || [],
       }));
     }
   }, [project]);
@@ -98,7 +111,9 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleEditSubmit = async () => {
+      console.log("ala,ls,als,ls")
+ setIsSubmitting(true); 
     const updatedData = {
       ...formData,
       allocated_executives: formData.allocated_executives.filter(Boolean),
@@ -107,20 +122,32 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     if (!formData.project_unique_id) return;
 
     try {
+      console.log("WWWWWW")
       const res = await fetch(`http://localhost:3030/api/projects/${formData.project_unique_id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
       });
+      console.log(res)
+   if (res.ok) {
+  showSnackbar('✅ Project updated successfully!', 'success');
 
-      if (res.ok) {
-        onUpdate(updatedData);
-        onClose();
-      } else {
-        console.error('Failed to update project:', res.statusText);
+  setTimeout(() => {
+    if (onUpdate) onUpdate();  // ✅ just trigger fetchProjects
+    onClose();                 // ✅ close dialog
+  }, 1000);
+}
+
+
+      else {
+        const result = await res.json();
+        showSnackbar(`❌ Failed to update project: ${result.error || 'Unknown error'}`, 'error');
       }
-    } catch (err) {
-      console.error('Error updating project:', err);
+    } catch (error) {
+      showSnackbar('❌ Failed to update project: Network error or server is down', 'error');
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -136,10 +163,10 @@ const EditProject = ({ project, onClose, onUpdate }) => {
       height: '40px',
     },
   };
-console.log('adaksmkamsk');
-console.log(formData);
-console.log(adminOptions);
-  return (
+  console.log('adaksmkamsk');
+  console.log(formData);
+  console.log(adminOptions);
+  return (<>
     <Dialog
       open
       onClose={onClose}
@@ -176,7 +203,7 @@ console.log(adminOptions);
         </DialogTitle>
       </Box>
 
-      
+
 
       <DialogContent dividers sx={{ px: 3, py: 5 }}>
         <Grid container spacing={5}>
@@ -320,7 +347,7 @@ console.log(adminOptions);
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 20, mr: 8 }}>
           <Button
             variant="contained"
-            onClick={handleSubmit}
+            onClick={handleEditSubmit}
             sx={{
               width: '120px',
               backgroundColor: '#1E40AF',
@@ -331,7 +358,27 @@ console.log(adminOptions);
           </Button>
         </Grid>
       </DialogContent>
-    </Dialog>
+    </Dialog><Portal>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3500}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            zIndex: 2500, // Ensure it's well above Dialog
+          },
+        }}
+      >
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Portal></>
   );
 };
 
