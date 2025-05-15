@@ -84,7 +84,9 @@ const AddProject = ({ onClose, onSubmit }) => {
     });
   };
 
+
   const handleSubmit = async (e) => {
+    console.log("submitted")
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -113,38 +115,52 @@ const AddProject = ({ onClose, onSubmit }) => {
       department: formData.domain,
       allocated_executives: crmIds,
     };
+    console.log(projectData)
 
-    try {
-      const response = await fetch('http://localhost:3030/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSnackbar({ open: true, message: '✅ Project added successfully!', severity: 'success' });
-      } else {
+    fetch('http://localhost:3030/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(projectData),
+    })
+      .then(response => {
+        console.log('1'); // This will now run
+        return response.json().then(result => {
+          if (response.ok) {
+            console.log('IF');
+            setSnackbar({
+              open: true,
+              message: '✅ Project added successfully!',
+              severity: 'success',
+            });
+          } else {
+            console.log('ELSE');
+            setSnackbar({
+              open: true,
+              message: `❌ Failed to add project: ${result.error || 'Unknown error'}`,
+              severity: 'error',
+            });
+          }
+        });
+      })
+      .catch(error => {
+        console.log('error');
         setSnackbar({
           open: true,
-          message: `❌ Failed to add project: ${result.error || 'Unknown error'}`,
+          message: '❌ Something went wrong while submitting the project.',
           severity: 'error',
         });
-      }
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: '❌ Something went wrong while submitting the project.',
-        severity: 'error',
+      })
+      .finally(() => {
+        console.log('finally');
+        setIsSubmitting(false);
       });
-    } finally {
-      setIsSubmitting(false);
-    }
+
   };
 
   const handleSnackbarClose = () => {
     setSnackbar({ ...snackbar, open: false });
+
+    // Only refresh and close if it was a success
     if (snackbar.severity === 'success') {
       onSubmit();
       onClose();
@@ -203,10 +219,217 @@ const AddProject = ({ onClose, onSubmit }) => {
 
   return (
     <>
-      {/* Dialog + Form JSX */}
-      {/* Your full JSX remains unchanged */}
-      {/* ... */}
-      {/* Snackbar */}
+      <Dialog
+        open
+        onClose={onClose}
+        fullWidth={false}
+        PaperProps={{
+          sx: {
+            width: '37.625rem',
+            height: '37.5rem',
+            position: 'absolute',
+            top: 'calc(50% + 35px)',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1300,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            backgroundColor: '#A3EAFD',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            height: '3rem',
+            px: 3,
+            py: 0,
+          }}
+        >
+          <Typography variant="h6" fontWeight={600}>
+            Add Project
+          </Typography>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ padding: '1.5em', mt: 4 }}>
+  <form>
+    <Grid container spacing={3.5}>
+      {/* Project ID */}
+      <Grid item xs={12} sm={8}>
+        <TextField
+          name="projectId"
+          label="Project ID"
+          variant="outlined"
+          fullWidth
+          value={formData.projectId || ''}
+          disabled // corrected "disable" to "disabled"
+          sx={{
+            ...inputStyle,
+            '& .MuiInputLabel-root': {
+              fontSize: '1.2rem',
+            },
+            '& .MuiInputBase-root': {
+              fontSize: '1.rem',
+              paddingTop: '1.rem', // adjust padding for label space
+            },
+          }}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+      </Grid>
+
+      {/* Project Name */}
+      <Grid item xs={12} sm={6}>
+        <TextField
+  label="Project Name"
+  name="projectName"
+  variant="outlined"
+  fullWidth
+  required
+  value={formData.projectName}
+  onChange={handleChange}
+  InputLabelProps={{ shrink: true }}
+  sx={{
+            ...inputStyle,
+            '& .MuiInputLabel-root': {
+              fontSize: '1.2rem',
+            },
+            '& .MuiInputBase-root': {
+              fontSize: '1.rem',
+            
+             
+            },
+          }}
+  
+/>
+</Grid>
+    
+  
+
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  name="domain"
+                  label="Domain"
+                  variant="outlined"
+                  fullWidth
+                  onChange={handleChange}
+                  value={formData.domain}
+                  required
+                  sx={inputStyle}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  name="lob"
+                  label="LOB"
+                  variant="outlined"
+                  fullWidth
+                  onChange={handleChange}
+                  value={formData.lob}
+                  required
+                  sx={inputStyle}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  placeholderText="Start Date"
+                  dateFormat="dd/MM/yyyy"
+                  customInput={<CustomInput placeholder="Select Start Date" />}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  placeholderText="End Date"
+                  dateFormat="dd/MM/yyyy"
+                  customInput={<CustomInput placeholder="Select End Date" />}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DatePicker
+                  selected={actualEndDate}
+                  onChange={(date) => setActualEndDate(date)}
+                  placeholderText="Actual End Date"
+                  dateFormat="dd/MM/yyyy"
+                  customInput={<CustomInput placeholder="Select Actual End Date" />}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  name="budget"
+                  label="Budget"
+                  variant="outlined"
+                  fullWidth
+                  onChange={handleChange}
+                  value={formData.budget}
+                  sx={inputStyle}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth sx={selectStyle}>
+                  <InputLabel id="select-multiple-label">Add People</InputLabel>
+                  <Select
+                    labelId="select-multiple-label"
+                    multiple
+                    value={formData.addPeople}
+                    onChange={handlePeopleChange}
+                    input={<OutlinedInput label="Add People" />}
+                    MenuProps={MenuProps}
+                  >
+                    {loadingAdmins ? (
+                      <MenuItem disabled>
+                        <CircularProgress size={20} />
+                        &nbsp;Loading...
+                      </MenuItem>
+                    ) : (
+                      adminOptions.map((admin) => (
+                        <MenuItem
+                          key={admin.crm_log_id}
+                          value={admin.name}
+                          style={getStyles(admin.name, formData.addPeople, theme)}
+                        >
+                          {admin.name}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+
+            <Box textAlign="center" mt={4}>
+              <Button
+                onClick={handleSubmit}
+                variant="contained"
+                disabled={isSubmitting}
+                sx={{
+                  backgroundColor: '#213E9A',
+                  color: 'white',
+                  width: '20%',
+                  height: '42px',
+                  fontWeight: 600,
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: '#213E9A',
+                  },
+                }}
+              >Submit
+                {/* {isSubmitting ? 'Submitting...' : 'Submit'} */}
+              </Button>
+            </Box>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -221,7 +444,6 @@ const AddProject = ({ onClose, onSubmit }) => {
   );
 };
 
-// Styles
 const inputStyle = {
   width: '260px',
   '& .MuiInputBase-root': {
