@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -12,12 +13,12 @@ import {
   InputLabel,
   MenuItem,
   OutlinedInput,
+  Portal,
   Select,
   Snackbar,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
@@ -43,6 +44,11 @@ const AddProject = ({ onClose, onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+  const showSnackbar = (message, severity = 'success') => {
+    console.log('Showing snackbar:', message, severity);
+    setSnackbar({ open: true, message, severity });
+  };
+
   useEffect(() => {
     const fetchAdmins = async () => {
       setLoadingAdmins(true);
@@ -51,7 +57,7 @@ const AddProject = ({ onClose, onSubmit }) => {
         const data = await res.json();
         setAdminOptions(data);
       } catch (err) {
-        setSnackbar({ open: true, message: 'Failed to load admins', severity: 'error' });
+        showSnackbar('Failed to load admins', 'error');
       } finally {
         setLoadingAdmins(false);
       }
@@ -84,11 +90,9 @@ const AddProject = ({ onClose, onSubmit }) => {
     });
   };
 
-
   const handleSubmit = async (e) => {
-    console.log("submitted")
     e.preventDefault();
-    setIsSubmitting(true);
+    //setIsSubmitting(true);
 
     const nameToIdMap = {};
     adminOptions.forEach(admin => {
@@ -115,57 +119,38 @@ const AddProject = ({ onClose, onSubmit }) => {
       department: formData.domain,
       allocated_executives: crmIds,
     };
-    console.log(projectData)
 
-    fetch('http://localhost:3030/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(projectData),
-    })
-      .then(response => {
-        console.log('1'); // This will now run
-        return response.json().then(result => {
-          if (response.ok) {
-            console.log('IF');
-            setSnackbar({
-              open: true,
-              message: '✅ Project added successfully!',
-              severity: 'success',
-            });
-          } else {
-            console.log('ELSE');
-            setSnackbar({
-              open: true,
-              message: `❌ Failed to add project: ${result.error || 'Unknown error'}`,
-              severity: 'error',
-            });
-          }
-        });
-      })
-      .catch(error => {
-        console.log('error');
-        setSnackbar({
-          open: true,
-          message: '❌ Something went wrong while submitting the project.',
-          severity: 'error',
-        });
-      })
-      .finally(() => {
-        console.log('finally');
-        setIsSubmitting(false);
+    try {
+      console.log("Handle submit")
+      const res = await fetch('http://localhost:3030/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(projectData),
       });
+      console.log(res)
+      if (res.ok) {
+  showSnackbar('✅ Project added successfully!', 'success');
+  setTimeout(() => {
+    if (onSubmit) onSubmit(projectData);
+  }, 1000);
 
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
-
-    // Only refresh and close if it was a success
-    if (snackbar.severity === 'success') {
-      onSubmit();
-      onClose();
+  // Delay close until snackbar is dismissed (4s)
+  setTimeout(() => {
+    onClose();
+  }, 3000); // match or exceed Snackbar's autoHideDuration
+}
+else {
+        const result = await res.json();
+        showSnackbar(`❌ Failed to add project: ${result.error || 'Unknown error'}`, 'error');
+      }
+    } catch (error) {
+      showSnackbar('❌ Failed to add project: Network error or server is down', 'error');
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+//console.log(snackbar)
 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -255,7 +240,7 @@ const AddProject = ({ onClose, onSubmit }) => {
         </DialogTitle>
 
         <DialogContent sx={{ padding: '1.5em', mt: 4 }}>
-          <form >
+          <form>
             <Grid container spacing={3.5}>
               <Grid item xs={12} sm={8}>
                 <TextField
@@ -398,17 +383,27 @@ const AddProject = ({ onClose, onSubmit }) => {
           </form>
         </DialogContent>
       </Dialog>
-
+<Portal>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        sx={{ zIndex: 2000 }}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+       sx={{
+    '& .MuiSnackbarContent-root': {
+      zIndex: 2500, // Ensure it's well above Dialog
+    },
+  }}
       >
-        <MuiAlert elevation={6} variant="filled" severity={snackbar.severity}>
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
-        </MuiAlert>
+        </Alert>
       </Snackbar>
+</Portal>
     </>
   );
 };

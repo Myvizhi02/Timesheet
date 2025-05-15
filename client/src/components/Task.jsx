@@ -20,31 +20,34 @@ import ActionView from './ActionView';
 import AddTask from './AddTask';
 
 const Task = () => {
-  const [showPopup, setShowPopup] = useState(false);
+   const [showPopup, setShowPopup] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [openActionView, setOpenActionView] = useState(false);
   const [tasks, setTasks] = useState([]);
+  const [refreshFlag, setRefreshFlag] = useState(false);  // <-- refresh trigger
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await axios.get('http://localhost:3030/api/tasks');
-        if (Array.isArray(response.data)) {
-          setTasks(response.data);
-        } else {
-          console.error('Expected an array of tasks');
-        }
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('http://localhost:3030/api/tasks');
+      if (Array.isArray(response.data)) {
+        setTasks(response.data);
+      } else {
+        console.error('Expected an array of tasks');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
 
+  // Fetch tasks initially and on every refreshFlag change
+  useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [refreshFlag]);
 
-  const handleCreateTask = (data) => {
-    setShowPopup(false);
-    // Optional: Refresh the task list after creation if needed
+  // Called after task is successfully created in AddTask
+  const handleCreateTask = () => {
+    setShowPopup(false);          // Close the AddTask popup
+    setRefreshFlag(prev => !prev); // Toggle refresh flag to reload tasks
   };
 
   const handleOpenActionView = (task) => {
@@ -57,15 +60,14 @@ const Task = () => {
     setOpenActionView(false);
   };
 
+
   return (
     <>
       <Box sx={{ padding: { xs: 2, sm: 4 }, backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
         <Box display="flex" justifyContent="flex-end" mb={3}>
           <Button
             variant="contained"
-            startIcon={
-              <img src={addIcon} alt="Add Icon" style={{ width: 20, height: 20 }} />
-            }
+            startIcon={<img src={addIcon} alt="Add Icon" style={{ width: 20, height: 20 }} />}
             sx={{
               backgroundColor: '#3D6BFA',
               borderRadius: '12px',

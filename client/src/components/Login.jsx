@@ -31,28 +31,28 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Check if user already logged in
-  useEffect(() => {
-    const checkLogin = async () => {
-      const crm_log_id = localStorage.getItem('crm_log_id');
-      const name = localStorage.getItem('name');
+  // useEffect(() => {
+  //   const checkLogin = async () => {
+  //     const crm_log_id = localStorage.getItem('crm_log_id');
+  //     const name = localStorage.getItem('name');
 
-      if (crm_log_id && name) {
-        try {
-          const res = await axios.post('http://localhost:3030/validate-session', { crm_log_id });
-          if (res.data.valid) {
-            navigate('/dashboard');
-          } else {
-            localStorage.clear();
-          }
-        } catch (err) {
-          console.error("Session validation error:", err.message);
-          localStorage.clear();
-        }
-      }
-    };
+  //     if (crm_log_id && name) {
+  //       try {
+  //         const res = await axios.post('http://localhost:3030/validate-session', { crm_log_id });
+  //         if (res.data.valid) {
+  //           navigate('/dashboard');
+  //         } else {
+  //           localStorage.clear();
+  //         }
+  //       } catch (err) {
+  //         console.error("Session validation error:", err.message);
+  //         localStorage.clear();
+  //       }
+  //     }
+  //   };
 
-    checkLogin();
-  }, [navigate]);
+  //   checkLogin();
+  // }, [navigate]);
 
   const handleLogin = async () => {
     if (!agentId.trim() || !password.trim()) {
