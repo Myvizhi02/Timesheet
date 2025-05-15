@@ -121,12 +121,8 @@ const AddProject = ({ onClose, onSubmit }) => {
     };
 
     try {
-<<<<<<< HEAD
       console.log("Handle submit")
       const res = await fetch('http://localhost:3030/api/projects', {
-=======
-      const response = await fetch('http://localhost:3030/api/projects', {
->>>>>>> 44cde0cba9295cc83e824c2b3d5c52446092f120
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectData),
@@ -138,7 +134,6 @@ const AddProject = ({ onClose, onSubmit }) => {
     if (onSubmit) onSubmit(projectData);
   }, 1000);
 
-<<<<<<< HEAD
   // Delay close until snackbar is dismissed (4s)
   setTimeout(() => {
     onClose();
@@ -153,35 +148,6 @@ else {
       console.error(error);
     } finally {
       setIsSubmitting(false);
-=======
-      const result = await response.json();
-
-      if (response.ok) {
-        setSnackbar({ open: true, message: '✅ Project added successfully!', severity: 'success' });
-      } else {
-        setSnackbar({
-          open: true,
-          message: `❌ Failed to add project: ${result.error || 'Unknown error'}`,
-          severity: 'error',
-        });
-      }
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: '❌ Something went wrong while submitting the project.',
-        severity: 'error',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
-    if (snackbar.severity === 'success') {
-      onSubmit();
-      onClose();
->>>>>>> 44cde0cba9295cc83e824c2b3d5c52446092f120
     }
   };
 //console.log(snackbar)
@@ -238,7 +204,6 @@ else {
 
   return (
     <>
-<<<<<<< HEAD
       <Dialog
         open
         onClose={onClose}
@@ -419,12 +384,6 @@ else {
         </DialogContent>
       </Dialog>
 <Portal>
-=======
-      {/* Dialog + Form JSX */}
-      {/* Your full JSX remains unchanged */}
-      {/* ... */}
-      {/* Snackbar */}
->>>>>>> 44cde0cba9295cc83e824c2b3d5c52446092f120
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

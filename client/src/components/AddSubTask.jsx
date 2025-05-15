@@ -10,14 +10,11 @@ import {
   TextField,
   Typography,
   Snackbar,
-  Alert,
+  Alert
 } from '@mui/material';
 import React, { useState } from 'react';
 
-const AddSubTask = ({ onClose, onSubmit, projectId,project, taskName,taskId }) => {
-  
-  console.log(projectId);
-  console.log(taskId);
+const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId }) => {
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(true);
   const [subtask, setSubtask] = useState('');
@@ -38,13 +35,11 @@ const AddSubTask = ({ onClose, onSubmit, projectId,project, taskName,taskId }) =
     }
 
     const crm_log_id = localStorage.getItem('crm_log_id');
-
     const statusValue = status ? 1 : 2;
 
-    // Prepare data with IDs (not names) as backend expects
     const subTaskData = {
-      project_id: projectId,
-      task_id: taskId,
+      project_name: project,
+      task_name: taskName,
       sub_task_name: subtask,
       description,
       status: statusValue,
@@ -63,15 +58,15 @@ const AddSubTask = ({ onClose, onSubmit, projectId,project, taskName,taskId }) =
 
       const result = await res.json();
 
-      if (res.ok) {
-        showSnackbar('✅ SubTask added successfully!', 'success');
-        if (onSubmit) onSubmit();
+     if (res.ok) {
+  showSnackbar('✅ SubTask added successfully!', 'success');
 
-        // Optionally close after delay
-        // setTimeout(() => {
-        //   if (onClose) onClose();
-        // }, 3000);
-      } else {
+  // Delay closing to show snackbar
+  setTimeout(() => {
+    if (onSubmit) onSubmit();
+  }, 1500);
+}
+ else {
         showSnackbar(`❌ Failed to add subtask: ${result.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
@@ -92,7 +87,7 @@ const AddSubTask = ({ onClose, onSubmit, projectId,project, taskName,taskId }) =
             maxWidth: '95vw',
             maxHeight: '95vh',
             borderRadius: '12px',
-            overflow: 'hidden',
+            overflow: 'visible',
             display: 'flex',
             flexDirection: 'column',
           },
@@ -221,17 +216,19 @@ const AddSubTask = ({ onClose, onSubmit, projectId,project, taskName,taskId }) =
             </Button>
           </Box>
         </DialogContent>
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={3000}
-          onClose={() => setSnackbarOpen(false)}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        >
-          <Alert severity={snackbarSeverity} sx={{ width: '100%' }}>
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
       </Dialog>
+
+      {/* ✅ Snackbar moved outside Dialog */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

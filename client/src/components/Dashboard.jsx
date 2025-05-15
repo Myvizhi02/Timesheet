@@ -44,6 +44,22 @@ const Dashboard = () => {
   const agentName = localStorage.getItem('name') || 'Agent';
   const [projects, setProjects] = useState([]);
   const [spentTimeDetails, setSpentTimeDetails] = useState([]);
+  const crmLogId = localStorage.getItem('crm_log_id');
+  console.log(crmLogId)
+const [executiveProjects, setExecutiveProjects] = useState([]);
+
+useEffect(() => {
+  if (!crmLogId) return;
+
+  axios.get(`http://localhost:3030/api/projects/by-executive/${crmLogId}`)
+    .then(response => {
+      setExecutiveProjects(response.data);
+    })
+    .catch(error => {
+      console.error('Error fetching projects for executive:', error);
+    });
+}, [crmLogId]);
+
 
   useEffect(() => {
     axios.get('http://localhost:3030/api/admins')
@@ -177,11 +193,16 @@ const Dashboard = () => {
                 <MenuItem value="">
                   <em>Select Project</em>
                 </MenuItem>
-                {projects.map((project) => (
-                  <MenuItem key={project.id} value={project.project_name}>
-                    {project.project_name}
-                  </MenuItem>
-                ))}
+                {executiveProjects.length === 0 ? (
+  <MenuItem disabled>No projects assigned</MenuItem>
+) : (
+  executiveProjects.map((project) => (
+    <MenuItem key={project.project_unique_id} value={project.project_name}>
+      {project.project_name}
+    </MenuItem>
+  ))
+)}
+
               </Select>
             </Box>
           </Grid>
