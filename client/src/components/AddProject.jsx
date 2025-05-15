@@ -391,11 +391,7 @@ const AddProject = ({ onClose, onSubmit }) => {
           autoHideDuration={3000}
           onClose={handleSnackbarClose}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          sx={{
-            '& .MuiSnackbarContent-root': {
-              zIndex: 2500,
-            },
-          }}
+          sx={{ '& .MuiSnackbarContent-root': { zIndex: 2500 } }}
         >
           <Alert
             onClose={handleSnackbarClose}

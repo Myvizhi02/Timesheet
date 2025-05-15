@@ -124,13 +124,29 @@ app.get('/getCrmLogId/:agent_id', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Server error.' });
   }
 });
+app.get('/api/projects/by-executive/:crm_log_id', async (req, res) => {
+  const { crm_log_id } = req.params;
 
+  try {
+    const [rows] = await db.query(
+      `SELECT * FROM main_project
+       WHERE is_active = 1
+         AND JSON_CONTAINS(allocated_executives, ?)`,
+      [`"${crm_log_id}"`] // note the quotes inside the string
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // ----------------------------------------------
 // PROJECTS
 // ----------------------------------------------
 app.get('/api/projects', checkDbConnection, async (req, res) => {
   try {
-    console.log("111111")
+  
     const [projects] = await db.execute('SELECT * FROM main_project WHERE is_active = 1 ORDER BY created_date ASC');
     res.json(projects);
   } catch (error) {

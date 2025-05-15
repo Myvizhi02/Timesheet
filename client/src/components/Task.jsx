@@ -106,9 +106,27 @@ const Task = () => {
                   <TableCell align="center">{task.subtask_name}</TableCell>
                   <TableCell align="center">{task.task_description}</TableCell>
                   <TableCell align="center">
-                    <Typography sx={{ color: task.subtask_status === 'Open' ? 'green' : 'red', fontWeight: 500 }}>
+                    {/* <Typography sx={{ color: task.subtask_status === 'Open' ? 'green' : 'red', fontWeight: 500 }}>
                       {task.subtask_status}
-                    </Typography>
+                    </Typography> */}
+                    <Typography
+  sx={{
+    color:
+      task.subtask_status === 1
+        ? 'green'
+        : task.subtask_status === 2 || task.subtask_status === '' || task.subtask_status == null
+        ? 'red'
+        : 'black', // default color if other values
+    fontWeight: 500,
+  }}
+>
+  {task.subtask_status === 1
+    ? 'Open'
+    : task.subtask_status === 2 || task.subtask_status === '' || task.subtask_status == null
+    ? 'Closed'
+    : 'Unknown'}
+</Typography>
+
                   </TableCell>
                   <TableCell align="center">
                     <IconButton onClick={() => handleOpenActionView(task)}>

@@ -33,7 +33,6 @@ const AddTask = ({ onClose, onSubmit }) => {
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [selectedProject, setSelectedProject] = useState(null);
 
-
   const showSnackbar = (message, severity = 'success') => {
       console.log('Snackbar called:', message, severity);
     setSnackbarMessage(message);
@@ -62,18 +61,13 @@ const AddTask = ({ onClose, onSubmit }) => {
   //     modified_by: localStorage.getItem('crm_log_id'),
   //   };
   // };
-  const taskPayload = () => {
-  // 'project' holds project_unique_id from select
-  const selectedProject = projectsList.find(
-    (proj) => proj.project_unique_id === project
-  );
- 
+ const taskPayload = () => {
+  const selectedProject = projectsList.find(proj => proj.project_unique_id === project);
 
-  // Defensive check:
   if (!selectedProject) {
-    // Could show an error or return early, but here just use empty string
+    // Defensive fallback
     return {
-      project_name: '',
+      project_name: '',   // maybe better to return empty string or handle error
       task_name: taskName,
       description,
       status: status ? 1 : 2,
@@ -83,7 +77,7 @@ const AddTask = ({ onClose, onSubmit }) => {
   }
 
   return {
-    project_name: selectedProject.project_name,  // send project name to backend
+    project_name: selectedProject.project_name,
     task_name: taskName,
     description,
     status: status ? 1 : 2,
@@ -107,11 +101,12 @@ const AddTask = ({ onClose, onSubmit }) => {
       });
 
       const result = await res.json();
-      console.log('Response status:', res.status);
-      console.log('Response data:', result);
+      
 
       if (res.ok) {
         showSnackbar('✅ Task added successfully!', 'success');
+        setShowSubTaskModal({ open: true, taskId: taskId, projectId: project });
+
         // 
          setTimeout(() => {
     if (onSubmit) onSubmit();
@@ -140,13 +135,12 @@ const AddTask = ({ onClose, onSubmit }) => {
       });
 
       const result = await res.json();
-
-      if (res.ok) {
-        const taskId = result.task_unique_id;
-        showSnackbar('✅ Task added successfully!', 'success');
-        setShowSubTaskModal({ open: true, taskId, projectId: project });
-
-      } else {
+if (res.ok) {
+  const taskId = result.task_id;
+  showSnackbar('✅ Task added successfully!', 'success');
+  setShowSubTaskModal({ open: true, taskId: taskId, projectId: project });
+}
+ else {
         showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
@@ -333,11 +327,12 @@ console.log('DEBUG — projectId:', project);
     onClose={() => setShowSubTaskModal({ open: false, taskId: null, projectId: null })}
     onSubmit={onSubmit}
     project={selectedProject?.project_name || ''}
-    projectId={showSubTaskModal.projectId} // ✅ Here
+    projectId={showSubTaskModal.projectId}  // here you pass project id
     taskName={taskName}
     taskId={showSubTaskModal.taskId}
   />
 )}
+
 
 
 
