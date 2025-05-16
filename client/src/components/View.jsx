@@ -1,168 +1,95 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import {
-  Backdrop,
-  Box,
-  Button,
   Dialog,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  Typography,
+  Grid,
+  IconButton,
+  Box,
+  Divider,
   TextField,
-  Typography
 } from '@mui/material';
-import { Grid } from '@mui/system';
+import CloseIcon from '@mui/icons-material/Close';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
-const View = ({ show, onClose, data }) => {
-  if (!show) return null;
-
-  const [tasks, setTasks] = useState([]);
-
-  const [formData, setFormData] = useState({
-    task_status: data?.task_status === 'Open' || data?.task_status === true,
-    start_date: data?.start_date || '',
-    end_date: data?.end_date || '',
-    start_time: data?.start_time || '',
-    end_time: data?.end_time || '',
-    allocated_executives: data?.allocated_executives || '',
-    comments: data?.comments || '',
-  });
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await axios.get('http://localhost:3030/api/tasks');
-        if (Array.isArray(response.data)) {
-          setTasks(response.data);
-        }
-      } catch (error) {
-        // Handle error silently or show toast if needed
-      }
-    };
-
-    fetchTasks();
-  }, []);
+const TaskDetailsDialog = ({ open, onClose, task }) => {
+  if (!task) return null;
 
   return (
-    <Grid container>
-      {show && (
-        <Backdrop
-          open={true}
-          sx={{
-            backgroundColor: 'rgba(220, 220, 220, 0.5)',
-            zIndex: (theme) => theme.zIndex.modal - 1,
-          }}
-        />
-      )}
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      {/* Header */}
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="subtitle1">
+          {task.employeeName} ({task.employeeId})
+        </Typography>
+        <IconButton onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-      <Dialog
-        open={show}
-        onClose={onClose}
-        hideBackdrop
-        PaperProps={{
-          sx: {
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            m: 2,
-            width: { xs: '90%', sm: '90%', md: '602px' },
-            height: { xs: 'auto', sm: 'auto', md: '641px' },
-            maxWidth: '602px',
-            maxHeight: '90vh',
-            borderRadius: '0.5rem',
-            overflowY: 'auto',
-            boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.25)',
-            backgroundColor: '#ffffff',
-            display: 'flex',
-            flexDirection: 'column',
-            zIndex: (theme) => theme.zIndex.modal,
-          }
-        }}
-      >
-        <DialogTitle
-          sx={{
-            backgroundColor: '#A3EAFD',
-            fontWeight: 'bold',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            p: 1,
-          }}
-        >
-          <Typography variant="h6" fontSize="1.125rem">
-            {data?.name || 'Employee 1'} ({data?.empId || 'K025689'})
-          </Typography>
-          <Button
-            onClick={onClose}
-            sx={{
-              minWidth: 'auto',
-              p: 0,
-              background: 'none',
-              border: 'none',
-              fontSize: '1.5rem',
-              color: 'black',
-              cursor: 'pointer',
-              '&:hover': {
-                color: 'red',
-                backgroundColor: 'transparent'
-              }
-            }}
-          >
-            ✕
-          </Button>
-        </DialogTitle>
+      <Divider />
 
-        <DialogContent sx={{ p: 3, mt: 5 }}>
-          <Typography variant="body1" fontSize="1rem" fontWeight="bold" mb={2}>
-            Task Details
-          </Typography>
+      {/* Content */}
+      <DialogContent>
+        <Grid container spacing={2}>
+          {/* Start Time & End Time */}
+          <Grid item xs={6}>
+            <Typography variant="body2" fontWeight="bold">Start Time</Typography>
+            <Typography variant="body2">{task.startTime}</Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <Typography variant="body2" fontWeight="bold">End Time</Typography>
+            <Typography variant="body2">{task.endTime}</Typography>
+          </Grid>
 
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography fontSize="0.9rem">
-              Start Time: <strong>{formData.start_time || 'N/A'}</strong>
-            </Typography>
-            <Typography fontSize="0.9rem">
-              Start Date: <strong>{formData.start_date || 'N/A'}</strong>
-            </Typography>
-          </Box>
+          {/* Start Date & End Date */}
+          <Grid item xs={6}>
+            <Typography variant="body2" fontWeight="bold">Start Date</Typography>
+            <Typography variant="body2">{task.startDate}</Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <Typography variant="body2" fontWeight="bold">End Date</Typography>
+            <Typography variant="body2">{task.endDate}</Typography>
+          </Grid>
 
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography fontSize="0.9rem">
-              End Time: <strong>{formData.end_time || 'N/A'}</strong>
-            </Typography>
-            <Typography fontSize="0.9rem">
-              End Date: <strong>{formData.end_date || 'N/A'}</strong>
-            </Typography>
-          </Box>
+          {/* Task Status */}
+          <Grid item xs={12}>
+            <Typography variant="body2" fontWeight="bold">Task Status</Typography>
+            <Box display="flex" alignItems="center">
+              <FiberManualRecordIcon
+                sx={{
+                  fontSize: 12,
+                  color: task.status === 'Open' ? 'green' : 'red',
+                  mr: 1,
+                }}
+              />
+              <Typography variant="body2">{task.status}</Typography>
+            </Box>
+          </Grid>
 
-          <Typography fontSize="0.9rem" mb={2}>
-            Task Status: <strong>{formData.task_status ? 'Open' : 'Closed'}</strong>
-          </Typography>
+          {/* People Worked */}
+          <Grid item xs={12}>
+            <Typography variant="body2" fontWeight="bold">People Worked</Typography>
+            <Typography variant="body2">{task.peopleWorked}</Typography>
+          </Grid>
 
-          <Typography fontSize="0.9rem" mb={2}>
-            People Worked: <strong>{formData.allocated_executives || 'N/A'}</strong>
-          </Typography>
-
-          <Box>
-            <Typography fontSize="0.9rem" mb={1}>
-              Comments:
-            </Typography>
+          {/* Comments */}
+          <Grid item xs={12}>
+            <Typography variant="body2" fontWeight="bold" gutterBottom>Comments:</Typography>
             <TextField
-              id="comments"
               multiline
-              rows={5}
               fullWidth
+              minRows={3}
+              value={task.comments}
+              InputProps={{ readOnly: true }}
               variant="outlined"
-              value={formData.comments}
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{ backgroundColor: '#ffffff' }}
             />
-          </Box>
-        </DialogContent>
-      </Dialog>
-    </Grid>
+          </Grid>
+        </Grid>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default View;
+export default TaskDetailsDialog;
