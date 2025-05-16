@@ -14,8 +14,8 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
@@ -26,13 +26,12 @@ import shareIcon from '../assets/share.png';
 import visibilityIcon from '../assets/visibility.png';
 import visibility2Icon from '../assets/visibility2.png';
 import AddSpenttime from './AddSpenttime';
-import Project from './Project';
 import View from './View';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
-  const [selectedTask, setSelectedTask] = useState(null); // ✅ uncommented to fix error
+  const [selectedTask, setSelectedTask] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [dateRange, setDateRange] = useState([null, null]);
@@ -44,39 +43,54 @@ const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [spentTimeDetails, setSpentTimeDetails] = useState([]);
   const [executiveProjects, setExecutiveProjects] = useState([]);
+
   const agentName = localStorage.getItem('name') || 'Agent';
   const crmLogId = localStorage.getItem('crm_log_id');
-
+  const empIdFromStorage = localStorage.getItem('agentId');
+  // console.log(localStorage)
+  // console.log("nnn", empIdFromStorage)
   useEffect(() => {
     if (!crmLogId) return;
-
     axios.get(`http://localhost:3030/api/projects/by-executive/${crmLogId}`)
       .then(response => setExecutiveProjects(response.data))
       .catch(error => console.error('Error fetching projects for executive:', error));
   }, [crmLogId]);
+  console.log("dfsfsfd");
+  console.log(project);
+  useEffect(() => {
+    const url = project
+      ? `http://localhost:3030/api/project-admins?project=${project}`
+      : `http://localhost:3030/api/project-admins`;
+
+    axios.get(url)
+      .then(response => setAdmins(response.data))
+      .catch(error => console.error('Error fetching admins:', error));
+  }, [project]);
+
+
 
   useEffect(() => {
     axios.get('http://localhost:3030/api/admins')
-      .then((response) => setAdmins(response.data))
-      .catch((error) => console.error('Error fetching admins:', error));
+      .then(response => setAdmins(response.data))
+      .catch(error => console.error('Error fetching admins:', error));
   }, []);
 
   useEffect(() => {
     axios.get('http://localhost:3030/api/tasks')
-      .then((response) => setEmployees(response.data))
-      .catch((error) => console.error('Error fetching task data:', error));
+      .then(response => setEmployees(response.data))
+      .catch(error => console.error('Error fetching task data:', error));
   }, []);
 
   useEffect(() => {
     axios.get('http://localhost:3030/api/projects')
-      .then((response) => setProjects(response.data))
-      .catch((error) => console.error('Error fetching projects:', error));
+      .then(response => setProjects(response.data))
+      .catch(error => console.error('Error fetching projects:', error));
   }, []);
 
   const fetchSpentTimeDetails = () => {
     axios.get('http://localhost:3030/api/spent-time-details')
-      .then((response) => setSpentTimeDetails(response.data))
-      .catch((error) => {
+      .then(response => setSpentTimeDetails(response.data))
+      .catch(error => {
         console.error('Error fetching spent-time-details:', error);
         alert(`Error: ${error.response?.data?.details || 'An unknown error occurred'}`);
       });
@@ -90,13 +104,10 @@ const Dashboard = () => {
     if (dateRange[0] && dateRange[1]) {
       const startDate = dateRange[0].toISOString().split('T')[0];
       const endDate = dateRange[1].toISOString().split('T')[0];
-
-      axios
-        .get('http://localhost:3030/api/spent-time-details', {
-          params: { startDate, endDate },
-        })
-        .then((response) => setSpentTimeDetails(response.data))
-        .catch((error) => {
+      axios.get('http://localhost:3030/api/spent-time-details', {
+        params: { startDate, endDate },
+      }).then(response => setSpentTimeDetails(response.data))
+        .catch(error => {
           console.error('Error fetching spent-time-details:', error);
           alert(`Error: ${error.response?.data?.details || 'An unknown error occurred'}`);
         });
@@ -109,22 +120,20 @@ const Dashboard = () => {
     fetchSpentTimeDetails();
   };
 
-const handleViewClick = (taskDetail) => {
-  setSelectedTask({
-    projectId: taskDetail.project_id,
-    taskId: taskDetail.task_id,
-    name: taskDetail.name,
-    empId: taskDetail.agent_id,
-  });
-  setShowViewModal(true);
-};
+  const handleViewClick = (taskDetail) => {
+    console.log(taskDetail)
 
+    setSelectedTask({
+      project_id: taskDetail.project_id,
+      task_id: taskDetail.task_id,
+      name: taskDetail.name,
+      empId: empIdFromStorage,
 
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
+    });
+    setShowViewModal(true);
   };
 
+  const handleCloseViewModal = () => setShowViewModal(false);
   const handleViewProjectPage = () => navigate('/project');
   const handleViewTaskPage = () => navigate('/task');
 
@@ -171,43 +180,39 @@ const handleViewClick = (taskDetail) => {
 
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} md={3}>
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
-              <DatePicker
-                selectsRange
-                startDate={dateRange[0]}
-                endDate={dateRange[1]}
-                onChange={(update) => setDateRange(update)}
-                placeholderText="dd/mm/yyyy"
-                dateFormat="dd/MM/yyyy"
-                customInput={<CustomInput placeholder="Select Date Range" />}
-                isClearable={true}
-              />
-            </Box>
+            <DatePicker
+              selectsRange
+              startDate={dateRange[0]}
+              endDate={dateRange[1]}
+              onChange={(update) => setDateRange(update)}
+              placeholderText="dd/mm/yyyy"
+              dateFormat="dd/MM/yyyy"
+              customInput={<CustomInput placeholder="Select Date Range" />}
+              isClearable={true}
+            />
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Select
-                value={project}
-                onChange={(e) => setProject(e.target.value)}
-                displayEmpty
-                fullWidth
-                sx={{ height: 42, width: '240px'}}
-              >
-                <MenuItem value="">
-                  <em>Select Project</em>
-                </MenuItem>
-                {executiveProjects.length === 0 ? (
-                  <MenuItem disabled>No projects assigned</MenuItem>
-                ) : (
-                  executiveProjects.map((project) => (
-                    <MenuItem key={project.project_unique_id} value={project.project_name}>
-                      {project.project_name}
-                    </MenuItem>
-                  ))
-                )}
-              </Select>
-            </Box>
+            <Select
+              value={project}
+              onChange={(e) => setProject(e.target.value)}
+              displayEmpty
+              fullWidth
+              sx={{ height: 42, width: '240px' }}
+            >
+              <MenuItem value="">
+                <em>Select Project</em>
+              </MenuItem>
+              {executiveProjects.length === 0 ? (
+                <MenuItem disabled>No projects assigned</MenuItem>
+              ) : (
+                executiveProjects.map((proj) => (
+                  <MenuItem key={proj.project_unique_id} value={proj.project_name}>
+                    {proj.project_name}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
           </Grid>
 
           <Grid item xs={12} md={5}>
@@ -221,12 +226,7 @@ const handleViewClick = (taskDetail) => {
               <Button variant="contained" sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={foldereyeIcon} alt="Project" width="20" />} onClick={handleViewProjectPage}>
                 View Project
               </Button>
-              <Button
-                variant="contained"
-                startIcon={<img src={addIcon} alt="Add" width="20" />}
-                onClick={handleOpenAddModal}
-                sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
-              >
+              <Button variant="contained" startIcon={<img src={addIcon} alt="Add" width="20" />} onClick={handleOpenAddModal} sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}>
                 Add Spent Time
               </Button>
             </Box>
@@ -263,8 +263,8 @@ const handleViewClick = (taskDetail) => {
             <TableBody>
               {spentTimeDetails.filter(detail => {
                 const matchesAdmin = activeTab === 'all' || detail.name === activeTab;
-                const matchesDate = (!dateRange[0] || new Date(detail.start_date).toDateString() >= new Date(dateRange[0]).toDateString()) && 
-                                    (!dateRange[1] || new Date(detail.start_date).toDateString() <= new Date(dateRange[1]).toDateString());
+                const matchesDate = (!dateRange[0] || new Date(detail.start_date) >= new Date(dateRange[0])) &&
+                  (!dateRange[1] || new Date(detail.start_date) <= new Date(dateRange[1]));
                 const matchesProject = !project || detail.project_name === project;
                 return matchesAdmin && matchesDate && matchesProject;
               }).map((detail, index) => (
@@ -285,34 +285,31 @@ const handleViewClick = (taskDetail) => {
               ))}
               {spentTimeDetails.filter(detail => {
                 const matchesAdmin = activeTab === 'all' || detail.name === activeTab;
-                const matchesDate = (!dateRange[0] || new Date(detail.start_date).toDateString() >= new Date(dateRange[0]).toDateString()) && 
-                                    (!dateRange[1] || new Date(detail.start_date).toDateString() <= new Date(dateRange[1]).toDateString());
+                const matchesDate = (!dateRange[0] || new Date(detail.start_date) >= new Date(dateRange[0])) &&
+                  (!dateRange[1] || new Date(detail.start_date) <= new Date(dateRange[1]));
                 const matchesProject = !project || detail.project_name === project;
                 return matchesAdmin && matchesDate && matchesProject;
               }).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} align="center">No data found</TableCell>
-                </TableRow>
-              )}
+                  <TableRow>
+                    <TableCell colSpan={8} align="center">No data found</TableCell>
+                  </TableRow>
+                )}
             </TableBody>
           </Table>
         </TableContainer>
       </Box>
 
       <AddSpenttime open={showAddModal} onClose={handleCloseAddModal} />
-      {/* <View show={showViewModal} onClose={handleCloseViewModal} data={selectedTask} /> */}
-   {selectedTask && (
-  <View
-    show={showViewModal}
-    onClose={handleCloseViewModal}
-    projectId={selectedTask.project_id}
-    taskId={selectedTask.task_id}
-    employee={{ name: selectedTask.name, empId: selectedTask.empId }}
-  />
-)}
+      {selectedTask && (
+        <View
 
-
-
+          show={showViewModal}
+          onClose={handleCloseViewModal}
+          projectId={selectedTask.project_id}
+          taskId={selectedTask.task_id}
+          employee={{ name: selectedTask.name, empId: selectedTask.empId }}
+        />
+      )}
     </>
   );
 };

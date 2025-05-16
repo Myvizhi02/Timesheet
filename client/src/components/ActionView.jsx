@@ -15,7 +15,7 @@ import {
 import axios from 'axios';
 import { useState } from 'react';
 
-const ActionView = ({ task = {}, onClose }) => {
+const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
     project: task.project_name || '',
@@ -71,6 +71,7 @@ const ActionView = ({ task = {}, onClose }) => {
       setSnackbar({ open: true, message: 'Task updated successfully', severity: 'success' });
         onUpdateDone();
     } catch (error) {
+      console.log("lllll", error)
       setSnackbar({ open: true, message: 'Task update failed', severity: 'error' });
     }
   };
@@ -90,6 +91,7 @@ const ActionView = ({ task = {}, onClose }) => {
     try {
       await axios.put(`http://localhost:3030/api/subtasks/${task.sub_task_id}`, payload);
       setSnackbar({ open: true, message: 'Subtask status updated successfully', severity: 'success' });
+       onUpdateDone();
     } catch (error) {
       setSnackbar({ open: true, message: 'Subtask update failed', severity: 'error' });
     }
