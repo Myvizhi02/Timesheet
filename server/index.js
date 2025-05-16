@@ -76,7 +76,7 @@ app.post('/login', checkDbConnection, async (req, res) => {
       } else if (user.admin_flag === 1 || user.admin_flag === 0) {
         redirectTo = '/spenttime';
       }
-      
+
       return res.json({
         message: 'Login successful',
         name: user.name,
@@ -84,8 +84,8 @@ app.post('/login', checkDbConnection, async (req, res) => {
         redirectTo,
         admin_flag: user.admin_flag, // send this to frontend
       });
-      
-      
+
+
     } else {
       return res.status(401).json({ error: 'Incorrect password.' });
     }
@@ -192,7 +192,7 @@ app.get('/api/spenttime/details', async (req, res) => {
 // ----------------------------------------------
 app.get('/api/projects', checkDbConnection, async (req, res) => {
   try {
-  
+
     const [projects] = await db.execute('SELECT * FROM main_project WHERE is_active = 1 ORDER BY created_date ASC');
     res.json(projects);
   } catch (error) {
@@ -383,6 +383,38 @@ app.get('/api/admins', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+app.get('/api/project-admins', async (req, res) => {
+  const project = req.query.project; // using ?project=XYZ
+
+  try {
+    let rows;
+
+    if (project) {
+      // Filtered by project
+      [rows] = await db.execute(
+        `SELECT ca.crm_log_id, ca.name 
+         FROM crm_admin ca 
+         JOIN (
+           SELECT JSON_EXTRACT(allocated_executives, '$') AS executives 
+           FROM main_project 
+           WHERE project_name = ?
+         ) AS mp 
+         WHERE JSON_CONTAINS(mp.executives, JSON_QUOTE(ca.crm_log_id), '$')`,
+        [project]
+      );
+    } else {
+      // Return all admins
+      [rows] = await db.execute(`SELECT crm_log_id, name FROM crm_admin`);
+    }
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching admins:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 // ----------------------------------------------
 // TASKS
@@ -414,7 +446,7 @@ app.get('/api/tasks', checkDbConnection, async (req, res) => {
     } else if (project_id) {
       // Return all tasks for a specific project
       const [tasks] = await db.execute(
-        'SELECT * FROM main_task WHERE project_id = ?',
+        'SELECT * FROM main_task WHERE project_id = ? AND status = 1',
         [project_id]
       );
       return res.json(tasks);
@@ -515,7 +547,7 @@ app.get('/api/subtasks', checkDbConnection, async (req, res) => {
   try {
     // Fetch subtasks based on both task_id and project_id
     const [results] = await db.execute(
-      'SELECT * FROM main_sub_task WHERE task_id = ? AND project_id = ?',
+      'SELECT * FROM main_sub_task WHERE task_id = ? AND project_id = ? AND status = 1',
       [task_id, project_id]
     );
 
@@ -536,14 +568,14 @@ app.put('/api/update-task/:taskId', checkDbConnection, async (req, res) => {
   const { taskId } = req.params; // fetch taskId from the URL parameter
 
   const { task_name, task_description, task_status } = req.body; // other task details
- 
+
   try {
     const [result] = await db.execute(`
       UPDATE main_task 
       SET task_name = ?, description = ?, status = ? 
       WHERE id = ? AND is_active = 1
     `, [task_name, task_description, task_status, taskId]);
-  
+
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Task not found or already inactive.' });
@@ -820,7 +852,9 @@ app.get('/api/spent-time-details', async (req, res) => {
   try {
     const [rows] = await db.execute(`
       SELECT 
-        t.task_name, 
+        t.task_name,
+        st.task_id,
+        st.project_id, 
         st.subtask_name, 
         p.project_name, 
         mst.start_date,
@@ -845,7 +879,7 @@ app.get('/api/spent-time', async (req, res) => {
     // Get crm_log_id from request header (or from query params)
     const crmLogId = req.headers['authorization']?.split(' ')[1] || req.query.crm_log_id;
     const selectedDate = req.query.date; // Get the selected date from the query parameter
-    
+
     if (!crmLogId) {
       return res.status(401).json({ error: 'Unauthorized: crm_log_id missing' });
     }
