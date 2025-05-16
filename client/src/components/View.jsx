@@ -1,30 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Typography,
-  Grid,
-  IconButton,
-  Box,
-  TextField,
   Backdrop,
+  Box,
   Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
+  Grid
 } from '@mui/material';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
-<<<<<<< HEAD
-const ViewTaskDetails = ({ show, onClose, projectId, taskId, employee }) => {
-=======
 const View = ({ show, onClose, projectId, taskId, employee }) => {
   // const empId =  localStorage.getItem('agentId');
   
   console.log( projectId, taskId, employee)
   // State to hold the fetched task details
->>>>>>> ca016fb2ab0e5ddde5af8f8c31e5602124a87d1e
   const [formData, setFormData] = useState({
-    task_status: false,
+    task_status: false,  // default false (Closed)
     start_date: '',
     end_date: '',
     start_time: '',
@@ -34,6 +28,7 @@ const View = ({ show, onClose, projectId, taskId, employee }) => {
   });
 
   useEffect(() => {
+    // Reset form if modal is closed or missing params
     if (!show || !projectId || !taskId) {
       setFormData({
         task_status: false,
@@ -47,6 +42,7 @@ const View = ({ show, onClose, projectId, taskId, employee }) => {
       return;
     }
 
+    // Fetch task spent time details from API
     const fetchSpentTimeDetails = async () => {
       try {
         const response = await axios.get('http://localhost:3030/api/spenttime/details', {
@@ -57,9 +53,11 @@ const View = ({ show, onClose, projectId, taskId, employee }) => {
         });
 
         if (Array.isArray(response.data) && response.data.length > 0) {
-          const details = response.data[0];
+          const details = response.data[0]; // Take first record
+          // console.log('Fetched task details:', details);
+
           setFormData({
-            task_status: details.status === 1,
+            task_status: details.status === 1, // true if status = 1
             start_date: details.start_date || '',
             end_date: details.end_date || '',
             start_time: details.start_time || '',
@@ -67,9 +65,29 @@ const View = ({ show, onClose, projectId, taskId, employee }) => {
             people_worked: details.people_worked || 'N/A',
             comments: details.comments || '',
           });
+        } else {
+          // No data found, reset form
+          setFormData({
+            task_status: false,
+            start_date: '',
+            end_date: '',
+            start_time: '',
+            end_time: '',
+            people_worked: 'N/A',
+            comments: '',
+          });
         }
       } catch (error) {
         console.error('Error fetching spent time details:', error);
+        setFormData({
+          task_status: false,
+          start_date: '',
+          end_date: '',
+          start_time: '',
+          end_time: '',
+          people_worked: 'N/A',
+          comments: '',
+        });
       }
     };
 
@@ -77,16 +95,18 @@ const View = ({ show, onClose, projectId, taskId, employee }) => {
   }, [show, projectId, taskId]);
 
   return (
-    <>
+    <Grid container>
+      {/* Backdrop with lighter opacity */}
       {show && (
         <Backdrop
-          open
+          open={true}
           sx={{
             backgroundColor: 'rgba(220, 220, 220, 0.5)',
             zIndex: (theme) => theme.zIndex.modal - 1,
           }}
         />
       )}
+
       <Dialog
         open={show}
         onClose={onClose}
@@ -103,15 +123,14 @@ const View = ({ show, onClose, projectId, taskId, employee }) => {
             maxHeight: '90vh',
             borderRadius: '0.5rem',
             overflowY: 'auto',
+            boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.25)',
             backgroundColor: '#ffffff',
             display: 'flex',
             flexDirection: 'column',
-            boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.25)',
             zIndex: (theme) => theme.zIndex.modal,
-          },
+          }
         }}
       >
-        {/* Header */}
         <DialogTitle
           sx={{
             backgroundColor: '#A3EAFD',
@@ -137,8 +156,8 @@ const View = ({ show, onClose, projectId, taskId, employee }) => {
               cursor: 'pointer',
               '&:hover': {
                 color: 'red',
-                backgroundColor: 'transparent',
-              },
+                backgroundColor: 'transparent'
+              }
             }}
             aria-label="Close"
           >
@@ -146,74 +165,58 @@ const View = ({ show, onClose, projectId, taskId, employee }) => {
           </Button>
         </DialogTitle>
 
-        {/* Content */}
-        <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <Typography variant="body2" fontWeight="bold">
-                Start Time
-              </Typography>
-              <Typography variant="body2">{formData.start_time}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body2" fontWeight="bold">
-                End Time
-              </Typography>
-              <Typography variant="body2">{formData.end_time}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body2" fontWeight="bold">
-                Start Date
-              </Typography>
-              <Typography variant="body2">{formData.start_date}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body2" fontWeight="bold">
-                End Date
-              </Typography>
-              <Typography variant="body2">{formData.end_date}</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="body2" fontWeight="bold">
-                Task Status
-              </Typography>
-              <Box display="flex" alignItems="center">
-                <FiberManualRecordIcon
-                  sx={{
-                    fontSize: 12,
-                    color: formData.task_status ? 'green' : 'red',
-                    mr: 1,
-                  }}
-                />
-                <Typography variant="body2">
-                  {formData.task_status ? 'Open' : 'Closed'}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="body2" fontWeight="bold">
-                People Worked
-              </Typography>
-              <Typography variant="body2">{formData.people_worked}</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="body2" fontWeight="bold" gutterBottom>
-                Comments:
-              </Typography>
-              <TextField
-                multiline
-                fullWidth
-                minRows={3}
-                value={formData.comments}
-                InputProps={{ readOnly: true }}
-                variant="outlined"
-              />
-            </Grid>
-          </Grid>
+        <DialogContent sx={{ p: 3, mt: 5 }}>
+          <Typography variant="body1" fontSize="1rem" fontWeight="bold" mb={2}>
+            Task Details
+          </Typography>
+
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography fontSize="0.9rem">
+              Start Time: <strong>{formData.start_time || 'N/A'}</strong>
+            </Typography>
+            <Typography fontSize="0.9rem">
+              Start Date: <strong>{formData.start_date || 'N/A'}</strong>
+            </Typography>
+          </Box>
+
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography fontSize="0.9rem">
+              End Time: <strong>{formData.end_time || 'N/A'}</strong>
+            </Typography>
+            <Typography fontSize="0.9rem">
+              End Date: <strong>{formData.end_date || 'N/A'}</strong>
+            </Typography>
+          </Box>
+
+          <Typography fontSize="0.9rem" mb={2}>
+            Task Status: <strong>{formData.task_status ? 'Open' : 'Closed'}</strong>
+          </Typography>
+
+          <Typography fontSize="0.9rem" mb={2}>
+            People Worked: <strong>{formData.people_worked}</strong>
+          </Typography>
+
+          <Box>
+            <Typography fontSize="0.9rem" mb={1}>
+              Comments:
+            </Typography>
+            <TextField
+              id="comments"
+              multiline
+              rows={5}
+              fullWidth
+              variant="outlined"
+              value={formData.comments}
+              InputProps={{
+                readOnly: true,
+              }}
+              sx={{ backgroundColor: '#ffffff' }}
+            />
+          </Box>
         </DialogContent>
       </Dialog>
-    </>
+    </Grid>
   );
 };
 
-export default ViewTaskDetails;
+export default View;
