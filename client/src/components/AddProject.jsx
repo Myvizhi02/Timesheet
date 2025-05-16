@@ -17,7 +17,7 @@ import {
   Select,
   Snackbar,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
@@ -29,6 +29,9 @@ const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
   const [adminOptions, setAdminOptions] = useState([]);
   const [loadingAdmins, setLoadingAdmins] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
   const [formData, setFormData] = useState({
     projectId: '',
     projectName: '',
@@ -41,11 +44,8 @@ const AddProject = ({ onClose, onSubmit }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [actualEndDate, setActualEndDate] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const showSnackbar = (message, severity = 'success') => {
-    console.log('Showing snackbar:', message, severity);
     setSnackbar({ open: true, message, severity });
   };
 
@@ -66,11 +66,10 @@ const AddProject = ({ onClose, onSubmit }) => {
     const fetchProjectId = async () => {
       try {
         const response = await fetch('http://localhost:3030/api/projects/new-id');
-        if (!response.ok) throw new Error('Failed to fetch project ID');
         const data = await response.json();
         setFormData(prev => ({ ...prev, projectId: data.project_unique_id }));
       } catch (error) {
-        console.error('Error fetching project ID:', error);
+        showSnackbar('Error fetching project ID', 'error');
       }
     };
 
@@ -86,13 +85,13 @@ const AddProject = ({ onClose, onSubmit }) => {
     const { value } = event.target;
     setFormData({
       ...formData,
-      addPeople: typeof value === 'string' ? value.split(',').map(item => item.trim()) : value,
+      addPeople: typeof value === 'string' ? value.split(',') : value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    //setIsSubmitting(true);
+    setIsSubmitting(true);
 
     const nameToIdMap = {};
     adminOptions.forEach(admin => {
@@ -121,36 +120,35 @@ const AddProject = ({ onClose, onSubmit }) => {
     };
 
     try {
-      console.log("Handle submit")
       const res = await fetch('http://localhost:3030/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectData),
       });
-      console.log(res)
-      if (res.ok) {
-  showSnackbar('✅ Project added successfully!', 'success');
-  setTimeout(() => {
-    if (onSubmit) onSubmit(projectData);
-  }, 1000);
 
-  // Delay close until snackbar is dismissed (4s)
-  setTimeout(() => {
-    onClose();
-  }, 3000); // match or exceed Snackbar's autoHideDuration
-}
-else {
-        const result = await res.json();
+      const result = await res.json();
+
+      if (res.ok) {
+        showSnackbar('✅ Project added successfully!', 'success');
+        setTimeout(() => {
+          if (onSubmit) onSubmit(projectData);
+        }, 1000);
+        setTimeout(() => {
+          onClose();
+        }, 3000);
+      } else {
         showSnackbar(`❌ Failed to add project: ${result.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
       showSnackbar('❌ Failed to add project: Network error or server is down', 'error');
-      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
-//console.log(snackbar)
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
@@ -207,11 +205,10 @@ else {
       <Dialog
         open
         onClose={onClose}
-        fullWidth={false}
         PaperProps={{
           sx: {
             width: '37.625rem',
-            height: '37.5rem',
+            height: 'auto',
             position: 'absolute',
             top: 'calc(50% + 35px)',
             left: '50%',
@@ -228,19 +225,14 @@ else {
             alignItems: 'center',
             height: '3rem',
             px: 3,
-            py: 0,
           }}
         >
-          <Typography variant="h6" fontWeight={600}>
-            Add Project
-          </Typography>
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
+          <Typography variant="h6" fontWeight={600}>Add Project</Typography>
+          <IconButton onClick={onClose}><CloseIcon /></IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ padding: '1.5em', mt: 4 }}>
-          <form>
+        <DialogContent sx={{ padding: '1.5em', mt: 2 }}>
+          <form onSubmit={handleSubmit}>
             <Grid container spacing={3.5}>
               <Grid item xs={12} sm={8}>
                 <TextField
@@ -248,47 +240,53 @@ else {
                   label="Project ID"
                   variant="outlined"
                   fullWidth
-                  value={formData.projectId || ''}
                   disabled
+                  value={formData.projectId || ''}
+                  InputLabelProps={{ shrink: true }}
                   sx={inputStyle}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   name="projectName"
                   label="Project Name"
                   variant="outlined"
                   fullWidth
-                  onChange={handleChange}
-                  value={formData.projectName}
                   required
+                  value={formData.projectName}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
                   sx={inputStyle}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   name="domain"
                   label="Domain"
                   variant="outlined"
                   fullWidth
-                  onChange={handleChange}
-                  value={formData.domain}
                   required
+                  value={formData.domain}
+                  onChange={handleChange}
                   sx={inputStyle}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   name="lob"
                   label="LOB"
                   variant="outlined"
                   fullWidth
-                  onChange={handleChange}
-                  value={formData.lob}
                   required
+                  value={formData.lob}
+                  onChange={handleChange}
                   sx={inputStyle}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <DatePicker
                   selected={startDate}
@@ -298,6 +296,7 @@ else {
                   customInput={<CustomInput placeholder="Select Start Date" />}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <DatePicker
                   selected={endDate}
@@ -307,6 +306,7 @@ else {
                   customInput={<CustomInput placeholder="Select End Date" />}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <DatePicker
                   selected={actualEndDate}
@@ -316,22 +316,24 @@ else {
                   customInput={<CustomInput placeholder="Select Actual End Date" />}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   name="budget"
                   label="Budget"
                   variant="outlined"
                   fullWidth
-                  onChange={handleChange}
                   value={formData.budget}
+                  onChange={handleChange}
                   sx={inputStyle}
                 />
               </Grid>
+
               <Grid item xs={12}>
                 <FormControl fullWidth sx={selectStyle}>
-                  <InputLabel id="select-multiple-label">Add People</InputLabel>
+                  <InputLabel id="add-people-label">Add People</InputLabel>
                   <Select
-                    labelId="select-multiple-label"
+                    labelId="add-people-label"
                     multiple
                     value={formData.addPeople}
                     onChange={handlePeopleChange}
@@ -340,8 +342,7 @@ else {
                   >
                     {loadingAdmins ? (
                       <MenuItem disabled>
-                        <CircularProgress size={20} />
-                        &nbsp;Loading...
+                        <CircularProgress size={20} /> &nbsp;Loading...
                       </MenuItem>
                     ) : (
                       adminOptions.map((admin) => (
@@ -361,7 +362,7 @@ else {
 
             <Box textAlign="center" mt={4}>
               <Button
-                onClick={handleSubmit}
+                type="submit"
                 variant="contained"
                 disabled={isSubmitting}
                 sx={{
@@ -376,39 +377,35 @@ else {
                     backgroundColor: '#213E9A',
                   },
                 }}
-              >Submit
-                {/* {isSubmitting ? 'Submitting...' : 'Submit'} */}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </Button>
             </Box>
           </form>
         </DialogContent>
       </Dialog>
-<Portal>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-       sx={{
-    '& .MuiSnackbarContent-root': {
-      zIndex: 2500, // Ensure it's well above Dialog
-    },
-  }}
-      >
-        <Alert
-          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
+
+      <Portal>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ '& .MuiSnackbarContent-root': { zIndex: 2500 } }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-</Portal>
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Portal>
     </>
   );
 };
 
-// Styles
 const inputStyle = {
   width: '260px',
   '& .MuiInputBase-root': {
