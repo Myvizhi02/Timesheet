@@ -1,12 +1,30 @@
 import { AppBar, Avatar, Box, IconButton, Toolbar, Typography } from '@mui/material';
+import { Menu, MenuItem } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import DimgIcon from '../assets/Dimg.png';
 import homeIcon from '../assets/home.png';
 import navIcon from '../assets/navigation.png';
+import { useNavigate } from 'react-router-dom'; 
 
 const Header = () => {
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
+   const [anchorEl, setAnchorEl] = useState(null);
+    const navigate = useNavigate(); 
+      const handleNavClick = (event) => {
+        setAnchorEl(event.currentTarget); // open menu
+      };
+    
+      const handleLogout = () => {
+        // Clear localStorage or token
+        localStorage.clear();
+        setAnchorEl(null); // close menu
+        navigate('/'); // go to login
+      };
+    
+      const handleMenuClose = () => {
+        setAnchorEl(null);
+      };
 
   useEffect(() => {
     const fetchAgentName = async () => {
@@ -44,7 +62,7 @@ const Header = () => {
         }}
       >
         {/* Left Side: Navigation + Home */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 3} }}>
           <IconButton sx={{ p: 0 }}>
             <img
               src={navIcon}
@@ -93,14 +111,18 @@ const Header = () => {
           >
             {agentName}
           </Typography>
-          <Avatar
-            alt="User"
-            src={DimgIcon}
-            sx={{
-              width: { xs: 30, sm: 36 },
-              height: { xs: 30, sm: 36 },
-            }}
-          />
+          
+          <IconButton>
+                      <Avatar alt="User Profile" src={DimgIcon} sx={{ width: 36, height: 36 }} style={{ cursor: 'pointer' }}
+              onClick={handleNavClick}/><Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              <MenuItem onClick={handleLogout} sx={{ color: 'black' }}>
+                 Logout</MenuItem>
+            </Menu>
+                    </IconButton>
         </Box>
       </Toolbar>
     </AppBar>

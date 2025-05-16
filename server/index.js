@@ -769,6 +769,70 @@ app.put('/api/subtasks/:id', async (req, res) => {
 // SPENT TIME - Save Time Endpoint
 // ----------------------------------------------
 // Check for existing time range
+
+// POST /api/subtasks
+app.post('/subtasks', async (req, res) => {
+  try {
+    const {
+      project_id,
+      task_id,
+      subtask_name,
+      created_by,
+      modified_by
+    } = req.body;
+
+    if (!project_id || !task_id || !subtask_name || !created_by || !modified_by) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Optionally verify if project_id and task_id exist and are active
+    const [projectResult] = await db.query(
+      'SELECT id FROM main_project WHERE id = ? AND is_active = 1',
+      [project_id]
+    );
+    if (projectResult.length === 0) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const [taskResult] = await db.query(
+      'SELECT id FROM main_task WHERE id = ? AND is_active = 1',
+      [task_id]
+    );
+    if (taskResult.length === 0) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    const insertQuery = `
+      INSERT INTO main_sub_task (
+        project_id,
+        task_id,
+        subtask_name,
+        description,
+        created_by,
+        modified_by,
+        created_date,
+        modified_date,
+        is_active,
+        status
+      ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), 1, 1)
+    `;
+
+    const [insertResult] =await db.query(insertQuery, [
+      project_id,
+      task_id,
+      subtask_name,
+      '----',
+      created_by,
+      modified_by
+    ]);
+
+    res.status(200).json({ message: 'Subtask added successfully', insertId: insertResult.insertId });
+  } catch (error) {
+    console.error('Error adding subtask:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 app.get('/api/spenttime/partial-check', (req, res) => {
   const { start_date, start_time, end_time } = req.query;
 
@@ -799,12 +863,60 @@ app.get('/api/spenttime/partial-check', (req, res) => {
 
 
 // Existing POST endpoint to save spent time
+// app.post('/api/spenttime', checkDbConnection, async (req, res) => {
+//   console.log('Received data:', req.body);
+//   const {
+//     project_id,
+//     task_id,
+//     sub_task_id,
+//     user_id,
+//     start_date,
+//     end_date,
+//     start_time,
+//     end_time,
+//     hours,
+//     created_by,
+//     modified_by,
+//     created_date,
+//     is_active,
+//     comments
+//   } = req.body;
+
+//   try {
+//     const [subTaskExists] = await db.execute(`
+//       SELECT COUNT(*) AS count FROM main_sub_task WHERE id = ?
+//     `, [sub_task_id]);
+
+//     if (subTaskExists[0].count === 0) {
+//       return res.status(400).json({ error: 'Sub-task ID does not exist.' });
+//     }
+
+//     await db.execute(`
+//       INSERT INTO main_spent_time (
+//         project_id, task_id, sub_task_id, user_id,
+//         start_date, end_date, start_time, end_time,
+//         hours, created_by, modified_by, created_date,
+//         is_active, comments
+//       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+//     `, [
+//       project_id, task_id, sub_task_id, user_id,
+//       start_date, end_date, start_time, end_time,
+//       hours, created_by, modified_by, created_date,
+//       is_active, comments
+//     ]);
+
+//     res.status(201).json({ message: 'Spent time saved successfully.' });
+//   } catch (error) {
+//     console.error('❌ Error inserting spent time:', error.message);
+//     res.status(500).json({ error: 'Internal server error.' });
+//   }
+// });
 app.post('/api/spenttime', checkDbConnection, async (req, res) => {
   console.log('Received data:', req.body);
   const {
     project_id,
     task_id,
-    sub_task_id,
+    sub_task_id = null,
     user_id,
     start_date,
     end_date,
@@ -819,27 +931,43 @@ app.post('/api/spenttime', checkDbConnection, async (req, res) => {
   } = req.body;
 
   try {
-    const [subTaskExists] = await db.execute(`
-      SELECT COUNT(*) AS count FROM main_sub_task WHERE id = ?
-    `, [sub_task_id]);
+    let finalSubTaskId = sub_task_id;
 
-    if (subTaskExists[0].count === 0) {
-      return res.status(400).json({ error: 'Sub-task ID does not exist.' });
+    if (sub_task_id !== null) {
+      // Check if sub_task_id exists
+      const [subTaskExists] = await db.execute(
+        `SELECT COUNT(*) AS count FROM main_sub_task WHERE id = ?`,
+        [sub_task_id]
+      );
+      if (subTaskExists[0].count === 0) {
+        return res.status(400).json({ error: 'Sub-task ID does not exist.' });
+      }
+    } else {
+      // sub_task_id is null, so find a subtask based on project_id and task_id
+      const [subtaskResult] = await db.execute(
+        `SELECT id FROM main_sub_task WHERE project_id = ? AND task_id = ? LIMIT 1`,
+        [project_id, task_id]
+      );
+      if (subtaskResult.length === 0) {
+        return res.status(400).json({ error: 'No sub-task found for the given project_id and task_id.' });
+      }
+      finalSubTaskId = subtaskResult[0].id;
     }
 
-    await db.execute(`
-      INSERT INTO main_spent_time (
+    await db.execute(
+      `INSERT INTO main_spent_time (
         project_id, task_id, sub_task_id, user_id,
         start_date, end_date, start_time, end_time,
         hours, created_by, modified_by, created_date,
         is_active, comments
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      project_id, task_id, sub_task_id, user_id,
-      start_date, end_date, start_time, end_time,
-      hours, created_by, modified_by, created_date,
-      is_active, comments
-    ]);
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        project_id, task_id, finalSubTaskId, user_id,
+        start_date, end_date, start_time, end_time,
+        hours, created_by, modified_by, created_date,
+        is_active, comments
+      ]
+    );
 
     res.status(201).json({ message: 'Spent time saved successfully.' });
   } catch (error) {
@@ -847,6 +975,7 @@ app.post('/api/spenttime', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
 
 app.get('/api/spent-time-details', async (req, res) => {
   try {

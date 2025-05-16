@@ -14,7 +14,6 @@ import {
   Typography
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-
 import addIcon from '../assets/add.png';
 import ActionView from './ActionView';
 import AddTask from './AddTask';

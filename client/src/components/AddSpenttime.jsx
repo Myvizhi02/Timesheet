@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
@@ -8,20 +9,17 @@ import {
   IconButton,
   Snackbar,
   TextField,
-  Typography,
-  Alert
+  Typography
 } from '@mui/material';
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const AddSpenttime = ({ open, onClose, onSaved }) => {
   const [subTasks, setSubTasks] = useState([]);
   const [executiveProjects, setExecutiveProjects] = useState([]);
-
-  const [selectedProjectUniqueId, setSelectedProjectUniqueId] = useState('');
-  const [projectDbId, setProjectDbId] = useState('');
+  const [selectedProjectId, setSelectedProjectId] = useState('');
   const [tasksList, setTasksList] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState('');
   const [selectedSubTask, setSelectedSubTask] = useState('');
@@ -31,7 +29,6 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
   const [showExtraField, setShowExtraField] = useState(false);
   const [extraSubTaskName, setExtraSubTaskName] = useState('');
   const [comments, setComments] = useState('');
-
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const crmLogId = localStorage.getItem('crm_log_id');
@@ -49,30 +46,20 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
   }, [crmLogId]);
 
   const handleProjectChange = async (e) => {
-    const uniqueId = e.target.value;
-    setSelectedProjectUniqueId(uniqueId);
+    const projectId = e.target.value;
+    setSelectedProjectId(projectId);
     setSelectedTaskId('');
     setSelectedSubTask('');
     setTasksList([]);
     setSubTasks([]);
 
+    if (!projectId) return;
+
     try {
-      const projectResponse = await axios.get('http://localhost:3030/api/projects');
-      const selectedProject = projectResponse.data.find(proj => String(proj.project_unique_id) === uniqueId);
-
-      if (selectedProject) {
-        setProjectDbId(selectedProject.id);
-
-        const taskResponse = await axios.get(`http://localhost:3030/api/tasks?project_id=${selectedProject.id}`);
-        setTasksList(taskResponse.data);
-      } else {
-        setProjectDbId('');
-        setTasksList([]);
-      }
+      const taskResponse = await axios.get(`http://localhost:3030/api/tasks?project_id=${projectId}`);
+      setTasksList(taskResponse.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
-      setProjectDbId('');
-      setTasksList([]);
     }
   };
 
@@ -82,11 +69,11 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
     setSelectedSubTask('');
     setSubTasks([]);
 
-    if (!taskId || !projectDbId) return;
+    if (!taskId || !selectedProjectId) return;
 
     try {
       const response = await axios.get('http://localhost:3030/api/subtasks', {
-        params: { task_id: taskId, project_id: projectDbId }
+        params: { task_id: taskId, project_id: selectedProjectId }
       });
       setSubTasks(response.data || []);
     } catch (error) {
@@ -97,8 +84,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
 
   useEffect(() => {
     if (open) {
-      setSelectedProjectUniqueId('');
-      setProjectDbId('');
+      setSelectedProjectId('');
       setSelectedTaskId('');
       setSelectedSubTask('');
       setStartDateTime(null);
@@ -141,9 +127,9 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
     const formattedDate = today.toISOString().split('T')[0];
 
     const payload = {
-      project_id: projectDbId,
+      project_id: selectedProjectId,
       task_id: selectedTaskId,
-      sub_task_id: selectedSubTask || null,
+      sub_task_id: selectedSubTask || ' ',
       user_id: crmLogId,
       start_date: formattedDate,
       end_date: formattedDate,
@@ -159,14 +145,16 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
 
     if (!selectedSubTask && extraSubTaskName.trim()) {
       try {
-        const subtaskRes = await axios.post('http://localhost:3030/api/subtasks', {
+        const subtaskRes = await axios.post('http://localhost:3030/subtasks', {
           subtask_name: extraSubTaskName,
           task_id: selectedTaskId,
-          project_id: projectDbId,
+          project_id: selectedProjectId,
           created_by: crmLogId,
           modified_by: crmLogId,
           is_active: 1,
         });
+        console.log('tskdmsdmk');
+        console.log(subtaskRes.data.insertId);
         payload.sub_task_id = subtaskRes.data.insertId;
       } catch (error) {
         console.error('Error creating custom subtask:', error);
@@ -175,11 +163,12 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
       }
     }
 
+    console.log(payload);
     try {
       await axios.post('http://localhost:3030/api/spenttime', payload);
       setSnackbar({ open: true, message: 'Time saved successfully!', severity: 'success' });
-      if (onSaved) onSaved(); // Call parent to refresh spent time list
-      onClose(); // Close dialog
+      onSaved();
+      
     } catch (error) {
       console.error('Error saving time:', error);
       setSnackbar({ open: true, message: 'Failed to save time.', severity: 'error' });
@@ -188,6 +177,20 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
 
   const handleSnackbarClose = () => {
     setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleSubmit = async () => {
+    if (extraSubTaskName && extraSubTaskName.trim() !== '') {
+      try {
+        await handleSaveTime();
+      } catch (error) {
+        console.error("Error in creating subtask and saving time:", error);
+      }
+    } else if (selectedSubTask) {
+      await handleSaveTime();
+    } else {
+      setSnackbar({ open: true, message: 'Please select or enter a subtask.', severity: 'warning' });
+    }
   };
 
   return (
@@ -217,17 +220,18 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
                   select
                   label="Select Project"
                   fullWidth
-                  value={selectedProjectUniqueId}
+                  value={selectedProjectId}
                   onChange={handleProjectChange}
                   SelectProps={{ native: true }}
-                  sx={{ '& .MuiOutlinedInput-root': { width: '258px', height: '50px' } }}
+                    sx={{ '& .MuiOutlinedInput-root': { width: '258px', height: '50px' } }}
+
                 >
                   <option value="" disabled></option>
                   {executiveProjects.length === 0 ? (
                     <option disabled>No projects assigned</option>
                   ) : (
                     executiveProjects.map((proj) => (
-                      <option key={String(proj.project_unique_id)} value={String(proj.project_unique_id)}>
+                      <option key={proj.id} value={proj.id}>
                         {proj.project_name}
                       </option>
                     ))
@@ -243,13 +247,9 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
                   value={selectedTaskId}
                   onChange={handleTaskChange}
                   SelectProps={{ native: true }}
-                  disabled={!selectedProjectUniqueId}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      width: '258px',
-                      height: '50px',
-                    },
-                  }}
+                  disabled={!selectedProjectId}
+                    sx={{ '& .MuiOutlinedInput-root': { width: '258px', height: '50px' } }}
+
                 >
                   <option value="" disabled></option>
                   {tasksList.map((task) => (
@@ -273,13 +273,14 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
                   SelectProps={{ native: true }}
                   disabled={!selectedTaskId}
                   error={subTaskError}
-                  sx={{
-                    width: '428px',
-                    '& .MuiOutlinedInput-root': {
-                      height: '50px',
-                      backgroundColor: subTaskError ? '#FED3D3' : 'inherit',
-                    },
-                  }}
+                   sx={{
+      width: '428px',
+      '& .MuiOutlinedInput-root': {
+        height: '50px',
+        backgroundColor: subTaskError ? '#FED3D3' : 'inherit',
+      },
+    }}
+
                 >
                   <option value="" disabled></option>
                   {subTasks.length > 0 ? (
@@ -289,9 +290,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
                       </option>
                     ))
                   ) : (
-                    <option value="" disabled>
-                      No subtasks available
-                    </option>
+                    <option value="" disabled>No subtasks available</option>
                   )}
                 </TextField>
               </Grid>
@@ -299,37 +298,40 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
               <Grid item xs={12}>
                 <Button
                   variant="contained"
-                  color="primary"
                   onClick={handleAddSubTask}
                   sx={{
-                    width: '5.5rem',
-                    height: '3.0rem',
-                    textTransform: 'none',
-                    fontSize: '0.58rem',
-                  }}
+                  width: '5.5rem',
+                  height: '3.0rem',
+                  textTransform: 'none',
+                  fontSize: '0.58rem',
+                }}
+
                 >
                   Add Subtask
                 </Button>
               </Grid>
+
               {showExtraField && (
                 <Grid item xs={12}>
                   <TextField
+                  
                     label="Enter Sub Task"
-                    variant="outlined"
-                    size="small"
                     fullWidth
                     value={extraSubTaskName}
                     onChange={(e) => setExtraSubTaskName(e.target.value)}
-                    sx={{ width: '525px', height: '2.5rem' }}
+                     sx={{ width: '525px', height: '2.5rem' }}
+
                   />
                 </Grid>
               )}
+
               <Grid item xs={6}>
                 <TimePicker
                   label="Start Time"
                   value={startDateTime}
                   onChange={setStartDateTime}
-                  renderInput={(params) => <TextField {...params} sx={{ width: '250px', '& .MuiInputBase-root': { height: '20px' } }} />}
+                  renderInput={(params) => <TextField {...params} fullWidth  sx={{ width: '250px',mt:2, '& .MuiInputBase-root': { height: '20px' } }}/>}
+                  
                 />
               </Grid>
               <Grid item xs={6}>
@@ -337,26 +339,28 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
                   label="End Time"
                   value={endDateTime}
                   onChange={setEndDateTime}
-                  renderInput={(params) => <TextField {...params} sx={{ width: '250px', '& .MuiInputBase-root': { height: '20px' } }} />}
+                  renderInput={(params) => <TextField {...params} fullWidth  sx={{ width: '250px', '& .MuiInputBase-root': { height: '20px' } }}/>}
                 />
               </Grid>
+
               <Grid item xs={12}>
                 <TextField
                   label="Comments"
                   multiline
                   rows={3}
                   fullWidth
-                  value={comments}
+                  value={comments}sx={{ width: '530px', '& .MuiOutlinedInput-root': { height: '100px' } }}
+
                   onChange={(e) => setComments(e.target.value)}
-                  sx={{ width: '530px', '& .MuiOutlinedInput-root': { height: '100px' } }}
                 />
               </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2, ml: 20 }}>
+
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center',ml:20 }}>
                 <Button
                   variant="contained"
-                  color="primary"
-                  onClick={handleSaveTime}
-                  sx={{ width: '12rem', height: '2.5rem', textTransform: 'none' }}
+                  onClick={handleSubmit}
+                    sx={{ width: '12rem', height: '2.5rem', textTransform: 'none' }}
+
                 >
                   Submit
                 </Button>
@@ -365,16 +369,13 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
           </LocalizationProvider>
         </DialogContent>
       </Dialog>
-
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={4000}
+        autoHideDuration={3000}
         onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
     </>
   );
