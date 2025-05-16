@@ -52,7 +52,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
     }));
 
     if (!task?.sub_task_id) {
-      setSnackbar({ open: true, message: 'Subtask ID missing for update', severity: 'error' });
+      setSnackbar({ open: true, severity: 'error' });
       return;
     }
   };
@@ -77,10 +77,10 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
   };
 
   const handleSubtaskUpdate = async () => {
-    // if (!task?.sub_task_id) {
-    //   //setSnackbar({ open: true, message: 'Subtask ID missing for update', severity: 'error' });
-    //   return;
-    // }
+    if (!task?.sub_task_id) {
+      setSnackbar({ open: true, severity: 'error' });
+      return;
+    }
 
     const payload = {
       subtask_name: formData.subtask_name,

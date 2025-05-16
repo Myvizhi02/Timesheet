@@ -209,7 +209,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
         }
       }}>
         <DialogTitle sx={{ backgroundColor: '#A3EAFD', display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 3, py: 0 }}>
-          <Typography variant="h6">Add Spent Time</Typography>
+          <Typography variant="large">Add Spent Time</Typography>
           <IconButton onClick={onClose}><CloseIcon /></IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ p: 4, pt: 3 }}>
