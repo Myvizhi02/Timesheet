@@ -22,7 +22,6 @@ import { useNavigate } from 'react-router-dom';
 import addIcon from '../assets/add.png';
 import dateIcon from '../assets/date.png';
 import foldereyeIcon from '../assets/foldereye.png';
-import selectionIcon from '../assets/selection.png';
 import shareIcon from '../assets/share.png';
 import visibilityIcon from '../assets/visibility.png';
 import visibility2Icon from '../assets/visibility2.png';
@@ -33,33 +32,28 @@ import View from './View';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
-  const [showSpentModal, setShowSpentModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [dateRange, setDateRange] = useState([null, null]); // State to hold the range [startDate, endDate]
-  const [project, setProject] = useState(''); // Project selection state
+  const [selectedTask, setSelectedTask] = useState(null); // ✅ uncommented to fix error
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [project, setProject] = useState('');
   const [employees, setEmployees] = useState([]);
   const [taskName, setTaskName] = useState('');
   const [admins, setAdmins] = useState([]);
   const [showProjectModal, setShowProjectModal] = useState(false);
-  const agentName = localStorage.getItem('name') || 'Agent';
   const [projects, setProjects] = useState([]);
   const [spentTimeDetails, setSpentTimeDetails] = useState([]);
+  const [executiveProjects, setExecutiveProjects] = useState([]);
+  const agentName = localStorage.getItem('name') || 'Agent';
   const crmLogId = localStorage.getItem('crm_log_id');
-  console.log(crmLogId)
-const [executiveProjects, setExecutiveProjects] = useState([]);
 
-useEffect(() => {
-  if (!crmLogId) return;
+  useEffect(() => {
+    if (!crmLogId) return;
 
-  axios.get(`http://localhost:3030/api/projects/by-executive/${crmLogId}`)
-    .then(response => {
-      setExecutiveProjects(response.data);
-    })
-    .catch(error => {
-      console.error('Error fetching projects for executive:', error);
-    });
-}, [crmLogId]);
-
+    axios.get(`http://localhost:3030/api/projects/by-executive/${crmLogId}`)
+      .then(response => setExecutiveProjects(response.data))
+      .catch(error => console.error('Error fetching projects for executive:', error));
+  }, [crmLogId]);
 
   useEffect(() => {
     axios.get('http://localhost:3030/api/admins')
@@ -93,10 +87,9 @@ useEffect(() => {
   }, []);
 
   useEffect(() => {
-    // Only fetch if both start and end dates are selected
     if (dateRange[0] && dateRange[1]) {
-      const startDate = dateRange[0].toISOString().split('T')[0]; // Format to yyyy-mm-dd
-      const endDate = dateRange[1].toISOString().split('T')[0]; // Format to yyyy-mm-dd
+      const startDate = dateRange[0].toISOString().split('T')[0];
+      const endDate = dateRange[1].toISOString().split('T')[0];
 
       axios
         .get('http://localhost:3030/api/spent-time-details', {
@@ -108,17 +101,28 @@ useEffect(() => {
           alert(`Error: ${error.response?.data?.details || 'An unknown error occurred'}`);
         });
     }
-  }, [dateRange]); // Trigger data fetch when the date range changes
+  }, [dateRange]);
 
-  const handleViewClick = (task) => {
-    setSelectedTask(task);
-    setShowSpentModal(true); // You can show the details in a modal or however you'd like
+  const handleOpenAddModal = () => setShowAddModal(true);
+  const handleCloseAddModal = () => {
+    setShowAddModal(false);
+    fetchSpentTimeDetails();
   };
 
-  const handleOpenSpentModal = () => setShowSpentModal(true);
-  const handleCloseSpentModal = () => {
-    setShowSpentModal(false);
-    fetchSpentTimeDetails();
+const handleViewClick = (taskDetail) => {
+  setSelectedTask({
+    projectId: taskDetail.project_id,
+    taskId: taskDetail.task_id,
+    name: taskDetail.name,
+    empId: taskDetail.agent_id,
+  });
+  setShowViewModal(true);
+};
+
+
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
   };
 
   const handleViewProjectPage = () => navigate('/project');
@@ -194,15 +198,14 @@ useEffect(() => {
                   <em>Select Project</em>
                 </MenuItem>
                 {executiveProjects.length === 0 ? (
-  <MenuItem disabled>No projects assigned</MenuItem>
-) : (
-  executiveProjects.map((project) => (
-    <MenuItem key={project.project_unique_id} value={project.project_name}>
-      {project.project_name}
-    </MenuItem>
-  ))
-)}
-
+                  <MenuItem disabled>No projects assigned</MenuItem>
+                ) : (
+                  executiveProjects.map((project) => (
+                    <MenuItem key={project.project_unique_id} value={project.project_name}>
+                      {project.project_name}
+                    </MenuItem>
+                  ))
+                )}
               </Select>
             </Box>
           </Grid>
@@ -221,7 +224,7 @@ useEffect(() => {
               <Button
                 variant="contained"
                 startIcon={<img src={addIcon} alt="Add" width="20" />}
-                onClick={handleOpenSpentModal}
+                onClick={handleOpenAddModal}
                 sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
               >
                 Add Spent Time
@@ -258,51 +261,58 @@ useEffect(() => {
               </TableRow>
             </TableHead>
             <TableBody>
-  {spentTimeDetails
-    .filter(detail => {
-      const matchesAdmin = activeTab === 'all' || detail.name === activeTab;
-      const matchesDate = (!dateRange[0] || new Date(detail.start_date).toDateString() >= new Date(dateRange[0]).toDateString()) && 
-                          (!dateRange[1] || new Date(detail.start_date).toDateString() <= new Date(dateRange[1]).toDateString());
-      const matchesProject = !project || detail.project_name === project;
-      return matchesAdmin && matchesDate && matchesProject;
-    })
-    .map((detail, index) => (
-      <TableRow key={detail.id || index}>
-        <TableCell align="center">{index + 1}</TableCell>
-        <TableCell>{detail.name}</TableCell>
-        <TableCell>{detail.project_name}</TableCell>
-        <TableCell>{detail.task_name}</TableCell>
-        <TableCell>{detail.subtask_name}</TableCell>
-        <TableCell>{new Date(detail.start_date).toLocaleDateString()}</TableCell>
-        <TableCell>{detail.hours}</TableCell>
-        <TableCell align="center">
-          <IconButton onClick={() => handleViewClick(detail.id)}>
-            <img src={visibility2Icon} width="25" alt="View" />
-          </IconButton>
-        </TableCell>
-      </TableRow>
-    ))}
-  {/* Show "No data found" message when no rows match the filters */}
-  {spentTimeDetails.filter(detail => {
-    const matchesAdmin = activeTab === 'all' || detail.name === activeTab;
-    const matchesDate = (!dateRange[0] || new Date(detail.start_date).toDateString() >= new Date(dateRange[0]).toDateString()) && 
-                        (!dateRange[1] || new Date(detail.start_date).toDateString() <= new Date(dateRange[1]).toDateString());
-    const matchesProject = !project || detail.project_name === project;
-    return matchesAdmin && matchesDate && matchesProject;
-  }).length === 0 && (
-    <TableRow>
-      <TableCell colSpan={8} align="center">
-        No data found
-      </TableCell>
-    </TableRow>
-  )}
-</TableBody>
-
+              {spentTimeDetails.filter(detail => {
+                const matchesAdmin = activeTab === 'all' || detail.name === activeTab;
+                const matchesDate = (!dateRange[0] || new Date(detail.start_date).toDateString() >= new Date(dateRange[0]).toDateString()) && 
+                                    (!dateRange[1] || new Date(detail.start_date).toDateString() <= new Date(dateRange[1]).toDateString());
+                const matchesProject = !project || detail.project_name === project;
+                return matchesAdmin && matchesDate && matchesProject;
+              }).map((detail, index) => (
+                <TableRow key={detail.id || index}>
+                  <TableCell align="center">{index + 1}</TableCell>
+                  <TableCell>{detail.name}</TableCell>
+                  <TableCell>{detail.project_name}</TableCell>
+                  <TableCell>{detail.task_name}</TableCell>
+                  <TableCell>{detail.subtask_name}</TableCell>
+                  <TableCell>{new Date(detail.start_date).toLocaleDateString()}</TableCell>
+                  <TableCell>{detail.hours}</TableCell>
+                  <TableCell align="center">
+                    <IconButton onClick={() => handleViewClick(detail)}>
+                      <img src={visibility2Icon} width="25" alt="View" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {spentTimeDetails.filter(detail => {
+                const matchesAdmin = activeTab === 'all' || detail.name === activeTab;
+                const matchesDate = (!dateRange[0] || new Date(detail.start_date).toDateString() >= new Date(dateRange[0]).toDateString()) && 
+                                    (!dateRange[1] || new Date(detail.start_date).toDateString() <= new Date(dateRange[1]).toDateString());
+                const matchesProject = !project || detail.project_name === project;
+                return matchesAdmin && matchesDate && matchesProject;
+              }).length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">No data found</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
           </Table>
         </TableContainer>
       </Box>
 
-      <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} />
+      <AddSpenttime open={showAddModal} onClose={handleCloseAddModal} />
+      {/* <View show={showViewModal} onClose={handleCloseViewModal} data={selectedTask} /> */}
+   {selectedTask && (
+  <View
+    show={showViewModal}
+    onClose={handleCloseViewModal}
+    projectId={selectedTask.project_id}
+    taskId={selectedTask.task_id}
+    employee={{ name: selectedTask.name, empId: selectedTask.empId }}
+  />
+)}
+
+
+
     </>
   );
 };

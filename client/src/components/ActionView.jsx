@@ -23,10 +23,9 @@ const ActionView = ({ task = {}, onClose }) => {
     task_description: task.task_description || '',
     subtask_name: task.subtask_name || '',
     subtask_description: task.subtask_description || '',
-    task_status: task.task_status === "1" || task.task_status === 'Open' || task.task_status === true,
-    subtask_status: task.subtask_status === "1" || task.subtask_status === 'Open' || task.subtask_status === true,
+    task_status: task.task_status === 1 || task.task_status === '1' ? 1 : 2,
+    subtask_status: task.subtask_status === 1 || task.subtask_status === '1' ? 1 : 2,
   });
-  
 
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -36,38 +35,26 @@ const ActionView = ({ task = {}, onClose }) => {
   };
 
   const handleTaskStatusToggle = async () => {
-    const newStatus = !formData.task_status;
-   
-setFormData(prev => ({
-    ...prev,
-    task_status: newStatus,
-  }));
-    const payload = {
-    
-      task_status: newStatus ? 'Open' : 'Closed',
-    };
+    const newStatus = formData.task_status === 1 ? 2 : 1;
 
-   
+    setFormData(prev => ({
+      ...prev,
+      task_status: newStatus,
+    }));
   };
 
   const handleSubtaskStatusToggle = async () => {
-    const newStatus = !formData.subtask_status;
-    
-setFormData(prev => ({
-    ...prev,
-    subtask_status: newStatus,
-  }));
+    const newStatus = formData.subtask_status === 1 ? 2 : 1;
+
+    setFormData(prev => ({
+      ...prev,
+      subtask_status: newStatus,
+    }));
+
     if (!task?.sub_task_id) {
       setSnackbar({ open: true, message: 'Subtask ID missing for update', severity: 'error' });
       return;
     }
-
-    const payload = {
-    
-      status: newStatus ? 'Open' : 'Closed',
-    };
-
-   
   };
 
   const handleUpdate = async () => {
@@ -76,12 +63,13 @@ setFormData(prev => ({
     const payload = {
       task_name: formData.task_name,
       task_description: formData.task_description,
-      task_status: formData.task_status ? 'Open' : 'Closed',
+      task_status: formData.task_status, // send 1 or 2
     };
 
     try {
       await axios.put(`http://localhost:3030/api/update-task/${task.task_id}`, payload);
       setSnackbar({ open: true, message: 'Task updated successfully', severity: 'success' });
+        onUpdateDone();
     } catch (error) {
       setSnackbar({ open: true, message: 'Task update failed', severity: 'error' });
     }
@@ -92,12 +80,11 @@ setFormData(prev => ({
       setSnackbar({ open: true, message: 'Subtask ID missing for update', severity: 'error' });
       return;
     }
-    console.log(task.sub_task_id)
 
     const payload = {
       subtask_name: formData.subtask_name,
       description: formData.subtask_description,
-      status: formData.subtask_status ? 'Open' : 'Closed',
+      status: formData.subtask_status, // send 1 or 2
     };
 
     try {
@@ -114,7 +101,7 @@ setFormData(prev => ({
       sx={{
         width: '40px',
         height: '20px',
-        backgroundColor: status ? '#3DC1F2' : '#ccc',
+        backgroundColor: status === 1 ? '#3DC1F2' : '#ccc',
         borderRadius: '20px',
         position: 'relative',
         cursor: 'pointer',
@@ -130,7 +117,7 @@ setFormData(prev => ({
           borderRadius: '50%',
           position: 'absolute',
           top: '2px',
-          left: status ? '20px' : '3px',
+          left: status === 1 ? '20px' : '3px',
           transition: 'left 0.3s',
         }}
       />
@@ -138,7 +125,23 @@ setFormData(prev => ({
   );
 
   return (
-    <Paper elevation={4} sx={{ width: '95%', maxWidth: 600, height: '700px', borderRadius: 2, overflow: 'hidden', bgcolor: '#fff', zIndex: 10000, position: 'fixed', top: '0.5%', right: '0.5%', display: 'flex', flexDirection: 'column' }}>
+    <Paper
+      elevation={4}
+      sx={{
+        width: '95%',
+        maxWidth: 600,
+        height: '700px',
+        borderRadius: 2,
+        overflow: 'hidden',
+        bgcolor: '#fff',
+        zIndex: 10000,
+        position: 'fixed',
+        top: '0.5%',
+        right: '0.5%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <Box sx={{ backgroundColor: '#9DECF9', px: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography fontWeight={600}>Actions</Typography>
         <IconButton onClick={onClose}><CloseIcon /></IconButton>
@@ -172,7 +175,7 @@ setFormData(prev => ({
             <Grid item xs={12}>
               <TextField
                 label="Task Status"
-                value={formData.task_status ? 'Open' : 'Closed'}
+                value={formData.task_status === 1 ? 'Open' : 'Closed'}
                 InputProps={{
                   readOnly: true,
                   endAdornment: <InputAdornment position="end">{renderStatusToggle(formData.task_status, handleTaskStatusToggle)}</InputAdornment>,
@@ -182,7 +185,12 @@ setFormData(prev => ({
             </Grid>
             <Grid item xs={12}>
               <Box display="flex" justifyContent="center" mt={4}>
-                <Button variant="contained" onClick={handleUpdate} sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}>
+                <Button
+                  type="button"
+                  variant="contained"
+                  onClick={handleUpdate}
+                  sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
+                >
                   Update
                 </Button>
               </Box>
@@ -204,7 +212,7 @@ setFormData(prev => ({
             <Grid item xs={12}>
               <TextField
                 label="SubTask Status"
-                value={formData.subtask_status ? 'Open' : 'Closed'}
+                value={formData.subtask_status === 1 ? 'Open' : 'Closed'}
                 InputProps={{
                   readOnly: true,
                   endAdornment: <InputAdornment position="end">{renderStatusToggle(formData.subtask_status, handleSubtaskStatusToggle)}</InputAdornment>,
@@ -214,7 +222,12 @@ setFormData(prev => ({
             </Grid>
             <Grid item xs={12}>
               <Box display="flex" justifyContent="center" mt={4}>
-                <Button variant="contained" onClick={handleSubtaskSubmit} sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}>
+                <Button
+                  type="button"
+                  variant="contained"
+                  onClick={handleSubtaskSubmit}
+                  sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
+                >
                   Submit
                 </Button>
               </Box>
@@ -240,8 +253,8 @@ setFormData(prev => ({
                   name={key}
                   variant="standard"
                   value={
-                    typeof formData[key] === 'boolean'
-                      ? formData[key] ? 'Open' : 'Closed'
+                    (key === 'task_status' || key === 'subtask_status')
+                      ? (formData[key] === 1 ? 'Open' : 'Closed')
                       : formData[key]
                   }
                   InputProps={{ readOnly: true }}

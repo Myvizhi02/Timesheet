@@ -60,6 +60,10 @@ const Task = () => {
     setOpenActionView(false);
   };
 
+const handleUpdateDone = () => {
+  setOpenActionView(false);  // Close popup
+  setRefreshFlag(prev => !prev); // Refresh tasks
+};
 
   return (
     <>
@@ -109,23 +113,15 @@ const Task = () => {
                     {/* <Typography sx={{ color: task.subtask_status === 'Open' ? 'green' : 'red', fontWeight: 500 }}>
                       {task.subtask_status}
                     </Typography> */}
-                    <Typography
+                   <Typography
   sx={{
-    color:
-      task.subtask_status === 1
-        ? 'green'
-        : task.subtask_status === 2 || task.subtask_status === '' || task.subtask_status == null
-        ? 'red'
-        : 'black', // default color if other values
+    color: task.subtask_status == 1 ? 'green' : 'red',
     fontWeight: 500,
   }}
 >
-  {task.subtask_status === 1
-    ? 'Open'
-    : task.subtask_status === 2 || task.subtask_status === '' || task.subtask_status == null
-    ? 'Closed'
-    : 'Unknown'}
+  {task.subtask_status == 1 ? 'Open' : 'Closed'}
 </Typography>
+
 
                   </TableCell>
                   <TableCell align="center">
@@ -141,8 +137,9 @@ const Task = () => {
       </Box>
 
       {openActionView && (
-        <ActionView task={selectedTask} onClose={handleCloseActionView} />
-      )}
+  <ActionView task={selectedTask} onClose={handleCloseActionView} onUpdateDone={handleUpdateDone} />
+)}
+
 
       {showPopup && (
         <AddTask onClose={() => setShowPopup(false)} onSubmit={handleCreateTask} />

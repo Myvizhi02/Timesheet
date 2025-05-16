@@ -25,6 +25,7 @@ const Project = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [projects, setProjects] = useState([]);
 
+
   const fetchProjects = async () => {
     console.log("Fetch project")
     try {
