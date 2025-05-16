@@ -14,7 +14,15 @@ import {
 } from '@mui/material';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
+<<<<<<< HEAD
 const ViewTaskDetails = ({ show, onClose, projectId, taskId, employee }) => {
+=======
+const View = ({ show, onClose, projectId, taskId, employee }) => {
+  // const empId =  localStorage.getItem('agentId');
+  
+  console.log( projectId, taskId, employee)
+  // State to hold the fetched task details
+>>>>>>> ca016fb2ab0e5ddde5af8f8c31e5602124a87d1e
   const [formData, setFormData] = useState({
     task_status: false,
     start_date: '',
