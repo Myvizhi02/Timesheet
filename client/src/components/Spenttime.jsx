@@ -56,6 +56,7 @@ const SpentTimeTable = () => {
 
   const handleCloseSpentModal = () => {
     setShowSpentModal(false);
+    //setRefreshFlag(prev => !prev); 
   };
 
   const handleDateChange = (newDate) => {
@@ -161,7 +162,16 @@ const SpentTimeTable = () => {
         </TableContainer>
       </Stack>
 
-      <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} />
+      {/* <AddSpenttime open={showSpentModal} onClose={handleCloseSpentModal} /> */}
+      <AddSpenttime
+  open={showSpentModal}
+  onClose={handleCloseSpentModal}
+  onSaved={() => {
+    handleCloseSpentModal(); // Close the modal
+    fetchSpentTimeData(selectedDate.format('YYYY-MM-DD')); // Refresh the data
+  }}
+/>
+
     </Box>
   );
 };

@@ -1,21 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import {
-  AppBar,
-  Avatar,
-  Box,
-  IconButton,
-  Toolbar,
-  Typography
-} from '@mui/material';
+import { AppBar, Toolbar, Avatar } from '@mui/material'; // 👈 add this line
 
+import { Box, Typography, IconButton, Menu, MenuItem } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import arrowIcon from '../assets/arrow.png';
 import DimgIcon from '../assets/Dimg.png';
-import homeIcon from '../assets/home.png';
+import home_Icon from '../assets/home_.png';
 import navIcon from '../assets/navigation.png';
+import axios from 'axios';
 
 const TaskHeader = () => {
+
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
+ const [anchorEl, setAnchorEl] = useState(null);
+
+const navigate = useNavigate(); 
+   const handleHomeClick = () => {
+    navigate('/dashboard'); // ✅ navigate to dashboard
+  };
+
+  const handleNavClick = (event) => {
+    setAnchorEl(event.currentTarget); // open menu
+  };
+
+  const handleLogout = () => {
+    // Clear localStorage or token
+    localStorage.clear();
+    setAnchorEl(null); // close menu
+    navigate('/'); // go to login
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     const fetchAgentName = async () => {
@@ -50,9 +67,24 @@ const TaskHeader = () => {
     >
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
         {/* Left Side */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <img src={navIcon} alt="Navigation Icon" width={26} height={26} />
-          <img src={homeIcon} alt="Home Icon" width={24} height={24} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3}}>
+           {/* <img src={navIcon} alt="Navigation Icon" width={26} height={26} /> */}
+            <img
+    src={navIcon}
+    alt="Navigation Icon"
+    width={26}
+    height={26}
+    
+  />
+  
+                             <img
+                    src={home_Icon}
+                    alt="Home Icon"
+                    width={24}
+                    height={24}
+                    style={{ cursor: 'pointer' }}
+                    onClick={handleHomeClick}
+                  />
           <img src={arrowIcon} alt="Arrow Icon" width={26} height={26} />
           <Typography
             variant="h6"
@@ -71,7 +103,15 @@ const TaskHeader = () => {
             {agentName}
           </Typography>
           <IconButton>
-            <Avatar alt="User Profile" src={DimgIcon} sx={{ width: 36, height: 36 }} />
+            <Avatar alt="User Profile" src={DimgIcon} sx={{ width: 36, height: 36 }} style={{ cursor: 'pointer' }}
+    onClick={handleNavClick}/><Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleMenuClose}
+  >
+    <MenuItem onClick={handleLogout} sx={{ color: 'black' }}>
+       Logout</MenuItem>
+  </Menu>
           </IconButton>
         </Box>
       </Toolbar>

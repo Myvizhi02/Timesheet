@@ -10,7 +10,10 @@ import {
   ArrowForward as ArrowIcon,
   Menu as NavIcon
 } from '@mui/icons-material';
+import arrowIcon from '../assets/arrow.png';
 import DimgIcon from '../assets/Dimg.png';
+import home_Icon from '../assets/home_.png';
+import navIcon from '../assets/navigation.png';
 
 const SpenttimeHeader = () => {
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
@@ -51,15 +54,9 @@ const SpenttimeHeader = () => {
     >
       {/* Left Section: Navigation */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <IconButton>
-          <NavIcon sx={{ width: 26 }} />
-        </IconButton>
-        <IconButton>
-          <HomeIcon sx={{ width: 24 }} />
-        </IconButton>
-        <IconButton>
-          <ArrowIcon sx={{ width: 26 }} />
-        </IconButton>
+       <img src={navIcon} alt="Navigation Icon" width={26} height={26} />
+                         <img src={home_Icon} alt="Home Icon" width={24} height={24} />
+                         <img src={arrowIcon} alt="Arrow Icon" width={26} height={26} />
         <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Spent Time</Typography>
       </Box>
 

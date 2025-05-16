@@ -76,7 +76,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
     }
   };
 
-  const handleSubtaskSubmit = async () => {
+  const handleSubtaskUpdate = async () => {
     if (!task?.sub_task_id) {
       setSnackbar({ open: true, message: 'Subtask ID missing for update', severity: 'error' });
       return;
@@ -96,6 +96,50 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
       setSnackbar({ open: true, message: 'Subtask update failed', severity: 'error' });
     }
   };
+
+ const handleSubtaskSubmit = async () => {
+  const { subtask_name, subtask_description, project, task_name, subtask_status } = formData;
+
+  if (!subtask_name || !subtask_description) {
+    setSnackbar({ open: true, message: '⚠ Please fill all the required fields.', severity: 'warning' });
+    return;
+  }
+
+  const crm_log_id = localStorage.getItem('crm_log_id');
+
+  const subTaskData = {
+    project_name: project,
+    task_name: task_name,
+    sub_task_name: subtask_name,
+    description: subtask_description,
+    status: subtask_status,
+    created_by: crm_log_id,
+    modified_by: crm_log_id,
+  };
+
+  try {
+    const res = await fetch('http://localhost:3030/api/subtasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subTaskData),
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      setSnackbar({ open: true, message: '✅ SubTask added successfully!', severity: 'success' });
+      setTimeout(() => {
+        onUpdateDone();  // Call parent update function
+      }, 1500);
+    } else {
+      setSnackbar({ open: true, message: `❌ Failed to add subtask: ${result.error || 'Unknown error'}`, severity: 'error' });
+    }
+  } catch (error) {
+    console.error(error);
+    setSnackbar({ open: true, message: '❌ Failed to add subtask: Network error or server is down', severity: 'error' });
+  }
+};
+
 
   const renderStatusToggle = (status, onClick) => (
     <Box
@@ -225,13 +269,14 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
             <Grid item xs={12}>
               <Box display="flex" justifyContent="center" mt={4}>
                 <Button
-                  type="button"
-                  variant="contained"
-                  onClick={handleSubtaskSubmit}
-                  sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
-                >
-                  Submit
-                </Button>
+  type="button"
+  variant="contained"
+  onClick={task?.sub_task_id ? handleSubtaskUpdate : handleSubtaskSubmit}
+  sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
+>
+  {task?.sub_task_id ? 'Update' : 'Submit'}
+</Button>
+
               </Box>
             </Grid>
           </Grid>
