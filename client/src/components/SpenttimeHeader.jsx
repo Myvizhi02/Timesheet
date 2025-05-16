@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; 
+import { Menu, MenuItem } from '@mui/material';
 import {
-  Box,
+  Box, Avatar,
   Typography,
   IconButton
 } from '@mui/material';
-import {
-  Home as HomeIcon,
-  ArrowForward as ArrowIcon,
-  Menu as NavIcon
-} from '@mui/icons-material';
+
 import arrowIcon from '../assets/arrow.png';
 import DimgIcon from '../assets/Dimg.png';
 import home_Icon from '../assets/home_.png';
@@ -17,6 +15,23 @@ import navIcon from '../assets/navigation.png';
 
 const SpenttimeHeader = () => {
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
+   const navigate = useNavigate(); 
+   const [anchorEl, setAnchorEl] = useState(null);
+  
+    const handleNavClick = (event) => {
+      setAnchorEl(event.currentTarget); // open menu
+    };
+  
+    const handleLogout = () => {
+      // Clear localStorage or token
+      localStorage.clear();
+      setAnchorEl(null); // close menu
+      navigate('/'); // go to login
+    };
+  
+    const handleMenuClose = () => {
+      setAnchorEl(null);
+    };
 
   useEffect(() => {
     const fetchAgentName = async () => {
@@ -63,11 +78,17 @@ const SpenttimeHeader = () => {
       {/* Right Section: Agent Name and Profile Image */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>{agentName}</Typography>
-        <img
-          src={DimgIcon}
-          alt="User Icon"
-          style={{ width: '36px', height: '36px', borderRadius: '50%' }}
-        />
+         <IconButton>
+            <Avatar alt="User Profile" src={DimgIcon} sx={{ width: 36, height: 36 }} style={{ cursor: 'pointer' }}
+    onClick={handleNavClick}/><Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleMenuClose}
+  >
+    <MenuItem onClick={handleLogout} sx={{ color: 'black', mt:2 }}>
+       Logout</MenuItem>
+  </Menu>
+          </IconButton>
       </Box>
     </Box>
   );

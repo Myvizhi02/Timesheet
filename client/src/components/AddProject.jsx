@@ -1,429 +1,325 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
-  Alert,
   Box,
   Button,
-  CircularProgress,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  FormControl,
   Grid,
   IconButton,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Portal,
-  Select,
+  InputAdornment,
+  Paper,
   Snackbar,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import React, { useEffect, useState } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import dateIcon from '../assets/date.png';
+import axios from 'axios';
+import { useState } from 'react';
 
-const AddProject = ({ onClose, onSubmit }) => {
-  const theme = useTheme();
-  const [adminOptions, setAdminOptions] = useState([]);
-  const [loadingAdmins, setLoadingAdmins] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-
+const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
+  const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
-    projectId: '',
-    projectName: '',
-    lob: '',
-    budget: '',
-    domain: '',
-    addPeople: [],
+    project: task.project_name || '',
+    task_name: task.task_name || '',
+    task_description: task.task_description || '',
+    subtask_name: task.subtask_name || '',
+    subtask_description: task.subtask_description || '',
+    task_status: task.task_status === 1 || task.task_status === '1' ? 1 : 2,
+    subtask_status: task.subtask_status === 1 || task.subtask_status === '1' ? 1 : 2,
   });
 
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [actualEndDate, setActualEndDate] = useState(null);
-
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  useEffect(() => {
-    const fetchAdmins = async () => {
-      setLoadingAdmins(true);
-      try {
-        const res = await fetch('http://localhost:3030/api/admins');
-        const data = await res.json();
-        setAdminOptions(data);
-      } catch (err) {
-        showSnackbar('Failed to load admins', 'error');
-      } finally {
-        setLoadingAdmins(false);
-      }
-    };
-
-    const fetchProjectId = async () => {
-      try {
-        const response = await fetch('http://localhost:3030/api/projects/new-id');
-        const data = await response.json();
-        setFormData(prev => ({ ...prev, projectId: data.project_unique_id }));
-      } catch (error) {
-        showSnackbar('Error fetching project ID', 'error');
-      }
-    };
-
-    fetchAdmins();
-    fetchProjectId();
-  }, []);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePeopleChange = (event) => {
-    const { value } = event.target;
-    setFormData({
-      ...formData,
-      addPeople: typeof value === 'string' ? value.split(',') : value,
-    });
+  const handleTaskStatusToggle = async () => {
+    const newStatus = formData.task_status === 1 ? 2 : 1;
+
+    setFormData(prev => ({
+      ...prev,
+      task_status: newStatus,
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const handleSubtaskStatusToggle = async () => {
+    const newStatus = formData.subtask_status === 1 ? 2 : 1;
 
-    const nameToIdMap = {};
-    adminOptions.forEach(admin => {
-      nameToIdMap[admin.name] = admin.crm_log_id;
-    });
+    setFormData(prev => ({
+      ...prev,
+      subtask_status: newStatus,
+    }));
 
-    const crmIds = formData.addPeople.map(person =>
-      nameToIdMap[person] ? nameToIdMap[person] : person
-    );
-
-    const projectData = {
-      project_unique_id: formData.projectId,
-      project_name: formData.projectName,
-      lob: formData.lob,
-      start_date: startDate,
-      end_date: endDate,
-      expected_date: actualEndDate,
-      budget: formData.budget,
-      created_by: crmIds[0],
-      modified_by: crmIds[0],
-      created_date: new Date().toISOString(),
-      modified_date: new Date().toISOString(),
-      is_active: 1,
-      department: formData.domain,
-      allocated_executives: crmIds,
-    };
-
-    try {
-      const res = await fetch('http://localhost:3030/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData),
-      });
-
-      const result = await res.json();
-
-      if (res.ok) {
-        showSnackbar('✅ Project added successfully!', 'success');
-        setTimeout(() => {
-          if (onSubmit) onSubmit(projectData);
-        }, 1000);
-        setTimeout(() => {
-          onClose();
-        }, 3000);
-      } else {
-        showSnackbar(`❌ Failed to add project: ${result.error || 'Unknown error'}`, 'error');
-      }
-    } catch (error) {
-      showSnackbar('❌ Failed to add project: Network error or server is down', 'error');
-    } finally {
-      setIsSubmitting(false);
+    if (!task?.sub_task_id) {
+      setSnackbar({ open: true, severity: 'error' });
+      return;
     }
   };
 
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
+  const handleUpdate = async () => {
+    if (!task?.task_id) return;
+
+    const payload = {
+      task_name: formData.task_name,
+      task_description: formData.task_description,
+      task_status: formData.task_status, // send 1 or 2
+    };
+
+    try {
+      await axios.put(`http://localhost:3030/api/update-task/${task.task_id}`, payload);
+      setSnackbar({ open: true, message: 'Task updated successfully', severity: 'success' });
+        onUpdateDone();
+    } catch (error) {
+      console.log("lllll", error)
+      setSnackbar({ open: true, message: 'Task update failed', severity: 'error' });
+    }
   };
 
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 8;
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      },
-    },
+  const handleSubtaskUpdate = async () => {
+    if (!task?.sub_task_id) {
+      setSnackbar({ open: true, severity: 'error' });
+      return;
+    }
+
+    const payload = {
+      subtask_name: formData.subtask_name,
+      description: formData.subtask_description,
+      status: formData.subtask_status, // send 1 or 2
+    };
+
+    try {
+      await axios.put(`http://localhost:3030/api/subtasks/${task.sub_task_id}`, payload);
+      setSnackbar({ open: true, message: 'Subtask status updated successfully', severity: 'success' });
+       onUpdateDone();
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Subtask update failed', severity: 'error' });
+    }
   };
 
-  const getStyles = (name, selected, theme) => ({
-    fontWeight: selected.includes(name)
-      ? theme.typography.fontWeightMedium
-      : theme.typography.fontWeightRegular,
-  });
+ const handleSubtaskSubmit = async () => {
+  const { subtask_name, subtask_description, project, task_name, subtask_status } = formData;
 
-  const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
+  if (!subtask_name || !subtask_description) {
+    setSnackbar({ open: true, message: '⚠ Please fill all the required fields.', severity: 'warning' });
+    return;
+  }
+
+  const crm_log_id = localStorage.getItem('crm_log_id');
+
+  const subTaskData = {
+    project_name: project,
+    task_name: task_name,
+    sub_task_name: subtask_name,
+    description: subtask_description,
+    status: subtask_status,
+    created_by: crm_log_id,
+    modified_by: crm_log_id,
+  };
+
+  try {
+    const res = await fetch('http://localhost:3030/api/subtasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subTaskData),
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      setSnackbar({ open: true, message: '✅ SubTask added successfully!', severity: 'success' });
+      setTimeout(() => {
+        onUpdateDone();  // Call parent update function
+      }, 1500);
+    } else {
+      setSnackbar({ open: true, message: `❌ Failed to add subtask: ${result.error || 'Unknown error'}`, severity: 'error' });
+    }
+  } catch (error) {
+    console.error(error);
+    setSnackbar({ open: true, message: '❌ Failed to add subtask: Network error or server is down', severity: 'error' });
+  }
+};
+
+
+  const renderStatusToggle = (status, onClick) => (
     <Box
       onClick={onClick}
-      ref={ref}
       sx={{
-        display: 'flex',
-        alignItems: 'center',
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        backgroundColor: '#fff',
-        width: '250px',
-        height: '40px',
+        width: '40px',
+        height: '20px',
+        backgroundColor: status === 1 ? '#3DC1F2' : '#ccc',
+        borderRadius: '20px',
+        position: 'relative',
         cursor: 'pointer',
-        paddingLeft: '10px',
+        transition: 'background-color 0.3s',
+        ml: 1,
       }}
     >
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        readOnly
-        style={{
-          border: 'none',
-          outline: 'none',
-          width: '100%',
-          backgroundColor: 'transparent',
-          fontSize: '1rem',
-          color: value ? '#000' : '#888',
+      <Box
+        sx={{
+          height: '16px',
+          width: '16px',
+          backgroundColor: '#fff',
+          borderRadius: '50%',
+          position: 'absolute',
+          top: '2px',
+          left: status === 1 ? '20px' : '3px',
+          transition: 'left 0.3s',
         }}
       />
-      <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em', padding: 8 }} />
     </Box>
-  ));
+  );
 
   return (
-    <>
-      <Dialog
-        open
-        onClose={onClose}
-        PaperProps={{
-          sx: {
-            width: '37.625rem',
-            height: 'auto',
-            position: 'absolute',
-            top: 'calc(50% + 35px)',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1300,
-          },
-        }}
+    <Paper
+      elevation={4}
+      sx={{
+        width: '95%',
+        maxWidth: 600,
+        height: '700px',
+        borderRadius: 2,
+        overflow: 'hidden',
+        bgcolor: '#fff',
+        zIndex: 10000,
+        position: 'fixed',
+        top: '0.5%',
+        right: '0.5%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Box sx={{ backgroundColor: '#9DECF9', px: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography fontWeight={600}>Actions</Typography>
+        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+      </Box>
+
+      <Tabs
+        value={tabIndex}
+        onChange={(e, newValue) => setTabIndex(newValue)}
+        variant="fullWidth"
+        textColor="primary"
+        indicatorColor="primary"
+        sx={{ borderBottom: 1, borderColor: 'white', '& .MuiTab-root': { textTransform: 'none', fontWeight: 500 } }}
       >
-        <DialogTitle
-          sx={{
-            backgroundColor: '#A3EAFD',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            height: '3rem',
-            px: 3,
-          }}
-        >
-          <Typography variant="h6" fontWeight={600}>Add Project</Typography>
-          <IconButton onClick={onClose}><CloseIcon /></IconButton>
-        </DialogTitle>
+        <Tab label="Edit Task" />
+        <Tab label="Sub-Task" />
+        <Tab label="Task Details" />
+      </Tabs>
 
-        <DialogContent sx={{ padding: '1.5em', mt: 2 }}>
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3.5}>
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  name="projectId"
-                  label="Project ID"
-                  variant="outlined"
-                  fullWidth
-                  disabled
-                  value={formData.projectId || ''}
-                  InputLabelProps={{ shrink: true }}
-                  sx={inputStyle}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="projectName"
-                  label="Project Name"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  value={formData.projectName}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  sx={inputStyle}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="domain"
-                  label="Domain"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  value={formData.domain}
-                  onChange={handleChange}
-                  sx={inputStyle}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="lob"
-                  label="LOB"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  value={formData.lob}
-                  onChange={handleChange}
-                  sx={inputStyle}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  placeholderText="Start Date"
-                  dateFormat="dd/MM/yyyy"
-                  customInput={<CustomInput placeholder="Select Start Date" />}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  placeholderText="End Date"
-                  dateFormat="dd/MM/yyyy"
-                  customInput={<CustomInput placeholder="Select End Date" />}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <DatePicker
-                  selected={actualEndDate}
-                  onChange={(date) => setActualEndDate(date)}
-                  placeholderText="Actual End Date"
-                  dateFormat="dd/MM/yyyy"
-                  customInput={<CustomInput placeholder="Select Actual End Date" />}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="budget"
-                  label="Budget"
-                  variant="outlined"
-                  fullWidth
-                  value={formData.budget}
-                  onChange={handleChange}
-                  sx={inputStyle}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControl fullWidth sx={selectStyle}>
-                  <InputLabel id="add-people-label">Add People</InputLabel>
-                  <Select
-                    labelId="add-people-label"
-                    multiple
-                    value={formData.addPeople}
-                    onChange={handlePeopleChange}
-                    input={<OutlinedInput label="Add People" />}
-                    MenuProps={MenuProps}
-                  >
-                    {loadingAdmins ? (
-                      <MenuItem disabled>
-                        <CircularProgress size={20} /> &nbsp;Loading...
-                      </MenuItem>
-                    ) : (
-                      adminOptions.map((admin) => (
-                        <MenuItem
-                          key={admin.crm_log_id}
-                          value={admin.name}
-                          style={getStyles(admin.name, formData.addPeople, theme)}
-                        >
-                          {admin.name}
-                        </MenuItem>
-                      ))
-                    )}
-                  </Select>
-                </FormControl>
-              </Grid>
+      <Box sx={{ p: 2, flex: 1, overflowY: 'auto', ml: 2.5 }}>
+        {tabIndex === 0 && (
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Project" name="project" value={formData.project} size="small" InputProps={{ readOnly: true }} sx={{ width: '252px', backgroundColor: '#FBECEC' }} />
             </Grid>
-
-            <Box textAlign="center" mt={4}>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={isSubmitting}
-                sx={{
-                  backgroundColor: '#213E9A',
-                  color: 'white',
-                  width: '20%',
-                  height: '42px',
-                  fontWeight: 600,
-                  borderRadius: '8px',
-                  textTransform: 'none',
-                  '&:hover': {
-                    backgroundColor: '#213E9A',
-                  },
+            <Grid item xs={12} sm={6}>
+              <TextField label="Task Name" name="task_name" value={formData.task_name} onChange={handleChange} size="small" sx={{ width: '252px' }} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField label="Task Description" name="task_description" value={formData.task_description} onChange={handleChange} size="small" multiline rows={1} sx={{ width: '525px' }} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Task Status"
+                value={formData.task_status === 1 ? 'Open' : 'Closed'}
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: <InputAdornment position="end">{renderStatusToggle(formData.task_status, handleTaskStatusToggle)}</InputAdornment>,
                 }}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </Button>
-            </Box>
-          </form>
-        </DialogContent>
-      </Dialog>
+                sx={{ width: '252px', '& .MuiOutlinedInput-root': { height: '40px' } }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" justifyContent="center" mt={4}>
+                <Button
+                  type="button"
+                  variant="contained"
+                  onClick={handleUpdate}
+                  sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
+                >
+                  Update
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        )}
 
-      <Portal>
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          sx={{ '& .MuiSnackbarContent-root': { zIndex: 2500 } }}
-        >
-          <Alert
-            onClose={handleSnackbarClose}
-            severity={snackbar.severity}
-            sx={{ width: '100%' }}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </Portal>
-    </>
+        {tabIndex === 1 && (
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <TextField label="Project" name="project" value={formData.project} size="small" InputProps={{ readOnly: true }} sx={{ width: '252px', backgroundColor: '#FBECEC' }} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField label="SubTask Name" name="subtask_name" value={formData.subtask_name} onChange={handleChange} size="small" sx={{ width: '252px' }} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField label="SubTask Description" name="subtask_description" value={formData.subtask_description} onChange={handleChange} size="small" multiline rows={1} sx={{ width: '525px' }} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="SubTask Status"
+                value={formData.subtask_status === 1 ? 'Open' : 'Closed'}
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: <InputAdornment position="end">{renderStatusToggle(formData.subtask_status, handleSubtaskStatusToggle)}</InputAdornment>,
+                }}
+                sx={{ width: '252px', '& .MuiOutlinedInput-root': { height: '40px' } }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" justifyContent="center" mt={4}>
+                <Button
+  type="button"
+  variant="contained"
+  onClick={task?.sub_task_id ? handleSubtaskUpdate : handleSubtaskSubmit}
+  sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
+>
+  {task?.sub_task_id ? 'Update' : 'Submit'}
+</Button>
+
+              </Box>
+            </Grid>
+          </Grid>
+        )}
+
+        {tabIndex === 2 && (
+          <Grid container spacing={3}>
+            {[
+              ['Project', 'project'],
+              ['Task Name', 'task_name'],
+              ['Task Description', 'task_description'],
+              ['Sub Task Name', 'subtask_name'],
+              ['Sub Task Description', 'subtask_description'],
+              ['Task Status', 'task_status'],
+              ['Sub Task Status', 'subtask_status'],
+            ].map(([label, key]) => (
+              <Grid item xs={12} key={key}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  name={key}
+                  variant="standard"
+                  value={
+                    (key === 'task_status' || key === 'subtask_status')
+                      ? (formData[key] === 1 ? 'Open' : 'Closed')
+                      : formData[key]
+                  }
+                  InputProps={{ readOnly: true }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Box>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        message={snackbar.message}
+      />
+    </Paper>
   );
 };
 
-const inputStyle = {
-  width: '260px',
-  '& .MuiInputBase-root': {
-    height: '40px',
-  },
-  '& input': {
-    height: '40px',
-    padding: '0 1em',
-  },
-};
-
-const selectStyle = {
-  width: '260px',
-  '& .MuiInputBase-root': {
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-  },
-};
-
-export default AddProject;
+export default ActionView;
