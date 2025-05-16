@@ -9,86 +9,76 @@ import {
   InputAdornment,
   TextField,
   Typography,
+  MenuItem,
   Snackbar,
   Alert,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import AddSubTask from './AddSubTask';
+import axios from 'axios';
 
 const AddTask = ({ onClose, onSubmit }) => {
   const [project, setProject] = useState('');
   const [taskName, setTaskName] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState(true); // true = Open (1), false = Closed (2)
-  //const [showSubTaskModal, setShowSubTaskModal] = useState({ open: false, taskId: null });
+  const [status, setStatus] = useState(true);
   const [showSubTaskModal, setShowSubTaskModal] = useState({
-  open: false,
-  taskId: null,
-  projectId: null,
-});
+    open: false,
+    taskId: null,
+    projectId: null,
+  });
 
   const [projectsList, setProjectsList] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [selectedProject, setSelectedProject] = useState(null);
+  const crmLogId = localStorage.getItem('crm_log_id');
+  const [executiveProjects, setExecutiveProjects] = useState([]);
+
+  useEffect(() => {
+    if (!crmLogId) return;
+
+    axios
+      .get(`http://localhost:3030/api/projects/by-executive/${crmLogId}`)
+      .then((response) => {
+        setExecutiveProjects(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching projects for executive:', error);
+      });
+  }, [crmLogId]);
+
+  useEffect(() => {
+    fetch('http://localhost:3030/api/projects')
+      .then((res) => res.json())
+      .then((data) => setProjectsList(data))
+      .catch(() => showSnackbar('❌ Failed to load projects', 'error'));
+  }, []);
 
   const showSnackbar = (message, severity = 'success') => {
-      console.log('Snackbar called:', message, severity);
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
 
-  useEffect(() => {
-    fetch('http://localhost:3030/api/projects')
-      .then(res => res.json())
-      .then(data => setProjectsList(data))
-      .catch(() => showSnackbar('❌ Failed to load projects', 'error'));
-  }, []);
+  const taskPayload = () => {
+    const selectedProject = projectsList.find(
+      (proj) => proj.project_unique_id === project
+    );
 
-  // const taskPayload = () => {
-  //   const selectedProject = projectsList.find(
-  //     (proj) => proj.project_unique_id === projectId
-  //   );
-
-  //   return {
-  //     project_name: project,
-  //     task_name: taskName,
-  //     description,
-  //     status: status ? 1 : 2,
-  //     created_by: localStorage.getItem('crm_log_id'),
-  //     modified_by: localStorage.getItem('crm_log_id'),
-  //   };
-  // };
- const taskPayload = () => {
-  const selectedProject = projectsList.find(proj => proj.project_unique_id === project);
-
-  if (!selectedProject) {
-    // Defensive fallback
     return {
-      project_name: '',   // maybe better to return empty string or handle error
+      project_name: selectedProject?.project_name || '',
       task_name: taskName,
       description,
       status: status ? 1 : 2,
-      created_by: localStorage.getItem('crm_log_id'),
-      modified_by: localStorage.getItem('crm_log_id'),
+      created_by: crmLogId,
+      modified_by: crmLogId,
     };
-  }
-
-  return {
-    project_name: selectedProject.project_name,
-    task_name: taskName,
-    description,
-    status: status ? 1 : 2,
-    created_by: localStorage.getItem('crm_log_id'),
-    modified_by: localStorage.getItem('crm_log_id'),
   };
-};
-
 
   const handleSubmit = async () => {
-    if (!project|| !taskName || !description) {
+    if (!project || !taskName || !description) {
       showSnackbar('⚠️ Please fill in all the required fields.', 'warning');
       return;
     }
@@ -101,17 +91,18 @@ const AddTask = ({ onClose, onSubmit }) => {
       });
 
       const result = await res.json();
-      
 
       if (res.ok) {
         showSnackbar('✅ Task added successfully!', 'success');
-        setShowSubTaskModal({ open: true, taskId: taskId, projectId: project });
+        setShowSubTaskModal({
+          open: true,
+          taskId: result.task_id,
+          projectId: project,
+        });
 
-        // 
-         setTimeout(() => {
-    if (onSubmit) onSubmit();
-  }, 1000);
-        //if (onClose) onClose();
+        setTimeout(() => {
+          if (onSubmit) onSubmit();
+        }, 1000);
       } else {
         showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
       }
@@ -135,12 +126,15 @@ const AddTask = ({ onClose, onSubmit }) => {
       });
 
       const result = await res.json();
-if (res.ok) {
-  const taskId = result.task_id;
-  showSnackbar('✅ Task added successfully!', 'success');
-  setShowSubTaskModal({ open: true, taskId: taskId, projectId: project });
-}
- else {
+
+      if (res.ok) {
+        showSnackbar('✅ Task added successfully!', 'success');
+        setShowSubTaskModal({
+          open: true,
+          taskId: result.task_id,
+          projectId: project,
+        });
+      } else {
         showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
@@ -200,23 +194,27 @@ if (res.ok) {
               label="Select Project"
               fullWidth
               value={project}
-             onChange={(e) => {
-  const selected = projectsList.find(
-    (proj) => proj.project_unique_id === e.target.value
-  );
-  setProject(e.target.value); // still store the ID
-  setSelectedProject(selected); // store full object
-}}
-
-              SelectProps={{ native: true }}
+              onChange={(e) => {
+                const selected = projectsList.find(
+                  (proj) => proj.project_unique_id === e.target.value
+                );
+                setProject(e.target.value);
+                setSelectedProject(selected);
+              }}
               sx={{ '& .MuiOutlinedInput-root': { height: '40px' } }}
             >
-              <option value="" disabled></option>
-              {projectsList.map((proj) => (
-                <option key={proj.project_unique_id} value={proj.project_unique_id}>
-                  {proj.project_name}
-                </option>
-              ))}
+              <MenuItem value="" disabled>
+                Select a project
+              </MenuItem>
+              {executiveProjects.length === 0 ? (
+                <MenuItem disabled>No projects assigned</MenuItem>
+              ) : (
+                executiveProjects.map((project) => (
+                  <MenuItem key={project.project_unique_id} value={project.project_unique_id}>
+                    {project.project_name}
+                  </MenuItem>
+                ))
+              )}
             </TextField>
 
             <TextField
@@ -319,48 +317,32 @@ if (res.ok) {
           </Box>
         </DialogContent>
       </Dialog>
-console.log('DEBUG — taskId:', taskId);
-console.log('DEBUG — projectId:', project);
 
-     {showSubTaskModal.open && (
-  <AddSubTask
-    onClose={() => setShowSubTaskModal({ open: false, taskId: null, projectId: null })}
-    onSubmit={onSubmit}
-    project={selectedProject?.project_name || ''}
-    projectId={showSubTaskModal.projectId}  // here you pass project id
-    taskName={taskName}
-    taskId={showSubTaskModal.taskId}
-  />
-)}
+      {showSubTaskModal.open && (
+        <AddSubTask
+          onClose={() => setShowSubTaskModal({ open: false, taskId: null, projectId: null })}
+          onSubmit={onSubmit}
+          project={selectedProject?.project_name || ''}
+          projectId={showSubTaskModal.projectId}
+          taskName={taskName}
+          taskId={showSubTaskModal.taskId}
+        />
+      )}
 
-
-
-
-      {/* <Snackbar
+      <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert severity={snackbarSeverity} sx={{ width: '100%' }}>
+        <Alert
+          severity={snackbarSeverity}
+          onClose={() => setSnackbarOpen(false)}
+          sx={{ width: '100%' }}
+        >
           {snackbarMessage}
         </Alert>
-      </Snackbar> */}
-      <Snackbar
-  open={snackbarOpen}
-  autoHideDuration={3000}
-  onClose={() => setSnackbarOpen(false)}
-  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
->
-  <Alert
-    severity={snackbarSeverity}
-    onClose={() => setSnackbarOpen(false)}
-    sx={{ width: '100%' }}
-  >
-    {snackbarMessage}
-  </Alert>
-</Snackbar>
-
+      </Snackbar>
     </>
   );
 };

@@ -141,6 +141,52 @@ app.get('/api/projects/by-executive/:crm_log_id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.get('/api/spenttime/details', async (req, res) => {
+  const { project_id, task_id } = req.query;  // pass as query params
+
+  if (!project_id || !task_id) {
+    return res.status(400).json({ error: 'project_id and task_id are required' });
+  }
+
+  try {
+    const [rows] = await db.query(
+      `
+      SELECT 
+          ms.start_time AS start_time,
+          mp.start_date AS start_date,
+          ms.end_time AS end_time,
+          mp.end_date AS end_date,
+          mt.status AS status,
+          GROUP_CONCAT(DISTINCT ca.name) AS people_worked,
+          ms.comments AS comments
+      FROM main_spent_time ms
+      JOIN main_project mp ON ms.project_id = mp.id
+      JOIN main_task mt ON ms.task_id = mt.id
+
+      LEFT JOIN crm_admin ca ON ca.crm_log_id IN (
+          JSON_UNQUOTE(JSON_EXTRACT(mp.allocated_executives, '$[0]')),
+          JSON_UNQUOTE(JSON_EXTRACT(mp.allocated_executives, '$[1]')),
+          JSON_UNQUOTE(JSON_EXTRACT(mp.allocated_executives, '$[2]')),
+          JSON_UNQUOTE(JSON_EXTRACT(mp.allocated_executives, '$[3]')),
+          JSON_UNQUOTE(JSON_EXTRACT(mp.allocated_executives, '$[4]'))
+      )
+
+      WHERE ms.project_id = ? AND ms.task_id = ?
+
+      GROUP BY ms.start_time, mp.start_date, ms.end_time, mp.end_date, mt.status, ms.comments
+      LIMIT 0, 25;
+      `,
+      [project_id, task_id]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching spent time details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // ----------------------------------------------
 // PROJECTS
 // ----------------------------------------------

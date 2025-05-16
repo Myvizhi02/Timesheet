@@ -8,42 +8,94 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Typography
+  Typography,
+  Grid
 } from '@mui/material';
-import { Grid } from '@mui/system';
 
-const View = ({ show, onClose, data }) => {
-  if (!show) return null;
-
-  const [tasks, setTasks] = useState([]);
-
+const View = ({ show, onClose, projectId, taskId, employee }) => {
+  const empId =  localStorage.getItem('agentId');
+  console.log( projectId, taskId, employee)
+  // State to hold the fetched task details
   const [formData, setFormData] = useState({
-    task_status: data?.task_status === 'Open' || data?.task_status === true,
-    start_date: data?.start_date || '',
-    end_date: data?.end_date || '',
-    start_time: data?.start_time || '',
-    end_time: data?.end_time || '',
-    allocated_executives: data?.allocated_executives || '',
-    comments: data?.comments || '',
+    task_status: false,  // default false (Closed)
+    start_date: '',
+    end_date: '',
+    start_time: '',
+    end_time: '',
+    people_worked: '',
+    comments: '',
   });
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    // Reset form if modal is closed or missing params
+    if (!show || !projectId || !taskId) {
+      setFormData({
+        task_status: false,
+        start_date: '',
+        end_date: '',
+        start_time: '',
+        end_time: '',
+        people_worked: '',
+        comments: '',
+      });
+      return;
+    }
+
+    // Fetch task spent time details from API
+    const fetchSpentTimeDetails = async () => {
       try {
-        const response = await axios.get('http://localhost:3030/api/tasks');
-        if (Array.isArray(response.data)) {
-          setTasks(response.data);
+        const response = await axios.get('http://localhost:3030/api/spenttime/details', {
+          params: {
+            project_id: projectId,
+            task_id: taskId,
+          },
+        });
+
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          const details = response.data[0]; // Take first record
+          // console.log('Fetched task details:', details);
+
+          setFormData({
+            task_status: details.status === 1, // true if status = 1
+            start_date: details.start_date || '',
+            end_date: details.end_date || '',
+            start_time: details.start_time || '',
+            end_time: details.end_time || '',
+            people_worked: details.people_worked || 'N/A',
+            comments: details.comments || '',
+          });
+        } else {
+          // No data found, reset form
+          setFormData({
+            task_status: false,
+            start_date: '',
+            end_date: '',
+            start_time: '',
+            end_time: '',
+            people_worked: 'N/A',
+            comments: '',
+          });
         }
       } catch (error) {
-        // Handle error silently or show toast if needed
+        console.error('Error fetching spent time details:', error);
+        setFormData({
+          task_status: false,
+          start_date: '',
+          end_date: '',
+          start_time: '',
+          end_time: '',
+          people_worked: 'N/A',
+          comments: '',
+        });
       }
     };
 
-    fetchTasks();
-  }, []);
+    fetchSpentTimeDetails();
+  }, [show, projectId, taskId]);
 
   return (
     <Grid container>
+      {/* Backdrop with lighter opacity */}
       {show && (
         <Backdrop
           open={true}
@@ -89,7 +141,7 @@ const View = ({ show, onClose, data }) => {
           }}
         >
           <Typography variant="h6" fontSize="1.125rem">
-            {data?.name || 'Employee 1'} ({data?.empId || 'K025689'})
+            {employee?.name || 'Employee'} ({employee?.empId || ' '})
           </Typography>
           <Button
             onClick={onClose}
@@ -106,6 +158,7 @@ const View = ({ show, onClose, data }) => {
                 backgroundColor: 'transparent'
               }
             }}
+            aria-label="Close"
           >
             ✕
           </Button>
@@ -139,7 +192,7 @@ const View = ({ show, onClose, data }) => {
           </Typography>
 
           <Typography fontSize="0.9rem" mb={2}>
-            People Worked: <strong>{formData.allocated_executives || 'N/A'}</strong>
+            People Worked: <strong>{formData.people_worked}</strong>
           </Typography>
 
           <Box>
