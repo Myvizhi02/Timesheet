@@ -13,7 +13,8 @@ import {
 } from '@mui/material';
 
 const View = ({ show, onClose, projectId, taskId, employee }) => {
-  const empId =  localStorage.getItem('agentId');
+  // const empId =  localStorage.getItem('agentId');
+  
   console.log( projectId, taskId, employee)
   // State to hold the fetched task details
   const [formData, setFormData] = useState({
