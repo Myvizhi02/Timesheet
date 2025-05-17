@@ -207,8 +207,8 @@ const AddProject = ({ onClose, onSubmit }) => {
         onClose={onClose}
         PaperProps={{
           sx: {
-            width: '37.625rem',
-            height: 'auto',
+            width: '45.625rem',
+            height: '600px',
             position: 'absolute',
             top: 'calc(50% + 35px)',
             left: '50%',
@@ -224,14 +224,14 @@ const AddProject = ({ onClose, onSubmit }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             height: '3rem',
-            px: 3,
+            px: 3,py:0, 
           }}
         >
           <Typography variant="h6" fontWeight={600}>Add Project</Typography>
           <IconButton onClick={onClose}><CloseIcon /></IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ padding: '1.5em', mt: 2 }}>
+        <DialogContent sx={{ padding: '1.5em', mt: 5 }}>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3.5}>
               <Grid item xs={12} sm={8}>

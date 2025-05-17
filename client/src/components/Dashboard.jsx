@@ -15,6 +15,8 @@ import {
   Typography,
 } from '@mui/material';
 import axios from 'axios';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -27,6 +29,7 @@ import visibilityIcon from '../assets/visibility.png';
 import visibility2Icon from '../assets/visibility2.png';
 import AddSpenttime from './AddSpenttime';
 import View from './View';
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -47,16 +50,89 @@ const Dashboard = () => {
   const agentName = localStorage.getItem('name') || 'Agent';
   const crmLogId = localStorage.getItem('crm_log_id');
   const empIdFromStorage = localStorage.getItem('agentId');
-  // console.log(localStorage)
-  // console.log("nnn", empIdFromStorage)
+
+  const exportToExcel = async () => {
+  const dataToExport = spentTimeDetails
+    .filter(detail => {
+      const matchesAdmin = activeTab === 'all' || detail.name === activeTab;
+      const matchesDate =
+        (!dateRange[0] || new Date(detail.start_date) >= new Date(dateRange[0])) &&
+        (!dateRange[1] || new Date(detail.start_date) <= new Date(dateRange[1]));
+      const matchesProject = !project || detail.project_name === project;
+      return matchesAdmin && matchesDate && matchesProject;
+    })
+    .map((detail, index) => ({
+      sl: index + 1,
+      name: detail.name,
+      project: detail.project_name,
+      task: detail.task_name,
+      subtask: detail.subtask_name,
+      date: new Date(detail.start_date).toLocaleDateString(),
+      hours: detail.hours
+    }));
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Spent Time');
+
+  // Define columns
+  worksheet.columns = [
+    { header: 'SL.no', key: 'sl', width: 6 },
+    { header: 'Name', key: 'name', width: 18 },
+    { header: 'Project', key: 'project', width: 25 },
+    { header: 'Task', key: 'task', width: 25 },
+    { header: 'Sub-Task', key: 'subtask', width: 25 },
+    { header: 'Date', key: 'date', width: 15 },
+    { header: 'Worked-Hrs', key: 'hours', width: 12 },
+  ];
+
+  // Add data rows
+  dataToExport.forEach(row => worksheet.addRow(row));
+
+  // Style header row
+  worksheet.getRow(1).eachCell(cell => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF4F81BD' }
+    };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    cell.border = {
+      top: { style: 'thin' },
+      bottom: { style: 'thin' },
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+    };
+  });
+
+  // Style data rows
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return; // Skip header
+    row.eachCell(cell => {
+      cell.alignment = { vertical: 'middle', horizontal: 'left' };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+        bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+        left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+        right: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      };
+    });
+  });
+
+  // Write and download the file
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, 'SpentTimeDetails.xlsx');
+};
+
+
   useEffect(() => {
     if (!crmLogId) return;
     axios.get(`http://localhost:3030/api/projects/by-executive/${crmLogId}`)
       .then(response => setExecutiveProjects(response.data))
       .catch(error => console.error('Error fetching projects for executive:', error));
   }, [crmLogId]);
-  console.log("dfsfsfd");
-  console.log(project);
+
   useEffect(() => {
     const url = project
       ? `http://localhost:3030/api/project-admins?project=${project}`
@@ -121,7 +197,7 @@ const Dashboard = () => {
   };
 
   const handleViewClick = (taskDetail) => {
-    console.log(taskDetail)
+
 
     setSelectedTask({
       project_id: taskDetail.project_id,
@@ -217,7 +293,13 @@ const Dashboard = () => {
 
           <Grid item xs={12} md={5}>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: { xs: 'center', md: 'flex-end' }, ml: { xs: 0, md: '90px' } }}>
-              <Button variant="contained" color="success" sx={{ minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={shareIcon} alt="Share" width="20" />}>
+              <Button
+                variant="contained"
+                color="success"
+                sx={{ minWidth: 150, height: 42, textTransform: 'none' }}
+                startIcon={<img src={shareIcon} alt="Share" width="20" />}
+                onClick={exportToExcel} // Attach here on Button, not on img
+              >
                 Export to Excel
               </Button>
               <Button variant="contained" sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }} startIcon={<img src={visibilityIcon} alt="View" width="20" />} onClick={handleViewTaskPage}>
@@ -232,7 +314,7 @@ const Dashboard = () => {
             </Box>
           </Grid>
         </Grid>
-      </Box>
+      </Box >
 
       <Box sx={{ mt: 8, mx: { xs: 2, md: 6 } }}>
         <Box sx={{ backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, display: 'flex', width: { xs: '100%', md: '99%' }, p: 1 }}>
@@ -299,17 +381,27 @@ const Dashboard = () => {
         </TableContainer>
       </Box>
 
-      <AddSpenttime open={showAddModal} onClose={handleCloseAddModal} />
-      {selectedTask && (
-        <View
+      {/* <AddSpenttime open={showAddModal} onClose={handleCloseAddModal} /> */}
+      <AddSpenttime
+  open={showAddModal}
+  onClose={handleCloseAddModal}
+  onSaved={() => {
+    handleCloseAddModal(); // Close the modal
+    // fetchSpentTimeData(selectedDate.format('YYYY-MM-DD')); // Refresh the data
+  }}
+/>
+      {
+        selectedTask && (
+          <View
 
-          show={showViewModal}
-          onClose={handleCloseViewModal}
-          projectId={selectedTask.project_id}
-          taskId={selectedTask.task_id}
-          employee={{ name: selectedTask.name, empId: selectedTask.empId }}
-        />
-      )}
+            show={showViewModal}
+            onClose={handleCloseViewModal}
+            projectId={selectedTask.project_id}
+            taskId={selectedTask.task_id}
+            employee={{ name: selectedTask.name, empId: selectedTask.empId }}
+          />
+        )
+      }
     </>
   );
 };

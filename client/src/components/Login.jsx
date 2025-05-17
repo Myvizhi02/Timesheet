@@ -1,12 +1,12 @@
 import { Box, Button, CircularProgress, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import backgroundImg from "../assets/bgimg.png";
 import timeIcon from "../assets/time.png";
 
-// Custom styled TextField
+// Custom styled TextField with MUI styles
 const StyledTextField = styled(TextField)({
   '& label.Mui-focused': {
     color: '#3758f9',
@@ -30,30 +30,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user already logged in
-  // useEffect(() => {
-  //   const checkLogin = async () => {
-  //     const crm_log_id = localStorage.getItem('crm_log_id');
-  //     const name = localStorage.getItem('name');
-
-  //     if (crm_log_id && name) {
-  //       try {
-  //         const res = await axios.post('http://localhost:3030/validate-session', { crm_log_id });
-  //         if (res.data.valid) {
-  //           navigate('/dashboard');
-  //         } else {
-  //           localStorage.clear();
-  //         }
-  //       } catch (err) {
-  //         console.error("Session validation error:", err.message);
-  //         localStorage.clear();
-  //       }
-  //     }
-  //   };
-
-  //   checkLogin();
-  // }, [navigate]);
-
   const handleLogin = async () => {
     if (!agentId.trim() || !password.trim()) {
       alert('Please enter both Employee ID and Password.');
@@ -68,17 +44,18 @@ const Login = () => {
         password: password.trim(),
       });
 
-     // In your handleLogin success block
-const { crm_log_id, name, redirectTo, admin_flag } = res.data;
+      const { crm_log_id, name, redirectTo, admin_flag } = res.data;
 
-if (crm_log_id && name) {
-  localStorage.setItem('crm_log_id', crm_log_id);
-  localStorage.setItem('name', name);
-  localStorage.setItem('agentId', agentId.trim());
-  localStorage.setItem('admin_flag', admin_flag); // Store admin_flag
-  navigate(redirectTo || '/dashboard');
-}
- else {
+      if (crm_log_id && name) {
+        // Save login info and role in localStorage (or sessionStorage)
+        localStorage.setItem('crm_log_id', crm_log_id);
+        localStorage.setItem('name', name);
+        localStorage.setItem('agentId', agentId.trim());
+        localStorage.setItem('admin_flag', admin_flag); // Store admin_flag for route protection
+
+        // Redirect based on backend's redirectTo or default
+        navigate(redirectTo || '/dashboard');
+      } else {
         alert('Invalid login details.');
       }
     } catch (err) {

@@ -41,22 +41,22 @@ const Project = () => {
   }, []);
 
   // Called when AddProject form submits new project data
- const handleCreateProject = async (data) => {
-  try {
-   // await axios.post('http://localhost:3030/api/projects', data);
-    fetchProjects();  // refresh project list after adding
-    setShowModal(false); // close modal
-  } catch (error) {
-    console.error('Error creating project:', error);
-  }
-};
+  const handleCreateProject = async (data) => {
+    try {
+      // await axios.post('http://localhost:3030/api/projects', data);
+      fetchProjects();  // refresh project list after adding
+      setShowModal(false); // close modal
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
+  };
 
 
   // Called when EditProject form submits updated project data
- const handleUpdateProject = () => {
-  fetchProjects();             // ✅ refresh projects
-  setShowEditModal(false);    // ✅ close modal
-};
+  const handleUpdateProject = () => {
+    fetchProjects();             // ✅ refresh projects
+    setShowEditModal(false);    // ✅ close modal
+  };
 
 
   const handleEditClick = (project) => {
@@ -185,11 +185,11 @@ const Project = () => {
             }}
           >
             {showModal && (
-  <AddProject
-    onClose={() => setShowModal(false)}
-    onSubmit={handleCreateProject}  // <-- important!
-  />
-)}
+              <AddProject
+                onClose={() => setShowModal(false)}
+                onSubmit={handleCreateProject}  // <-- important!
+              />
+            )}
 
           </Box>
         </Modal>
@@ -214,11 +214,11 @@ const Project = () => {
               boxShadow: 24,
             }}
           >
-           <EditProject
-  project={selectedProject}
-  onClose={() => setShowEditModal(false)}
-  onUpdate={handleUpdateProject}
-/>
+            <EditProject
+              project={selectedProject}
+              onClose={() => setShowEditModal(false)}
+              onUpdate={handleUpdateProject}
+            />
 
           </Box>
         </Modal>
