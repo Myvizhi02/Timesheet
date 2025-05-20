@@ -56,6 +56,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
       return;
     }
   };
+// console.log("Incoming task object:", task);
 
   const handleUpdate = async () => {
     if (!task?.task_id) return;
