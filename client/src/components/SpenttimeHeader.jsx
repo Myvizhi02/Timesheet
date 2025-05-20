@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; 
-import { Menu, MenuItem } from '@mui/material';
 import {
-  Box, Avatar,
+  AppBar,
+  Avatar,
+  Box,
   Typography,
-  IconButton
+  IconButton,
+  Menu,
+  MenuItem,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
+// Assets
 import arrowIcon from '../assets/arrow.png';
 import DimgIcon from '../assets/Dimg.png';
 import home_Icon from '../assets/home_.png';
@@ -15,23 +21,11 @@ import navIcon from '../assets/navigation.png';
 
 const SpenttimeHeader = () => {
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
-   const navigate = useNavigate(); 
-   const [anchorEl, setAnchorEl] = useState(null);
-  
-    const handleNavClick = (event) => {
-      setAnchorEl(event.currentTarget); // open menu
-    };
-  
-    const handleLogout = () => {
-      // Clear localStorage or token
-      localStorage.clear();
-      setAnchorEl(null); // close menu
-      navigate('/'); // go to login
-    };
-  
-    const handleMenuClose = () => {
-      setAnchorEl(null);
-    };
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const fetchAgentName = async () => {
@@ -39,16 +33,35 @@ const SpenttimeHeader = () => {
         const agentId = localStorage.getItem('agentId');
         if (agentId) {
           const response = await axios.get(`http://localhost:3030/api/agents/${agentId}`);
-          setAgentName(response.data.name);
-          localStorage.setItem('name', response.data.name);
+          const name = response.data.name;
+          setAgentName(name);
+          localStorage.setItem('name', name);
         }
       } catch (error) {
-        // Error is silently caught for a clean UI; you can handle this in a global error boundary if needed
+        console.error('Error fetching agent name:', error);
       }
     };
 
     fetchAgentName();
   }, []);
+
+  const handleHomeClick = () => {
+    navigate('/dashboard');
+  };
+
+  const handleNavClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setAnchorEl(null);
+    navigate('/');
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <Box
@@ -56,39 +69,49 @@ const SpenttimeHeader = () => {
         backgroundColor: 'white',
         width: '100%',
         height: '70px',
-        position: 'fixed',
-        top: 0,
-        zIndex: 1302,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '0 20px',
+        padding: isMobile ? '0 10px' : '0 20px',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         boxSizing: 'border-box',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
       }}
     >
-      {/* Left Section: Navigation */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-       <img src={navIcon} alt="Navigation Icon" width={26} height={26} />
-                         <img src={home_Icon} alt="Home Icon" width={24} height={24} />
-                         <img src={arrowIcon} alt="Arrow Icon" width={26} height={26} />
-        <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>Spent Time</Typography>
+      {/* Left Section: Navigation + Title */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 1.5 : 3 }}>
+        <img src={navIcon} alt="Navigation Icon" width={isMobile ? 22 : 26} height={isMobile ? 22 : 26} />
+        <img
+          src={home_Icon}
+          alt="Home Icon"
+          width={isMobile ? 20 : 24}
+          height={isMobile ? 20 : 24}
+          style={{ cursor: 'pointer' }}
+          onClick={handleHomeClick}
+        />
+        <img src={arrowIcon} alt="Arrow Icon" width={isMobile ? 22 : 26} height={isMobile ? 22 : 26} />
+        <Typography sx={{ fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: 500 }}>
+         Spent Time
+        </Typography>
       </Box>
 
-      {/* Right Section: Agent Name and Profile Image */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Typography sx={{ fontSize: '1.2rem', fontWeight: 500 }}>{agentName}</Typography>
-         <IconButton>
-            <Avatar alt="User Profile" src={DimgIcon} sx={{ width: 36, height: 36 }} style={{ cursor: 'pointer' }}
-    onClick={handleNavClick}/><Menu
-    anchorEl={anchorEl}
-    open={Boolean(anchorEl)}
-    onClose={handleMenuClose}
-  >
-    <MenuItem onClick={handleLogout} sx={{ color: 'black', mt:2 }}>
-       Logout</MenuItem>
-  </Menu>
-          </IconButton>
+      {/* Right Section: User Info */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Typography sx={{ fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: 500 }}>
+          {agentName}
+        </Typography>
+
+        <IconButton onClick={handleNavClick}>
+          <Avatar alt="User" src={DimgIcon} sx={{ width: 36, height: 36 }} />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleLogout} sx={{ color: 'black' }}>
+            Logout
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   );

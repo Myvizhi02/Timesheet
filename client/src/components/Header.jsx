@@ -1,30 +1,30 @@
-import { AppBar, Avatar, Box, IconButton, Toolbar, Typography } from '@mui/material';
-import { Menu, MenuItem } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// Assets
+import arrowIcon from '../assets/arrow.png';
 import DimgIcon from '../assets/Dimg.png';
 import homeIcon from '../assets/home.png';
 import navIcon from '../assets/navigation.png';
-import { useNavigate } from 'react-router-dom'; 
 
 const Header = () => {
   const [agentName, setAgentName] = useState(localStorage.getItem('name') || 'Agent');
-   const [anchorEl, setAnchorEl] = useState(null);
-    const navigate = useNavigate(); 
-      const handleNavClick = (event) => {
-        setAnchorEl(event.currentTarget); // open menu
-      };
-    
-      const handleLogout = () => {
-        // Clear localStorage or token
-        localStorage.clear();
-        setAnchorEl(null); // close menu
-        navigate('/'); // go to login
-      };
-    
-      const handleMenuClose = () => {
-        setAnchorEl(null);
-      };
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const fetchAgentName = async () => {
@@ -32,8 +32,9 @@ const Header = () => {
         const agentId = localStorage.getItem('agentId');
         if (agentId) {
           const response = await axios.get(`http://localhost:3030/api/agents/${agentId}`);
-          setAgentName(response.data.name);
-          localStorage.setItem('name', response.data.name);
+          const name = response.data.name;
+          setAgentName(name);
+          localStorage.setItem('name', name);
         }
       } catch (error) {
         console.error('Error fetching agent name:', error);
@@ -43,89 +44,75 @@ const Header = () => {
     fetchAgentName();
   }, []);
 
+  const handleHomeClick = () => {
+    navigate('/dashboard');
+  };
+
+  const handleNavClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setAnchorEl(null);
+    navigate('/');
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
-    <AppBar
-      position="static"
-      elevation={1}
+    <Box
       sx={{
         backgroundColor: 'white',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        width: '100%',
+        height: '70px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: isMobile ? '0 10px' : '0 20px',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        boxSizing: 'border-box',
       }}
     >
-      <Toolbar
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          minHeight: { xs: '60px', sm: '70px' },
-          px: { xs: 2, sm: 4 },
-        }}
-      >
-        {/* Left Side: Navigation + Home */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 3} }}>
-          <IconButton sx={{ p: 0 }}>
-            <img
-              src={navIcon}
-              alt="Navigation"
-              style={{
-                width: '22px',
-                height: '22px',
-                objectFit: 'contain',
-              }}
-            />
-          </IconButton>
-          <IconButton sx={{ p: 0 }}>
-            <img
-              src={homeIcon}
-              alt="Home"
-              style={{
-                width: '20px',
-                height: '20px',
-                objectFit: 'contain',
-              }}
-            />
-          </IconButton>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 500,
-              fontSize: { xs: '16px', sm: '18px' },
-              color: 'black',
-              display: { xs: 'none', sm: 'block' },
-            }}
-          >
-            Dashboard
-          </Typography>
-        </Box>
+      {/* Left Section: Navigation + Title */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 1.5 : 3 }}>
+        <img src={navIcon} alt="Navigation Icon" width={isMobile ? 22 : 26} height={isMobile ? 22 : 26} />
+        <img
+          src={homeIcon}
+          alt="Home Icon"
+          width={isMobile ? 20 : 24}
+          height={isMobile ? 20 : 24}
+          style={{ cursor: 'pointer' }}
+          onClick={handleHomeClick}
+        />
+        
+        <Typography sx={{ fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: 500 }}>
+          Dashboard
+        </Typography>
+      </Box>
 
-        {/* Right Side: Agent Name + Profile Image */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 500,
-              fontSize: { xs: '14px', sm: '16px' },
-              color: 'black',
-              display: { xs: 'none', sm: 'block' },
-            }}
-          >
-            {agentName}
-          </Typography>
-          
-          <IconButton>
-                      <Avatar alt="User Profile" src={DimgIcon} sx={{ width: 36, height: 36 }} style={{ cursor: 'pointer' }}
-              onClick={handleNavClick}/><Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={handleLogout} sx={{ color: 'black' }}>
-                 Logout</MenuItem>
-            </Menu>
-                    </IconButton>
-        </Box>
-      </Toolbar>
-    </AppBar>
+      {/* Right Section: User Info */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Typography sx={{ fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: 500 }}>
+          {agentName}
+        </Typography>
+
+        <IconButton onClick={handleNavClick}>
+          <Avatar alt="User" src={DimgIcon} sx={{ width: 36, height: 36 }} />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleLogout} sx={{ color: 'black' }}>
+            Logout
+          </MenuItem>
+        </Menu>
+      </Box>
+    </Box>
   );
 };
 

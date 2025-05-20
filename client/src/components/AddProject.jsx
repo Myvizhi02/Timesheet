@@ -450,16 +450,23 @@ const AddProject = ({ onClose, onSubmit }) => {
         </DialogContent>
       </Dialog>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert severity={snackbar.severity} onClose={handleSnackbarClose}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+         <Portal>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ '& .MuiSnackbarContent-root': { zIndex: 2500 } }}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Portal>
     </>
   );
 };
