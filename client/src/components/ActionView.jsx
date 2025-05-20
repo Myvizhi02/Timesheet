@@ -211,13 +211,13 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
         {tabIndex === 0 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
-              <TextField label="Project" name="project" value={formData.project} size="small" InputProps={{ readOnly: true }} sx={{ width: '252px', backgroundColor: '#FBECEC' }} />
+              <TextField label="Project" name="project" value={formData.project} size="small" InputProps={{ readOnly: true }} sx={{ width: { xs: '135%', sm: '247px' }, backgroundColor: '#FBECEC' }} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Task Name" name="task_name" value={formData.task_name} onChange={handleChange} size="small" sx={{ width: '252px' }} />
+              <TextField label="Task Name" name="task_name" value={formData.task_name} onChange={handleChange} size="small" sx={{ width: { xs: '135%', sm: '247px' }}} />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Task Description" name="task_description" value={formData.task_description} onChange={handleChange} size="small" multiline rows={1} sx={{ width: '525px' }} />
+              <TextField label="Task Description" name="task_description" value={formData.task_description} onChange={handleChange} size="small" multiline rows={1} sx={{ width: { xs: '150%', sm: '520px'} }} />
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -227,7 +227,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
                   readOnly: true,
                   endAdornment: <InputAdornment position="end">{renderStatusToggle(formData.task_status, handleTaskStatusToggle)}</InputAdornment>,
                 }}
-                sx={{ width: '252px', '& .MuiOutlinedInput-root': { height: '40px' } }}
+                sx={{  width: { xs: '105%', sm: '247px' }, '& .MuiOutlinedInput-root': { height: '40px' } }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -236,7 +236,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
                   type="button"
                   variant="contained"
                   onClick={handleUpdate}
-                  sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
+                  sx={{ ml: { xs: 10, sm:25},px: 6, py: 1, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
                 >
                   Update
                 </Button>
@@ -248,13 +248,13 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
         {tabIndex === 1 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
-              <TextField label="Project" name="project" value={formData.project} size="small" InputProps={{ readOnly: true }} sx={{ width: '252px', backgroundColor: '#FBECEC' }} />
+              <TextField label="Project" name="project" value={formData.project} size="small" InputProps={{ readOnly: true }} sx={{  width: { xs: '135%', sm: '247px' }, backgroundColor: '#FBECEC' }} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="SubTask Name" name="subtask_name" value={formData.subtask_name} onChange={handleChange} size="small" sx={{ width: '252px' }} />
+              <TextField label="SubTask Name" name="subtask_name" value={formData.subtask_name} onChange={handleChange} size="small" sx={{  width: { xs: '135%', sm: '247px' }}} />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="SubTask Description" name="subtask_description" value={formData.subtask_description} onChange={handleChange} size="small" multiline rows={1} sx={{ width: '525px' }} />
+              <TextField label="SubTask Description" name="subtask_description" value={formData.subtask_description} onChange={handleChange} size="small" multiline rows={1} sx={{ width: { xs: '150%', sm: '520px'}  }} />
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -264,7 +264,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
                   readOnly: true,
                   endAdornment: <InputAdornment position="end">{renderStatusToggle(formData.subtask_status, handleSubtaskStatusToggle)}</InputAdornment>,
                 }}
-                sx={{ width: '252px', '& .MuiOutlinedInput-root': { height: '40px' } }}
+                sx={{ width:{ xs: '105%', sm: '247px' }, '& .MuiOutlinedInput-root': { height: '40px' } }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -273,7 +273,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
   type="button"
   variant="contained"
   onClick={task?.sub_task_id ? handleSubtaskUpdate : handleSubtaskSubmit}
-  sx={{ px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
+  sx={{ml: { xs: 10, sm:25}, px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
 >
   {task?.sub_task_id ? 'Update' : 'Submit'}
 </Button>
@@ -284,7 +284,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
         )}
 
         {tabIndex === 2 && (
-          <Grid container spacing={3}>
+          <Grid container columnSpacing={15} rowSpacing={3}>
             {[
               ['Project', 'project'],
               ['Task Name', 'task_name'],

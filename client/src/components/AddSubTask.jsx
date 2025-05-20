@@ -144,7 +144,7 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
               label="Enter SubTask"
               value={subtask}
               onChange={(e) => setSubtask(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { height: '40px', width: '260px' } }}
+              sx={{ '& .MuiOutlinedInput-root': { height: '40px',  } }}
             />
             <TextField
               label="Status"
@@ -157,20 +157,20 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
                     <Box
                       onClick={() => setStatus(!status)}
                       sx={{
-                        width: '40px',
+                        width: { xs: '40px', sm: '40px' },
                         height: '20px',
                         backgroundColor: status ? '#3DC1F2' : '#ccc',
                         borderRadius: '20px',
                         position: 'relative',
                         cursor: 'pointer',
                         transition: 'background-color 0.3s',
-                        mr: 4,
+                        mr: { xs: 1, sm:4  },
                       }}
                     >
                       <Box
                         sx={{
                           height: '16px',
-                          width: '16px',
+                          width: { xs: '17px', sm: '17px' },
                           backgroundColor: '#fff',
                           borderRadius: '50%',
                           position: 'absolute',
@@ -185,7 +185,7 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
               }}
               sx={{
                 width: { xs: '100%', sm: '247px' },
-                '& .MuiOutlinedInput-root': { height: '40px', width: '260px' },
+                '& .MuiOutlinedInput-root': { height: '40px',  },
               }}
             />
           </Box>
@@ -197,6 +197,8 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
             minRows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            sx={{
+                width: { xs: '80%', sm: '80%' },}}
           />
 
           <Box display="flex" justifyContent="center" mt="auto">
@@ -208,7 +210,7 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
                 paddingX: 5,
                 paddingY: 1,
                 textTransform: 'none',
-                width: { xs: '100%', sm: 'auto' },
+                width: { xs: '90%', sm: 'auto' },
                 '&:hover': { backgroundColor: '#2c47c5' },
               }}
             >

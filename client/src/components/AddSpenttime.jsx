@@ -1,7 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
   Alert,
-  Button,
+  Button,Box,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -192,191 +192,231 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
       setSnackbar({ open: true, message: 'Please select or enter a subtask.', severity: 'warning' });
     }
   };
-
+//  const commonFieldStyle = {
+//    width: { xs: '100%', sm: '260px' },
+//     '& .MuiInputBase-root': {
+//       height: '40px',
+//     },
+//     '& input': {
+//       padding: '0 1em',
+//     },
+//   };
   return (
     <>
-      <Dialog open={open} onClose={onClose} PaperProps={{
-        sx: {
-          width: '600px',
-          height: '600px',
-          m: 0,
-          p: 0,
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 11
-        }
-      }}>
-        <DialogTitle sx={{ backgroundColor: '#A3EAFD', display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 3, py: 0 }}>
-          <Typography variant="large">Add Spent Time</Typography>
-          <IconButton onClick={onClose}><CloseIcon /></IconButton>
-        </DialogTitle>
-        <DialogContent dividers sx={{ p: 4, pt: 3 }}>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  label="Select Project"
-                  fullWidth
-                  value={selectedProjectId}
-                  onChange={handleProjectChange}
-                  SelectProps={{ native: true }}
-                    sx={{ '& .MuiOutlinedInput-root': { width: '258px', height: '50px' } }}
+      <Dialog
+  open={open}
+  onClose={onClose}
+  PaperProps={{
+    sx: {
+      width: { xs: '90%', sm: '600px' },
+       maxWidth: '95vw',
+      height: { xs: 'auto', sm: '600px' },
+      maxHeight: '90vh',
 
-                >
-                  <option value="" disabled></option>
-                  {executiveProjects.length === 0 ? (
-                    <option disabled>No projects assigned</option>
-                  ) : (
-                    executiveProjects.map((proj) => (
-                      <option key={proj.id} value={proj.id}>
-                        {proj.project_name}
-                      </option>
-                    ))
-                  )}
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  label="Select Task"
-                  fullWidth
-                  value={selectedTaskId}
-                  onChange={handleTaskChange}
-                  SelectProps={{ native: true }}
-                  disabled={!selectedProjectId}
-                    sx={{ '& .MuiOutlinedInput-root': { width: '258px', height: '50px' } }}
-
-                >
-                  <option value="" disabled></option>
-                  {tasksList.map((task) => (
-                    <option key={task.id} value={task.id}>
-                      {task.task_name}
-                    </option>
-                  ))}
-                </TextField>
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  label="Select SubTask"
-                  fullWidth
-                  value={selectedSubTask}
-                  onChange={(e) => {
-                    setSelectedSubTask(e.target.value);
-                    setSubTaskError(false);
-                  }}
-                  SelectProps={{ native: true }}
-                  disabled={!selectedTaskId}
-                  error={subTaskError}
-                   sx={{
-      width: '428px',
-      '& .MuiOutlinedInput-root': {
-        height: '50px',
-        backgroundColor: subTaskError ? '#FED3D3' : 'inherit',
-      },
+      m: 0,
+      p: 0,
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 11,
+    },
+  }}
+>
+  <DialogTitle
+    sx={{
+      backgroundColor: '#A3EAFD',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      px: 3,
+      py: 1,
     }}
+  >
+    <Typography variant="h6">Add Spent Time</Typography>
+    <IconButton onClick={onClose}>
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
 
-                >
-                  <option value="" disabled></option>
-                  {subTasks.length > 0 ? (
-                    subTasks.map((subtask) => (
-                      <option key={subtask.id} value={subtask.id}>
-                        {subtask.subtask_name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="" disabled>No subtasks available</option>
-                  )}
-                </TextField>
-              </Grid>
+  <DialogContent dividers sx={{ p: { xs: 2, sm: 4 }, pt: 3, overflowY: 'auto' }}>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Grid container rowSpacing={2.5} columnSpacing={3} sx={{ flexWrap: 'wrap' }}>
+        <Grid item xs={12}>
+          <TextField
+            select
+            label="Select Project"
+            fullWidth
+            value={selectedProjectId}
+            onChange={handleProjectChange}
+            SelectProps={{ native: true }}
+            sx={{ width: { xs: '250px', sm: '247px' },}}
+          >
+            <option value="" disabled></option>
+            {executiveProjects.length === 0 ? (
+              <option disabled>No projects assigned</option>
+            ) : (
+              executiveProjects.map((proj) => (
+                <option key={proj.id} value={proj.id}>
+                  {proj.project_name}
+                </option>
+              ))
+            )}
+          </TextField>
+        </Grid>
 
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  onClick={handleAddSubTask}
-                  sx={{
-                  width: '5.5rem',
-                  height: '3.0rem',
-                  textTransform: 'none',
-                  fontSize: '0.58rem',
-                }}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            select
+            label="Select Task"
+           fullWidth
+            value={selectedTaskId}
+            onChange={handleTaskChange}
+            SelectProps={{ native: true }}
+            disabled={!selectedProjectId}
+           sx={{ width: { xs: '250px', sm: '247px' },}}
+          >
+            <option value="" disabled></option>
+            {tasksList.map((task) => (
+              <option key={task.id} value={task.id}>
+                {task.task_name}
+              </option>
+            ))}
+          </TextField>
+        </Grid>
 
-                >
-                  Add Subtask
-                </Button>
-              </Grid>
+        <Grid item xs={12}>
+          <TextField
+            select
+            label="Select SubTask"
+            fullWidth
+            value={selectedSubTask}
+            onChange={(e) => {
+              setSelectedSubTask(e.target.value);
+              setSubTaskError(false);
+            }}
+            SelectProps={{ native: true }}
+            disabled={!selectedTaskId}
+            error={subTaskError}
+            sx={{
+               width: { xs: '250px', sm: '370px' },
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: subTaskError ? '#FED3D3' : 'inherit',
+              },
+            }}
+          >
+            <option value="" disabled></option>
+            {subTasks.length > 0 ? (
+              subTasks.map((subtask) => (
+                <option key={subtask.id} value={subtask.id}>
+                  {subtask.subtask_name}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>No subtasks available</option>
+            )}
+          </TextField>
+        </Grid>
 
-              {showExtraField && (
-                <Grid item xs={12}>
-                  <TextField
-                  
-                    label="Enter Sub Task"
-                    fullWidth
-                    value={extraSubTaskName}
-                    onChange={(e) => setExtraSubTaskName(e.target.value)}
-                     sx={{ width: '525px', height: '2.5rem' }}
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            onClick={handleAddSubTask}
+            sx={{
+              textTransform: 'none',
+              fontSize: '0.75rem',
+              width: '120px',
+              height:'55px',
+              maxWidth: '200px',
+            }}
+          >
+            Add Subtask
+          </Button>
+        </Grid>
 
-                  />
-                </Grid>
-              )}
+        {showExtraField && (
+          <Grid item xs={12}>
+            <TextField
+              label="Enter Sub Task"
+              fullWidth
+              value={extraSubTaskName}
+              onChange={(e) => setExtraSubTaskName(e.target.value)}
+              sx={{ width: { xs: '250px', sm: '520px' },}}
+            />
+          </Grid>
+        )}
 
-              <Grid item xs={6}>
-                <TimePicker
-                  label="Start Time"
-                  value={startDateTime}
-                  onChange={setStartDateTime}
-                  renderInput={(params) => <TextField {...params} fullWidth  sx={{ width: '250px',mt:2, '& .MuiInputBase-root': { height: '20px' } }}/>}
-                  
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TimePicker
-                  label="End Time"
-                  value={endDateTime}
-                  onChange={setEndDateTime}
-                  renderInput={(params) => <TextField {...params} fullWidth  sx={{ width: '250px', '& .MuiInputBase-root': { height: '20px' } }}/>}
-                />
-              </Grid>
+    <Grid item xs={12} sm={6}>
+  <Box sx={{ width: '250px' }}>
+    <TimePicker
+      label="Start Time"
+      value={startDateTime}
+      onChange={setStartDateTime}
+      renderInput={(params) => (
+        <TextField {...params} fullWidth />
+      )}
+    />
+  </Box>
+</Grid>
 
-              <Grid item xs={12}>
-                <TextField
-                  label="Comments"
-                  multiline
-                  rows={3}
-                  fullWidth
-                  value={comments}sx={{ width: '530px', '& .MuiOutlinedInput-root': { height: '100px' } }}
 
-                  onChange={(e) => setComments(e.target.value)}
-                />
-              </Grid>
+<Grid item xs={12} sm={6} >
+  <Box sx={{ width: '250px' }}>
+  <TimePicker
+    label="End Time"
+    value={endDateTime}
+    onChange={setEndDateTime}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+       fullWidth
+      />
+    )}
+  /></Box>
+</Grid>
 
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center',ml:20 }}>
-                <Button
-                  variant="contained"
-                  onClick={handleSubmit}
-                    sx={{ width: '12rem', height: '2.5rem', textTransform: 'none' }}
 
-                >
-                  Submit
-                </Button>
-              </Grid>
-            </Grid>
-          </LocalizationProvider>
-        </DialogContent>
-      </Dialog>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
-      </Snackbar>
+
+        <Grid item xs={12}>
+          <TextField
+            label="Comments"
+            multiline
+            rows={3}
+            fullWidth
+            value={comments}
+            onChange={(e) => setComments(e.target.value)}
+            sx={{ width: { xs: '250px', sm: '520px' },}}
+          />
+        </Grid>
+
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            sx={{
+              ml: { xs: 15, sm:25},
+              width: { xs: '100%', sm: '200px' },
+              height: '2.5rem',
+              textTransform: 'none',
+            }}
+          >
+            Submit
+          </Button>
+        </Grid>
+      </Grid>
+    </LocalizationProvider>
+  </DialogContent>
+</Dialog>
+
+<Snackbar
+  open={snackbar.open}
+  autoHideDuration={3000}
+  onClose={handleSnackbarClose}
+  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+>
+  <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+</Snackbar>
+
     </>
   );
 };
