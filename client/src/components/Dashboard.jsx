@@ -245,6 +245,7 @@ const Dashboard = () => {
       />
     </Box>
   ));
+  
 
   return (
     <>
@@ -319,7 +320,7 @@ const Dashboard = () => {
       variant="contained"
       color="success"
       sx={{ minWidth: 150, height: 42, textTransform: 'none' }}
-      startIcon={<img src={shareIcon} alt="Share" width="20" />}
+      startIcon={<img src={shareIcon} alt="Share" width="14" />}
       onClick={exportToExcel}
     >
       Export to Excel
@@ -327,7 +328,7 @@ const Dashboard = () => {
     <Button
       variant="contained"
       sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
-      startIcon={<img src={visibilityIcon} alt="View" width="20" />}
+      startIcon={<img src={visibilityIcon} alt="View" width="15" />}
       onClick={handleViewTaskPage}
     >
       View Task
@@ -335,7 +336,7 @@ const Dashboard = () => {
     <Button
       variant="contained"
       sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
-      startIcon={<img src={foldereyeIcon} alt="Project" width="20" />}
+      startIcon={<img src={foldereyeIcon} alt="Project" width="15" />}
       onClick={handleViewProjectPage}
     >
       View Project
@@ -343,7 +344,7 @@ const Dashboard = () => {
     <Button
       variant="contained"
       sx={{ bgcolor: '#213E9A', minWidth: 150, height: 42, textTransform: 'none' }}
-      startIcon={<img src={addIcon} alt="Add" width="20" />}
+      startIcon={<img src={addIcon} alt="Add" width="13" />}
       onClick={handleOpenAddModal}
     >
       Add Spent Time
