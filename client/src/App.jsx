@@ -16,7 +16,7 @@ import Spenttime from "./components/Spenttime";
 // Session handling function to check if user is logged in
 const ProtectedRoute = ({ element }) => {
   const isLoggedIn = localStorage.getItem('agentId') && localStorage.getItem('name');
-  
+
   return isLoggedIn ? element : <Navigate to="/" />;
 };
 
@@ -91,13 +91,13 @@ function App() {
                 <>
                   <SpenttimeHeader />
                   {/* <AddSpenttime /> */}
-                  <Spenttime/>
+                  <Spenttime />
                 </>
               }
             />
           }
         />
-      
+
       </Routes>
     </BrowserRouter>
   );
