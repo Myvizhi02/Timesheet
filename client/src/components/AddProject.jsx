@@ -1,32 +1,94 @@
-import CloseIcon from '@mui/icons-material/Close';
+import React, { useState, useEffect } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
   Dialog,
-  DialogContent,
   DialogTitle,
-  FormControl,
-  Grid,
+  DialogContent,
   IconButton,
+  TextField,
+  Button,
+  Typography,
+  Grid,
+  Box,
+  Snackbar,
+  Alert,
+  FormControl,
   InputLabel,
+  Select,
   MenuItem,
   OutlinedInput,
-  Portal,
-  Select,
-  Snackbar,
-  TextField,
-  Typography,
+  CircularProgress,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import React, { useEffect, useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import axios from 'axios';
 import dateIcon from '../assets/date.png';
+import { spacing } from '@mui/system';
+
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: 224,
+      width: 250,
+    },
+  },
+};
+
+const getStyles = (name, personName, theme) => ({
+  fontWeight:
+    personName.indexOf(name) === -1
+      ? theme.typography.fontWeightRegular
+      : theme.typography.fontWeightMedium,
+});
+
+const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  return (
+    <TextField
+      variant="outlined"
+      onClick={onClick}
+      ref={ref}
+      value={value}
+      placeholder={placeholder}
+      InputProps={{
+        readOnly: true,
+        endAdornment: (
+          <img
+            src={dateIcon}
+            alt="Date Icon"
+            style={{
+              width: '1.25em',
+              marginLeft: '0.5em',
+              padding: 10,
+              cursor: 'pointer',
+            }}
+            onClick={onClick}
+          />
+        ),
+      }}
+      sx={{
+        width: '255px',
+        '& .MuiInputBase-root': {
+          height: '40px',
+          paddingRight: 0,
+          cursor: 'pointer',
+        },
+        '& input': {
+          cursor: 'pointer',
+        },
+      }}
+    />
+  );
+});
 
 const AddProject = ({ onClose, onSubmit }) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [adminOptions, setAdminOptions] = useState([]);
   const [loadingAdmins, setLoadingAdmins] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,7 +199,7 @@ const AddProject = ({ onClose, onSubmit }) => {
           onClose();
         }, 3000);
       } else {
-        showSnackbar(`❌ Failed to add project: ${result.error || 'Unknown error'}`, 'error');
+        showSnackbar(`❌ Failed to add project: ${result.error || 'Unknown error'}, 'error'`);
       }
     } catch (error) {
       showSnackbar('❌ Failed to add project: Network error or server is down', 'error');
@@ -165,55 +227,38 @@ const AddProject = ({ onClose, onSubmit }) => {
       ? theme.typography.fontWeightMedium
       : theme.typography.fontWeightRegular,
   });
+  const commonFieldStyle = {
+    width: '255px',
+    '& .MuiInputBase-root': {
+      height: '40px',
+    },
+    '& input': {
+      padding: '0 1em',
+    },
+  };
 
-  const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
-    <Box
-      onClick={onClick}
-      ref={ref}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        backgroundColor: '#fff',
-        width: '250px',
-        height: '40px',
-        cursor: 'pointer',
-        paddingLeft: '10px',
-      }}
-    >
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        readOnly
-        style={{
-          border: 'none',
-          outline: 'none',
-          width: '100%',
-          backgroundColor: 'transparent',
-          fontSize: '1rem',
-          color: value ? '#000' : '#888',
-        }}
-      />
-      <img src={dateIcon} alt="Date Icon" style={{ width: '1.25em', marginLeft: '0.5em', padding: 8 }} />
-    </Box>
-  ));
+  const commonSelectStyle = {
+    width: '255px',
+    '& .MuiInputBase-root': {
+      height: '40px',
+    },
+    '& input': {
+      padding: '0 1em',
+
+    },
+  };
 
   return (
     <>
-      <Dialog
+     <Dialog
         open
         onClose={onClose}
+        maxWidth="sm"
+        fullWidth
         PaperProps={{
           sx: {
-            width: '45.625rem',
-            height: '600px',
-            position: 'absolute',
-            top: 'calc(50% + 35px)',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1300,
+            borderRadius: '10px',
+            maxHeight: '90vh',
           },
         }}
       >
@@ -223,41 +268,49 @@ const AddProject = ({ onClose, onSubmit }) => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            height: '3rem',
-            px: 3,py:0, 
+            px: 3,
+            py: 0,
           }}
         >
-          <Typography variant="h6" fontWeight={600}>Add Project</Typography>
-          <IconButton onClick={onClose}><CloseIcon /></IconButton>
+          <Typography variant="h6" fontWeight={600}>
+            Add Project
+          </Typography>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ padding: '1.5em', mt: 5 }}>
+        <DialogContent
+          sx={{
+            p: 4,
+            pt: 4,
+            overflowY: 'auto',
+            overflowX: 'hidden'
+          }}
+        >
           <form onSubmit={handleSubmit}>
-            <Grid container spacing={3.5}>
-              <Grid item xs={12} sm={8}>
+            <Grid container rowSpacing={3.5} columnSpacing={3.5} columnGap={2} pt={5}>
+              <Grid item xs={12} sm={6} >
                 <TextField
                   name="projectId"
                   label="Project ID"
                   variant="outlined"
-                  fullWidth
                   disabled
-                  value={formData.projectId || ''}
-                  InputLabelProps={{ shrink: true }}
-                  sx={inputStyle}
+                  fullWidth
+                  value={formData.projectId}
+                  sx={commonFieldStyle}
                 />
               </Grid>
-
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6}  >
                 <TextField
                   name="projectName"
                   label="Project Name"
                   variant="outlined"
-                  fullWidth
                   required
+                  fullWidth
                   value={formData.projectName}
                   onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  sx={inputStyle}
+                  sx={commonFieldStyle}
                 />
               </Grid>
 
@@ -266,11 +319,11 @@ const AddProject = ({ onClose, onSubmit }) => {
                   name="domain"
                   label="Domain"
                   variant="outlined"
-                  fullWidth
                   required
+                  fullWidth
                   value={formData.domain}
                   onChange={handleChange}
-                  sx={inputStyle}
+                  sx={commonFieldStyle}
                 />
               </Grid>
 
@@ -279,11 +332,11 @@ const AddProject = ({ onClose, onSubmit }) => {
                   name="lob"
                   label="LOB"
                   variant="outlined"
-                  fullWidth
                   required
+                  fullWidth
                   value={formData.lob}
                   onChange={handleChange}
-                  sx={inputStyle}
+                  sx={commonFieldStyle}
                 />
               </Grid>
 
@@ -291,7 +344,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 <DatePicker
                   selected={startDate}
                   onChange={(date) => setStartDate(date)}
-                  placeholderText="Start Date"
+                  placeholderText="Select Start Date"
                   dateFormat="dd/MM/yyyy"
                   customInput={<CustomInput placeholder="Select Start Date" />}
                 />
@@ -301,7 +354,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 <DatePicker
                   selected={endDate}
                   onChange={(date) => setEndDate(date)}
-                  placeholderText="End Date"
+                  placeholderText="Select End Date"
                   dateFormat="dd/MM/yyyy"
                   customInput={<CustomInput placeholder="Select End Date" />}
                 />
@@ -311,7 +364,7 @@ const AddProject = ({ onClose, onSubmit }) => {
                 <DatePicker
                   selected={actualEndDate}
                   onChange={(date) => setActualEndDate(date)}
-                  placeholderText="Actual End Date"
+                  placeholderText="Select Actual End Date"
                   dateFormat="dd/MM/yyyy"
                   customInput={<CustomInput placeholder="Select Actual End Date" />}
                 />
@@ -325,20 +378,27 @@ const AddProject = ({ onClose, onSubmit }) => {
                   fullWidth
                   value={formData.budget}
                   onChange={handleChange}
-                  sx={inputStyle}
+                  sx={commonFieldStyle}
                 />
               </Grid>
 
-              <Grid item xs={12}>
-                <FormControl fullWidth sx={selectStyle}>
-                  <InputLabel id="add-people-label">Add People</InputLabel>
-                  <Select
-                    labelId="add-people-label"
-                    multiple
+              <Grid item xs={12} pr={25}>
+                <FormControl fullWidth sx={commonSelectStyle}>
+
+
+
+                  <TextField
+                    select
+                    label="Add People"
+                    variant="outlined"
+                    fullWidth
                     value={formData.addPeople}
                     onChange={handlePeopleChange}
-                    input={<OutlinedInput label="Add People" />}
-                    MenuProps={MenuProps}
+                    SelectProps={{
+                      multiple: true,
+                      MenuProps: MenuProps,
+                    }}
+                    sx={commonFieldStyle}
                   >
                     {loadingAdmins ? (
                       <MenuItem disabled>
@@ -355,75 +415,53 @@ const AddProject = ({ onClose, onSubmit }) => {
                         </MenuItem>
                       ))
                     )}
-                  </Select>
+                  </TextField>
+
                 </FormControl>
               </Grid>
-            </Grid>
 
-            <Box textAlign="center" mt={4}>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={isSubmitting}
-                sx={{
-                  backgroundColor: '#213E9A',
-                  color: 'white',
-                  width: '20%',
-                  height: '42px',
-                  fontWeight: 600,
-                  borderRadius: '8px',
-                  textTransform: 'none',
-                  '&:hover': {
-                    backgroundColor: '#213E9A',
-                  },
-                }}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </Button>
-            </Box>
+              <Grid item xs={12}>
+                <Box sx={{ textAlign: 'center', mt: 3 }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubmitting}
+                    sx={{
+                      backgroundColor: '#213E9A',
+                      color: 'white',
+                      width: isMobile ? '100%' : '100%',
+                      ml: isMobile ? 9 : 18,
+                      height: '42px',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: '#213E9A',
+                      },
+                    }}
+                  >
+                    {isSubmitting ? 'Submit' : 'Submit'}
+                  </Button>
+                </Box>
+
+              </Grid>
+            </Grid>
           </form>
         </DialogContent>
       </Dialog>
 
-      <Portal>
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          sx={{ '& .MuiSnackbarContent-root': { zIndex: 2500 } }}
-        >
-          <Alert
-            onClose={handleSnackbarClose}
-            severity={snackbar.severity}
-            sx={{ width: '100%' }}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </Portal>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} onClose={handleSnackbarClose}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
-};
-
-const inputStyle = {
-  width: '260px',
-  '& .MuiInputBase-root': {
-    height: '40px',
-  },
-  '& input': {
-    height: '40px',
-    padding: '0 1em',
-  },
-};
-
-const selectStyle = {
-  width: '260px',
-  '& .MuiInputBase-root': {
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-  },
 };
 
 export default AddProject;
