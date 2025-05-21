@@ -144,11 +144,11 @@ const Dashboard = () => {
       .catch(error => console.error('Error fetching admins:', error));
   }, [project]);
 
-  useEffect(() => {
-    axios.get('http://localhost:3030/api/admins')
-      .then(response => setAdmins(response.data))
-      .catch(error => console.error('Error fetching admins:', error));
-  }, []);
+  // useEffect(() => {
+  //   axios.get('http://localhost:3030/api/admins')
+  //     .then(response => setAdmins(response.data))
+  //     .catch(error => console.error('Error fetching admins:', error));
+  // }, []);
 
   useEffect(() => {
     axios.get('http://localhost:3030/api/tasks')

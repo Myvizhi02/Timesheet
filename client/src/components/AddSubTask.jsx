@@ -15,7 +15,6 @@ import {
 import React, { useState } from 'react';
 
 const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId }) => {
-  console.log(projectId);
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(true);
   const [subtask, setSubtask] = useState('');
