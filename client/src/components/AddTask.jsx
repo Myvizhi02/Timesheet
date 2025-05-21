@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -7,15 +8,14 @@ import {
   DialogTitle,
   IconButton,
   InputAdornment,
-  TextField,
-  Typography,
   MenuItem,
   Snackbar,
-  Alert,
+  TextField,
+  Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import AddSubTask from './AddSubTask';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
+import AddSubTask from './AddSubTask';
 
 const AddTask = ({ onClose, onSubmit }) => {
   const [project, setProject] = useState('');
@@ -64,7 +64,7 @@ const AddTask = ({ onClose, onSubmit }) => {
 
   const taskPayload = () => {
     const selectedProject = projectsList.find(
-      (proj) => proj.project_unique_id === project
+      (proj) => proj.id === project
     );
 
     return {
@@ -196,7 +196,7 @@ const AddTask = ({ onClose, onSubmit }) => {
               value={project}
               onChange={(e) => {
                 const selected = projectsList.find(
-                  (proj) => proj.project_unique_id === e.target.value
+                  (proj) => proj.id === e.target.value
                 );
                 setProject(e.target.value);
                 setSelectedProject(selected);
@@ -210,7 +210,7 @@ const AddTask = ({ onClose, onSubmit }) => {
                 <MenuItem disabled>No projects assigned</MenuItem>
               ) : (
                 executiveProjects.map((project) => (
-                  <MenuItem key={project.project_unique_id} value={project.project_unique_id}>
+                  <MenuItem key={project.id} value={project.id}>
                     {project.project_name}
                   </MenuItem>
                 ))

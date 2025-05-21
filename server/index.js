@@ -605,61 +605,38 @@ app.get('/api/tasks/by-name', checkDbConnection, async (req, res) => {
 });
 
 
-app.post('/api/subtasks', checkDbConnection, async (req, res) => {
-  const {
-    project_id,
-    task_id,
-    sub_task_name,
-    description,
-    status,
-    created_by,
-    modified_by
-  } = req.body;
+app.post('/api/subtasks', async (req, res) => {
+  const { project_id, task_id, sub_task_name, description, status, created_by, modified_by } = req.body;
+
+  // Check all required fields
+  if (!project_id || !task_id || !sub_task_name || !description || status === undefined || !created_by || !modified_by) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
 
   try {
-    if (!project_id || !task_id || !sub_task_name || !description || status === undefined) {
-      return res.status(400).json({ error: 'Missing required fields.' });
+    const [result] = await db.query(
+  'INSERT INTO main_sub_task (project_id, task_id, subtask_name, description, status, created_by, modified_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+  [project_id, task_id, sub_task_name, description, status, created_by, modified_by],
+  (err, result) => {
+    if (err) {
+      console.error('Error inserting subtask:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
     }
-
-    // Optional: validate project_id exists and active
-    const [projectRows] = await db.execute(
-      'SELECT id FROM main_project WHERE id = ? AND is_active = 1',
-      [project_id]
-    );
-    if (projectRows.length === 0) {
-      return res.status(400).json({ error: 'Invalid project ID.' });
-    }
-
-    // Optional: validate task_id exists for the project and active
-    const [taskRows] = await db.execute(
-      'SELECT id FROM main_task WHERE id = ? AND project_id = ? AND is_active = 1',
-      [task_id, project_id]
-    );
-    if (taskRows.length === 0) {
-      return res.status(400).json({ error: 'Invalid task ID for the given project.' });
-    }
-
-    await db.execute(`INSERT INTO main_sub_task (
-      project_id, task_id, subtask_name, description, status,
-      created_by, modified_by, created_date, modified_date, is_active
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?)`, [
-      project_id,
-      task_id,
-      sub_task_name,
-      description,
-      status,  // 1 or 2 (open or closed)
-      created_by,
-      modified_by,
-      status === 1 ? 1 : 2,  // is_active based on status
-    ]);
-
-    res.status(201).json({ message: 'Subtask added successfully.' });
-  } catch (error) {
-    console.error('❌ Error adding subtask:', error.message);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(200).json({ message: 'Subtask added successfully' });
   }
-});
+);
 
+    res.status(200).json({ message: 'Subtask added successfully' });
+  } 
+    catch (error) {
+  console.error('Error inserting subtask:', error);
+  if (error.sqlMessage) console.error('SQL Message:', error.sqlMessage);
+  if (error.code) console.error('Error Code:', error.code);
+  res.status(500).json({ message: 'Internal server error', error: error.sqlMessage || error.message });
+}
+
+});
 
 
 
