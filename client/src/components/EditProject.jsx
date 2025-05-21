@@ -59,31 +59,42 @@ const EditProject = ({ project, onClose, onUpdate }) => {
     }
   }, [project]);
 
-  useEffect(() => {
-    const fetchAdmins = async () => {
-      try {
-        const res = await fetch('http://localhost:3030/api/admins');
-        const data = await res.json();
-        setAdminOptions(data);
 
-        if (project?.allocated_executives?.length > 0) {
-          const ids = project.allocated_executives
-            .map((name) => {
-              const admin = data.find((a) => a.name === name);
-              return admin?.crm_log_id;
-            })
-            .filter(Boolean);
-          setFormData((prev) => ({
-            ...prev,
-            allocated_executives: ids,
-          }));
-        }
-      } catch (err) {
-        console.error('Failed to fetch admin names:', err);
+useEffect(() => {
+  const fetchAdmins = async () => {
+    try {
+      const res = await fetch('http://localhost:3030/api/admins');
+      const data = await res.json();
+      
+
+      setAdminOptions(data);
+
+      // Ensure allocated_executives is parsed as an array
+      let parsedExecutives = [];
+      try {
+        parsedExecutives = Array.isArray(project.allocated_executives)
+          ? project.allocated_executives
+          : JSON.parse(project.allocated_executives || '[]');
+        
+      } catch (e) {
+        console.error("Error parsing allocated_executives:", e);
       }
-    };
+
+      if (parsedExecutives.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          allocated_executives: parsedExecutives, // Already CRM IDs
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin names:', err);
+    }
+  };
+
+  if (project) {
     fetchAdmins();
-  }, [project]);
+  }
+}, [project]);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });

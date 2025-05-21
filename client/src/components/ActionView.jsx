@@ -15,7 +15,9 @@ import {
 import axios from 'axios';
 import { useState } from 'react';
 
-const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
+const ActionView = ({ task = {}, onClose, onUpdateDone }) => {
+ 
+
   const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
     project: task.project_name || '',
@@ -34,32 +36,23 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleTaskStatusToggle = async () => {
+  const handleTaskStatusToggle = () => {
     const newStatus = formData.task_status === 1 ? 2 : 1;
-
-    setFormData(prev => ({
-      ...prev,
-      task_status: newStatus,
-    }));
+    setFormData(prev => ({ ...prev, task_status: newStatus }));
   };
 
-  const handleSubtaskStatusToggle = async () => {
+  const handleSubtaskStatusToggle = () => {
     const newStatus = formData.subtask_status === 1 ? 2 : 1;
+    setFormData(prev => ({ ...prev, subtask_status: newStatus }));
 
-    setFormData(prev => ({
-      ...prev,
-      subtask_status: newStatus,
-    }));
-
-    if (!task?.sub_task_id) {
-      setSnackbar({ open: true, severity: 'error' });
-      return;
-    }
+   
   };
-// console.log("Incoming task object:", task);
 
   const handleUpdate = async () => {
-    if (!task?.task_id) return;
+    if (!task?.task_id) {
+      setSnackbar({ open: true, message: 'Task ID missing!', severity: 'error' });
+      return;
+    }
 
     const payload = {
       task_name: formData.task_name,
@@ -70,16 +63,16 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
     try {
       await axios.put(`http://localhost:3030/api/update-task/${task.task_id}`, payload);
       setSnackbar({ open: true, message: 'Task updated successfully', severity: 'success' });
-        onUpdateDone();
+      onUpdateDone();
     } catch (error) {
-      console.log("lllll", error)
+      console.error('Task update error:', error);
       setSnackbar({ open: true, message: 'Task update failed', severity: 'error' });
     }
   };
 
   const handleSubtaskUpdate = async () => {
     if (!task?.sub_task_id) {
-      setSnackbar({ open: true, severity: 'error' });
+      setSnackbar({ open: true, message: 'Subtask ID missing!', severity: 'error' });
       return;
     }
 
@@ -91,56 +84,61 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
 
     try {
       await axios.put(`http://localhost:3030/api/subtasks/${task.sub_task_id}`, payload);
-      setSnackbar({ open: true, message: 'Subtask status updated successfully', severity: 'success' });
-       onUpdateDone();
+      setSnackbar({ open: true, message: 'Subtask updated successfully', severity: 'success' });
+      onUpdateDone();
     } catch (error) {
+      console.error('Subtask update error:', error);
       setSnackbar({ open: true, message: 'Subtask update failed', severity: 'error' });
     }
   };
 
- const handleSubtaskSubmit = async () => {
-  const { subtask_name, subtask_description, project, task_name, subtask_status } = formData;
+  const handleSubtaskSubmit = async () => {
+    const { subtask_name, subtask_description, subtask_status } = formData;
 
-  if (!subtask_name || !subtask_description) {
-    setSnackbar({ open: true, message: '⚠ Please fill all the required fields.', severity: 'warning' });
-    return;
-  }
-
-  const crm_log_id = localStorage.getItem('crm_log_id');
-
-  const subTaskData = {
-    project_name: project,
-    task_name: task_name,
-    sub_task_name: subtask_name,
-    description: subtask_description,
-    status: subtask_status,
-    created_by: crm_log_id,
-    modified_by: crm_log_id,
-  };
-
-  try {
-    const res = await fetch('http://localhost:3030/api/subtasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(subTaskData),
-    });
-
-    const result = await res.json();
-
-    if (res.ok) {
-      setSnackbar({ open: true, message: '✅ SubTask added successfully!', severity: 'success' });
-      setTimeout(() => {
-        onUpdateDone();  // Call parent update function
-      }, 1500);
-    } else {
-      setSnackbar({ open: true, message: `❌ Failed to add subtask: ${result.error || 'Unknown error'}`, severity: 'error' });
+    if (!subtask_name || !subtask_description) {
+      setSnackbar({ open: true, message: '⚠ Please fill all the required fields.', severity: 'warning' });
+      return;
     }
-  } catch (error) {
-    console.error(error);
-    setSnackbar({ open: true, message: '❌ Failed to add subtask: Network error or server is down', severity: 'error' });
-  }
-};
 
+    const crm_log_id = localStorage.getItem('crm_log_id');
+
+    if (!crm_log_id) {
+      setSnackbar({ open: true, message: 'User not logged in!', severity: 'error' });
+      return;
+    }
+
+    const subTaskData = {
+      project_id: task.project_id,
+      task_id: task.task_id,
+      sub_task_name: subtask_name,
+      description: subtask_description,
+      status: subtask_status,
+      created_by: crm_log_id,
+      modified_by: crm_log_id,
+    };
+
+    try {
+      const res = await fetch('http://localhost:3030/api/subtasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subTaskData),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        setSnackbar({ open: true, message: '✅ SubTask added successfully!', severity: 'success' });
+        setTimeout(() => {
+          onUpdateDone();
+        }, 1500);
+      } else {
+        setSnackbar({ open: true, message: `❌ Failed to add subtask: ${result.error || 'Unknown error'}`, severity: 'error' });
+      }
+    } catch (error) {
+      console.error('Subtask submit error:', error);
+      setSnackbar({ open: true, message: '❌ Failed to add subtask: Network error or server is down', severity: 'error' });
+    }
+  };
 
   const renderStatusToggle = (status, onClick) => (
     <Box
@@ -211,13 +209,36 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
         {tabIndex === 0 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
-              <TextField label="Project" name="project" value={formData.project} size="small" InputProps={{ readOnly: true }} sx={{ width: { xs: '135%', sm: '247px' }, backgroundColor: '#FBECEC' }} />
+              <TextField
+                label="Project"
+                name="project"
+                value={formData.project}
+                size="small"
+                InputProps={{ readOnly: true }}
+                sx={{ width: { xs: '135%', sm: '247px' }, backgroundColor: '#FBECEC' }}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Task Name" name="task_name" value={formData.task_name} onChange={handleChange} size="small" sx={{ width: { xs: '135%', sm: '247px' }}} />
+              <TextField
+                label="Task Name"
+                name="task_name"
+                value={formData.task_name}
+                onChange={handleChange}
+                size="small"
+                sx={{ width: { xs: '135%', sm: '247px' } }}
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Task Description" name="task_description" value={formData.task_description} onChange={handleChange} size="small" multiline rows={1} sx={{ width: { xs: '150%', sm: '520px'} }} />
+              <TextField
+                label="Task Description"
+                name="task_description"
+                value={formData.task_description}
+                onChange={handleChange}
+                size="small"
+                multiline
+                rows={1}
+                sx={{ width: { xs: '150%', sm: '520px' } }}
+              />
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -227,7 +248,7 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
                   readOnly: true,
                   endAdornment: <InputAdornment position="end">{renderStatusToggle(formData.task_status, handleTaskStatusToggle)}</InputAdornment>,
                 }}
-                sx={{  width: { xs: '105%', sm: '247px' }, '& .MuiOutlinedInput-root': { height: '40px' } }}
+                sx={{ width: { xs: '105%', sm: '247px' }, '& .MuiOutlinedInput-root': { height: '40px' } }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -235,8 +256,18 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
                 <Button
                   type="button"
                   variant="contained"
+                  
                   onClick={handleUpdate}
-                  sx={{ ml: { xs: 10, sm:25},px: 6, py: 1, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
+                  sx={{
+                    ml: { xs: 10, sm: 25 },
+                    px: 6,
+                    py: 1,
+                    backgroundColor: '#1A237E',
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    '&:hover': { backgroundColor: '#0D1640' },
+                  }}
                 >
                   Update
                 </Button>
@@ -248,13 +279,36 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
         {tabIndex === 1 && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
-              <TextField label="Project" name="project" value={formData.project} size="small" InputProps={{ readOnly: true }} sx={{  width: { xs: '135%', sm: '247px' }, backgroundColor: '#FBECEC' }} />
+              <TextField
+                label="Project"
+                name="project"
+                value={formData.project}
+                size="small"
+                InputProps={{ readOnly: true }}
+                sx={{ width: { xs: '135%', sm: '247px' }, backgroundColor: '#FBECEC' }}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="SubTask Name" name="subtask_name" value={formData.subtask_name} onChange={handleChange} size="small" sx={{  width: { xs: '135%', sm: '247px' }}} />
+              <TextField
+                label="SubTask Name"
+                name="subtask_name"
+                value={formData.subtask_name}
+                onChange={handleChange}
+                size="small"
+                sx={{ width: { xs: '135%', sm: '247px' } }}
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="SubTask Description" name="subtask_description" value={formData.subtask_description} onChange={handleChange} size="small" multiline rows={1} sx={{ width: { xs: '150%', sm: '520px'}  }} />
+              <TextField
+                label="SubTask Description"
+                name="subtask_description"
+                value={formData.subtask_description}
+                onChange={handleChange}
+                size="small"
+                multiline
+                rows={1}
+                sx={{ width: { xs: '150%', sm: '520px' } }}
+              />
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -264,20 +318,28 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
                   readOnly: true,
                   endAdornment: <InputAdornment position="end">{renderStatusToggle(formData.subtask_status, handleSubtaskStatusToggle)}</InputAdornment>,
                 }}
-                sx={{ width:{ xs: '105%', sm: '247px' }, '& .MuiOutlinedInput-root': { height: '40px' } }}
+                sx={{ width: { xs: '105%', sm: '247px' }, '& .MuiOutlinedInput-root': { height: '40px' } }}
               />
             </Grid>
             <Grid item xs={12}>
               <Box display="flex" justifyContent="center" mt={4}>
                 <Button
-  type="button"
-  variant="contained"
-  onClick={task?.sub_task_id ? handleSubtaskUpdate : handleSubtaskSubmit}
-  sx={{ml: { xs: 10, sm:25}, px: 6, py: 1.5, backgroundColor: '#1A237E', borderRadius: 2, textTransform: 'none', fontWeight: 600, '&:hover': { backgroundColor: '#0D1640' } }}
->
-  {task?.sub_task_id ? 'Update' : 'Submit'}
-</Button>
-
+                  type="button"
+                  variant="contained"
+                  onClick={task?.sub_task_id ? handleSubtaskUpdate : handleSubtaskSubmit}
+                  sx={{
+                    ml: { xs: 10, sm: 25 },
+                    px: 6,
+                    py: 1.5,
+                    backgroundColor: '#1A237E',
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    '&:hover': { backgroundColor: '#0D1640' },
+                  }}
+                >
+                  {task?.sub_task_id ? 'Update' : 'Submit'}
+                </Button>
               </Box>
             </Grid>
           </Grid>
@@ -301,8 +363,10 @@ const ActionView = ({ task = {}, onClose,onUpdateDone  }) => {
                   name={key}
                   variant="standard"
                   value={
-                    (key === 'task_status' || key === 'subtask_status')
-                      ? (formData[key] === 1 ? 'Open' : 'Closed')
+                    key === 'task_status' || key === 'subtask_status'
+                      ? formData[key] === 1
+                        ? 'Open'
+                        : 'Closed'
                       : formData[key]
                   }
                   InputProps={{ readOnly: true }}

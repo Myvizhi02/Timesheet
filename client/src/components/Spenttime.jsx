@@ -1,4 +1,4 @@
-import {
+import {Dialog,
   Box, Button, Paper, Stack,
   Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow,
@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import addIcon from '../assets/add.png';
 import AddSpenttime from './AddSpenttime';
 
-const SpentTimeTable = () => {
+const SpentTime = () => {
   // Set default date to today's date
   const [selectedDate, setSelectedDate] = useState(dayjs()); // Default to current date
   const [showSpentModal, setShowSpentModal] = useState(false);
@@ -73,7 +73,7 @@ const SpentTimeTable = () => {
   const isToday = selectedDate.isSame(dayjs(), 'day');
 
   return (
-    <Box p={4} sx={{ backgroundColor: '#f4f6f9', minHeight: '100vh' }}>
+       <Box p={4} sx={{ backgroundColor: '#f4f6f9', minHeight: '100vh' }}>
       <Stack direction="row" spacing={3} mt={10} justifyContent="flex-end">
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
@@ -176,4 +176,4 @@ const SpentTimeTable = () => {
   );
 };
 
-export default SpentTimeTable;
+export default SpentTime;

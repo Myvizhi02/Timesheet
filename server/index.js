@@ -247,54 +247,9 @@ app.put('/api/projects/:id', checkDbConnection, async (req, res) => {
   }
 });
 
-// app.post('/api/projects', checkDbConnection, async (req, res) => {
-//   try {
-//     const {
-//       project_name,
-//       lob,
-//       start_date,
-//       end_date,
-//       expected_date,
-//       budget,
-//       created_by,
-//       modified_by,
-//       department,
-//       allocated_executives,
-//     } = req.body;
-
-//     const [lastProject] = await db.execute('SELECT project_unique_id FROM main_project ORDER BY id DESC LIMIT 1');
-
-//     const newProjectId = lastProject.length > 0
-//       ? `P${(parseInt(lastProject[0].project_unique_id.replace('P', '')) + 1).toString().padStart(4, '0')}`
-//       : 'P0001';
-
-//     await db.execute(`INSERT INTO main_project (
-//       project_unique_id, project_name, lob, start_date, end_date,
-//       expected_date, budget, created_by, modified_by,
-//       created_date, modified_date, is_active, department, allocated_executives
-//     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 1, ?, ?)`, [
-//       newProjectId,
-//       project_name,
-//       lob,
-//       start_date,
-//       end_date,
-//       expected_date,
-//       budget,
-//       created_by,
-//       modified_by,
-//       department,
-//       JSON.stringify(allocated_executives),
-//     ]);
-
-//     res.status(201).json({ message: 'Project created successfully.', project_unique_id: newProjectId });
-//   } catch (error) {
-//     console.error('❌ Error creating project:', error.message);
-//     res.status(500).json({ error: 'Internal server error.' });
-//   }
-// });
 
 app.post('/api/projects', async (req, res) => {
-  console.log("Received body:", req.body);
+ 
   const {
     project_unique_id,
     project_name,
@@ -362,7 +317,6 @@ app.post('/api/projects', async (req, res) => {
   try {
 
     const [result] = await db.execute(query, values);
-    console.log(result)
     res.status(201).json({ message: 'Project added successfully', projectId: result.insertId });
   } catch (err) {
     console.error('Error inserting project:', err);
@@ -453,9 +407,30 @@ app.get('/api/tasks', checkDbConnection, async (req, res) => {
     } else {
       // Return all tasks with project and subtask info
       const [tasks] = await db.execute(`
-       SELECT st.task_id, st.id AS sub_task_id, t.project_id, p.project_name, t.task_name, st.subtask_name, t.description AS task_description, st.description AS subtask_description, t.status AS task_status, st.status AS subtask_status, p.start_date AS project_start_date, p.end_date AS project_end_date, mst.start_time, mst.end_time, p.allocated_executives AS people_worked, mst.comments FROM main_project p JOIN main_task t ON t.project_id = p.id LEFT JOIN main_sub_task st ON st.task_id = t.id LEFT JOIN main_spent_time mst ON mst.sub_task_id = st.id WHERE p.is_active = 1 AND t.is_active = 1 ORDER BY p.created_date ASC;
-
-      `);
+     SELECT 
+  st.task_id, 
+  st.id AS sub_task_id, 
+  t.id AS task_id,
+  t.project_id, 
+  p.project_name, 
+  t.task_name, 
+  st.subtask_name, 
+  t.description AS task_description, 
+  st.description AS subtask_description, 
+  t.status AS task_status, 
+  st.status AS subtask_status, 
+  p.start_date AS project_start_date, 
+  p.end_date AS project_end_date, 
+  mst.start_time, 
+  mst.end_time, 
+  p.allocated_executives AS people_worked, 
+  mst.comments 
+FROM main_project p 
+JOIN main_task t ON t.project_id = p.id
+LEFT JOIN main_sub_task st ON st.task_id = t.id
+LEFT JOIN main_spent_time mst ON mst.sub_task_id = st.id
+WHERE p.is_active = 1
+ORDER BY p.created_date ASC;`);
       return res.json(tasks);
     }
   } catch (error) {
@@ -632,8 +607,8 @@ app.get('/api/tasks/by-name', checkDbConnection, async (req, res) => {
 
 app.post('/api/subtasks', checkDbConnection, async (req, res) => {
   const {
-    project_name,
-    task_name,
+    project_id,
+    task_id,
     sub_task_name,
     description,
     status,
@@ -642,33 +617,28 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
   } = req.body;
 
   try {
-    if (!project_name || !task_name || !sub_task_name || !description || status === undefined) {
+    if (!project_id || !task_id || !sub_task_name || !description || status === undefined) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
 
+    // Optional: validate project_id exists and active
     const [projectRows] = await db.execute(
-      'SELECT id FROM main_project WHERE project_name = ? AND is_active = 1',
-      [project_name]
+      'SELECT id FROM main_project WHERE id = ? AND is_active = 1',
+      [project_id]
     );
-
     if (projectRows.length === 0) {
-      return res.status(400).json({ error: 'Invalid project name.' });
+      return res.status(400).json({ error: 'Invalid project ID.' });
     }
 
-    const project_id = projectRows[0].id;
-
+    // Optional: validate task_id exists for the project and active
     const [taskRows] = await db.execute(
-      'SELECT id FROM main_task WHERE task_name = ? AND project_id = ? AND is_active = 1',
-      [task_name, project_id]
+      'SELECT id FROM main_task WHERE id = ? AND project_id = ? AND is_active = 1',
+      [task_id, project_id]
     );
-
     if (taskRows.length === 0) {
-      return res.status(400).json({ error: 'Invalid task name for the given project.' });
+      return res.status(400).json({ error: 'Invalid task ID for the given project.' });
     }
 
-    const task_id = taskRows[0].id;
-
-    // Insert the subtask, adjusting the status for active/inactive
     await db.execute(`INSERT INTO main_sub_task (
       project_id, task_id, subtask_name, description, status,
       created_by, modified_by, created_date, modified_date, is_active
@@ -677,10 +647,10 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
       task_id,
       sub_task_name,
       description,
-      status,  // status should be 1 (Open) or 0 (Closed)
+      status,  // 1 or 2 (open or closed)
       created_by,
       modified_by,
-      status === 0 ? 1 : 2,  // if status is 0, set is_active to 0 (inactive), otherwise 1 (active)
+      status === 1 ? 1 : 2,  // is_active based on status
     ]);
 
     res.status(201).json({ message: 'Subtask added successfully.' });
@@ -689,6 +659,7 @@ app.post('/api/subtasks', checkDbConnection, async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
 
 
 
@@ -861,58 +832,8 @@ app.get('/api/spenttime/partial-check', (req, res) => {
 });
 
 
-
-// Existing POST endpoint to save spent time
-// app.post('/api/spenttime', checkDbConnection, async (req, res) => {
-//   console.log('Received data:', req.body);
-//   const {
-//     project_id,
-//     task_id,
-//     sub_task_id,
-//     user_id,
-//     start_date,
-//     end_date,
-//     start_time,
-//     end_time,
-//     hours,
-//     created_by,
-//     modified_by,
-//     created_date,
-//     is_active,
-//     comments
-//   } = req.body;
-
-//   try {
-//     const [subTaskExists] = await db.execute(`
-//       SELECT COUNT(*) AS count FROM main_sub_task WHERE id = ?
-//     `, [sub_task_id]);
-
-//     if (subTaskExists[0].count === 0) {
-//       return res.status(400).json({ error: 'Sub-task ID does not exist.' });
-//     }
-
-//     await db.execute(`
-//       INSERT INTO main_spent_time (
-//         project_id, task_id, sub_task_id, user_id,
-//         start_date, end_date, start_time, end_time,
-//         hours, created_by, modified_by, created_date,
-//         is_active, comments
-//       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-//     `, [
-//       project_id, task_id, sub_task_id, user_id,
-//       start_date, end_date, start_time, end_time,
-//       hours, created_by, modified_by, created_date,
-//       is_active, comments
-//     ]);
-
-//     res.status(201).json({ message: 'Spent time saved successfully.' });
-//   } catch (error) {
-//     console.error('❌ Error inserting spent time:', error.message);
-//     res.status(500).json({ error: 'Internal server error.' });
-//   }
-// });
 app.post('/api/spenttime', checkDbConnection, async (req, res) => {
-  console.log('Received data:', req.body);
+  
   const {
     project_id,
     task_id,
@@ -1049,45 +970,6 @@ app.get('/api/spent-time', async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
-
-
-
-//   const { spentTimeId } = req.params;  // Extract spentTimeId from URL parameter
-
-//   const query = `
-//     SELECT 
-//       a.name,
-//       a.crm_log_id AS empId,
-//       s.start_time,
-//       p.start_date,
-//       s.end_time,
-//       p.end_date,
-//       t.status,
-//       p.allocated_executives AS peopleWorked,
-//       s.comments
-//     FROM main_spent_time s
-//     JOIN crm_admin a ON s.user_id = a.crm_log_id
-//     JOIN main_project p ON s.project_id = p.id
-//     JOIN main_task t ON s.task_id = t.id
-//     WHERE s.id = ?
-//   `;
-
-//   try {
-//     const [rows] = await db.execute(query, [spentTimeId]);
-
-//     if (rows.length === 0) {
-//       return res.status(404).json({ message: 'Data not found' });
-//     }
-
-//     res.json(rows[0]);  // Send the first row of the result (because we are querying for a specific `spentTimeId`)
-//   } catch (error) {
-//     console.error('Error fetching spent time details:', error);
-//     res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// });
-
-
-
 
 // Start the server
 app.listen(PORT, () => {

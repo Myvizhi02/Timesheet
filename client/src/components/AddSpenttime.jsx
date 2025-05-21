@@ -233,7 +233,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
       py: 1,
     }}
   >
-    <Typography variant="h6">Add Spent Time</Typography>
+    <Typography fontSize="18px" fontWeight="bold">Add Spent Time</Typography>
     <IconButton onClick={onClose}>
       <CloseIcon />
     </IconButton>
@@ -242,7 +242,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
   <DialogContent dividers sx={{ p: { xs: 2, sm: 4 }, pt: 3, overflowY: 'auto' }}>
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Grid container rowSpacing={2.5} columnSpacing={3} sx={{ flexWrap: 'wrap' }}>
-        <Grid item xs={12}>
+        <Grid xs={12}>
           <TextField
             select
             label="Select Project"
@@ -265,7 +265,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
           </TextField>
         </Grid>
 
-        <Grid item xs={12} sm={6}>
+        <Grid xs={12} sm={6}>
           <TextField
             select
             label="Select Task"
@@ -285,7 +285,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
           </TextField>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid  xs={12}>
           <TextField
             select
             label="Select SubTask"
@@ -318,7 +318,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
           </TextField>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid  xs={12}>
           <Button
             variant="contained"
             onClick={handleAddSubTask}
@@ -335,7 +335,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
         </Grid>
 
         {showExtraField && (
-          <Grid item xs={12}>
+          <Grid  xs={12}>
             <TextField
               label="Enter Sub Task"
               fullWidth
@@ -346,7 +346,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
           </Grid>
         )}
 
-    <Grid item xs={12} sm={6}>
+    <Grid  xs={12} sm={6}>
   <Box sx={{ width: '250px' }}>
     <TimePicker
       label="Start Time"
@@ -360,7 +360,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
 </Grid>
 
 
-<Grid item xs={12} sm={6} >
+<Grid  xs={12} sm={6} >
   <Box sx={{ width: '250px' }}>
   <TimePicker
     label="End Time"
@@ -377,7 +377,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
 
 
 
-        <Grid item xs={12}>
+        <Grid  xs={12}>
           <TextField
             label="Comments"
             multiline
@@ -389,7 +389,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
           />
         </Grid>
 
-        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Grid  xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Button
             variant="contained"
             onClick={handleSubmit}

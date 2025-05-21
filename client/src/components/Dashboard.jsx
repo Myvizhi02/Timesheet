@@ -384,22 +384,23 @@ const Dashboard = () => {
 
     {/* Conditionally render other tabs only if project is selected */}
     {project &&
-      admins.map((admin, idx) => (
-        <Button
-          key={admin.admin_id || idx}
-          onClick={() => setActiveTab(admin.name)}
-          sx={{
-            flex: { xs: '1 1 100%', md: 1 },
-            bgcolor: activeTab === admin.name ? '#ffffff' : '#CDCDCD80',
-            borderRadius: 2,
-            p: { xs: 1, md: 1.5 },
-            fontSize: { xs: '0.85rem', md: '1rem' },
-            textTransform: 'none',
-          }}
-        >
-          {admin.name}
-        </Button>
-      ))}
+  admins.map((admin, idx) => (
+    <Button
+      key={admin.admin_id || idx}
+      onClick={() => setActiveTab(admin.name)}
+      sx={{
+        flex: { xs: '1 1 100%', md: 1 },
+        bgcolor: activeTab === admin.name ? '#ffffff' : '#CDCDCD80',
+        borderRadius: 2,
+        p: { xs: 1, md: 1.5 },
+        fontSize: { xs: '0.85rem', md: '1rem' },
+        textTransform: 'none',
+      }}
+    >
+      {admin.name}
+    </Button>
+  ))}
+
   </Box>
 </Box>
 

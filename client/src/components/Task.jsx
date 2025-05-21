@@ -26,6 +26,8 @@ const Task = () => {
   const [refreshFlag, setRefreshFlag] = useState(false);  // <-- refresh trigger
 
   const fetchTasks = async () => {
+    
+
     try {
       const response = await axios.get('http://localhost:3030/api/tasks');
       if (Array.isArray(response.data)) {
@@ -37,6 +39,8 @@ const Task = () => {
       console.error('Error fetching tasks:', error);
     }
   };
+  
+
 
   // Fetch tasks initially and on every refreshFlag change
   useEffect(() => {
@@ -134,6 +138,7 @@ const handleUpdateDone = () => {
           </Table>
         </TableContainer>
       </Box>
+
 
       {openActionView && (
   <ActionView task={selectedTask} onClose={handleCloseActionView} onUpdateDone={handleUpdateDone} />
