@@ -207,17 +207,17 @@ const ActionView = ({ task = {}, onClose, onUpdateDone }) => {
 
       <Box sx={{ p: 2, flex: 1, overflowY: 'auto', ml: 2.5 }}>
         {tabIndex === 0 && (
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Project"
-                name="project"
-                value={formData.project}
-                size="small"
-                InputProps={{ readOnly: true }}
-                sx={{ width: { xs: '135%', sm: '247px' }, backgroundColor: '#FBECEC' }}
-              />
-            </Grid>
+          <Grid container spacing={3} columns={12}>
+  <Grid xs={6}>
+    <TextField
+      label="Project"
+      name="project"
+      value={formData.project}
+      size="small"
+      InputProps={{ readOnly: true }}
+      sx={{ width: { xs: '135%', sm: '247px' }, backgroundColor: '#FBECEC' }}
+    />
+  </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Task Name"
@@ -228,17 +228,17 @@ const ActionView = ({ task = {}, onClose, onUpdateDone }) => {
                 sx={{ width: { xs: '135%', sm: '247px' } }}
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Task Description"
-                name="task_description"
-                value={formData.task_description}
-                onChange={handleChange}
-                size="small"
-                multiline
-                rows={1}
-                sx={{ width: { xs: '150%', sm: '520px' } }}
-              />
+            <Grid xs={12}>
+    <TextField
+      label="Task Description"
+      name="task_description"
+      value={formData.task_description}
+      onChange={handleChange}
+      size="small"
+      multiline
+      rows={1}
+      sx={{ width: { xs: '150%', sm: '520px' } }}
+    />
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -346,7 +346,7 @@ const ActionView = ({ task = {}, onClose, onUpdateDone }) => {
         )}
 
         {tabIndex === 2 && (
-          <Grid container columnSpacing={15} rowSpacing={3}>
+          <Grid container columnSpacing={5} rowSpacing={3}>
             {[
               ['Project', 'project'],
               ['Task Name', 'task_name'],
@@ -358,7 +358,7 @@ const ActionView = ({ task = {}, onClose, onUpdateDone }) => {
             ].map(([label, key]) => (
               <Grid item xs={12} key={key}>
                 <TextField
-                  fullWidth
+                  sx={{width:{xs:'150%', sm:'252px'}}}
                   label={label}
                   name={key}
                   variant="standard"

@@ -37,15 +37,16 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
     const crm_log_id = localStorage.getItem('crm_log_id');
     const statusValue = status ? 1 : 2;
 
-    const subTaskData = {
-      project_name: project,
-      task_name: taskName,
-      sub_task_name: subtask,
-      description,
-      status: statusValue,
-      created_by: crm_log_id,
-      modified_by: crm_log_id,
-    };
+   const subTaskData = {
+  project_id: projectId,
+  task_id: taskId,
+  sub_task_name: subtask,
+  description,
+  status: statusValue,
+  created_by: crm_log_id,
+  modified_by: crm_log_id,
+};
+
 
     try {
       const res = await fetch('http://localhost:3030/api/subtasks', {
