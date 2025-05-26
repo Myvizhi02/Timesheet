@@ -52,6 +52,10 @@ const Task = () => {
     setShowPopup(false);          // Close the AddTask popup
     setRefreshFlag(prev => !prev); // Toggle refresh flag to reload tasks
   };
+  
+const handleRefreshTasks = () => {
+  setRefreshFlag(prev => !prev); // triggers task list reload
+};
 
   const handleOpenActionView = (task) => {
     setSelectedTask(task);
@@ -146,7 +150,13 @@ const handleUpdateDone = () => {
 
 
       {showPopup && (
-        <AddTask onClose={() => setShowPopup(false)} onSubmit={handleCreateTask} />
+     <AddTask
+  onClose={() => setShowPopup(false)}        // For close icon or cancel button
+  onSubmit={handleCreateTask}                 // For Submit button (close + refresh)
+  onAddTaskWithoutClose={handleRefreshTasks} // For Add Task button (refresh only)
+/>
+
+        
       )}
       
     </>

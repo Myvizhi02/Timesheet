@@ -17,11 +17,14 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import AddSubTask from './AddSubTask';
 
-const AddTask = ({ onClose, onSubmit }) => {
+const AddTask = ({ onClose, onSubmit, onAddTaskWithoutClose }) => {
+
   const [project, setProject] = useState('');
   const [taskName, setTaskName] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(true);
+const [taskCounter, setTaskCounter] = useState(2); // starts at 2
+
   const [showSubTaskModal, setShowSubTaskModal] = useState({
     open: false,
     taskId: null,
@@ -102,7 +105,7 @@ const AddTask = ({ onClose, onSubmit }) => {
 
         setTimeout(() => {
           if (onSubmit) onSubmit();
-        }, 1000);
+        }, 500);
       } else {
         showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
       }
@@ -111,6 +114,41 @@ const AddTask = ({ onClose, onSubmit }) => {
       console.error(error);
     }
   };
+
+const handleAddTask = async () => {
+  if (!project || !taskName || !description) {
+    showSnackbar('⚠️ Please fill in all the required fields.', 'warning');
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:3030/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(taskPayload()),
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      showSnackbar('✅ Task added successfully!', 'success');
+
+      // Refresh the page to reload the tasks
+      if (onAddTaskWithoutClose) onAddTaskWithoutClose(); // Assuming this refreshes the parent list or table
+
+      // Clear form fields
+      setTaskName('');
+      setDescription('');
+      setTaskCounter((prev) => prev + 1); // Update placeholder (Enter Task 2, etc.)
+    } else {
+      showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
+    }
+  } catch (error) {
+    showSnackbar('❌ Failed to add task: Network error or server is down', 'error');
+    console.error(error);
+  }
+};
+
 
   const handleAddSubTask = async () => {
     if (!project || !taskName || !description) {
@@ -218,7 +256,7 @@ const AddTask = ({ onClose, onSubmit }) => {
             </TextField>
 
             <TextField
-              label="Enter Task Name"
+              label={`Enter Task ${taskCounter - 1}`} 
               fullWidth
               value={taskName}
               onChange={(e) => setTaskName(e.target.value)}
@@ -235,7 +273,7 @@ const AddTask = ({ onClose, onSubmit }) => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
-          <Box mt={1}>
+          <Box mt={1} >
             <TextField
               label="Status"
               variant="outlined"
@@ -275,6 +313,27 @@ const AddTask = ({ onClose, onSubmit }) => {
               }}
               sx={{ width: { xs: '100%', sm: '250px' }, '& .MuiOutlinedInput-root': { height: '40px' } }}
             />
+            <Button
+               variant="contained"
+  onClick={async () => {
+    await handleAddTask();           // add task logic
+    if (onAddTaskWithoutClose) {
+      onAddTaskWithoutClose();       // refresh parent WITHOUT closing popup
+    }
+  }}
+              sx={{
+                backgroundColor: '#3758f9',
+                padding: 4,
+                paddingY: 1,
+                ml:5,
+                width: { xs: '100%', sm: 'auto' },
+                textTransform: 'none',
+                mb:10,
+                '&:hover': { backgroundColor: '#2c47c5' },
+              }}
+            >
+              Add Task
+            </Button>
           </Box>
 
           <Box
@@ -285,21 +344,7 @@ const AddTask = ({ onClose, onSubmit }) => {
             gap={3}
             mt="auto"
           >
-            <Button
-              variant="contained"
-              //onClick={handleSubmit}
-              sx={{
-                backgroundColor: '#3758f9',
-                paddingX: 4,
-                paddingY: 1,
-                width: { xs: '100%', sm: 'auto' },
-                textTransform: 'none',
-                mb:10,
-                '&:hover': { backgroundColor: '#2c47c5' },
-              }}
-            >
-              Add Task
-            </Button>
+            
             <Button
               variant="contained"
               onClick={handleAddSubTask}
