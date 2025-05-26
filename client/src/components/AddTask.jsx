@@ -12,6 +12,7 @@ import {
   Snackbar,
   TextField,
   Typography,
+  Switch,
 } from '@mui/material';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -407,6 +408,9 @@ const handleAddTask = async () => {
               }}
               sx={{ width: { xs: '100%', sm: '250px' }, '& .MuiOutlinedInput-root': { height: '40px' } }}
             />
+
+            
+
             <Button
                variant="contained"
  onClick={handleAddTask} 
@@ -423,7 +427,10 @@ const handleAddTask = async () => {
             >
               Add Task
             </Button>
+
           </Box>
+          
+          
 
           <Box
             display="flex"
@@ -434,6 +441,10 @@ const handleAddTask = async () => {
             mt="auto"
           >
             
+
+           
+
+
             <Button
               variant="contained"
               onClick={handleAddSubTask}
