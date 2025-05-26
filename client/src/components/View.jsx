@@ -212,8 +212,8 @@ const responsiveRowStyle = {
                 readOnly: true,
               }}
               sx={{  width: {
-    xs: '80%',   
-    sm: '350px',   
+    xs: '95%',   
+    sm: '450px',   
   },backgroundColor: '#ffffff' }}
             />
           </Box>

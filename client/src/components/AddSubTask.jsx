@@ -143,9 +143,10 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
           <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
             <TextField
               label="Enter SubTask"
+             
               value={subtask}
               onChange={(e) => setSubtask(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { height: '40px',  } }}
+              sx={{  width:{ xs: '100%', sm: '260px' }, '& .MuiOutlinedInput-root': { height: '40px',  } }}
             />
             <TextField
               label="Status"
@@ -185,7 +186,7 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
                 ),
               }}
               sx={{
-                width: { xs: '100%', sm: '247px' },
+                width: { xs: '100%', sm: '260px' },
                 '& .MuiOutlinedInput-root': { height: '40px',  },
               }}
             />
@@ -199,7 +200,7 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             sx={{
-                width: { xs: '80%', sm: '80%' },}}
+                width: { xs: '100%', sm: '100%' },}}
           />
 
           <Box display="flex" justifyContent="center" mt="auto">

@@ -294,8 +294,83 @@ app.put('/api/projects/:id', checkDbConnection, async (req, res) => {
 });
 
 
-app.post('/api/projects', async (req, res) => {
+// app.post('/api/projects', async (req, res) => {
  
+//   const {
+//     project_unique_id,
+//     project_name,
+//     lob,
+//     start_date,
+//     end_date,
+//     expected_date,
+//     budget,
+//     created_by,
+//     modified_by,
+//     created_date,
+//     modified_date,
+//     is_active,
+//     department,
+//     allocated_executives,
+//   } = req.body;
+
+//   const formatDate = (date) => {
+//     if (!date) return null;
+//     const newDate = new Date(date);
+//     return newDate.toISOString().split('T')[0];
+//   };
+
+//   const formattedStartDate = formatDate(start_date);
+//   const formattedEndDate = formatDate(end_date);
+//   const formattedExpectedDate = formatDate(expected_date);
+//   const formattedCreatedDate = formatDate(created_date);
+//   const formattedModifiedDate = formatDate(modified_date);
+
+//   const query = `
+//     INSERT INTO main_project (
+//       project_unique_id,
+//       project_name,
+//       lob,
+//       start_date,
+//       end_date,
+//       expected_date,
+//       budget,
+//       created_by,
+//       modified_by,
+//       created_date,
+//       modified_date,
+//       is_active,
+//       department,
+//       allocated_executives
+//     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+//   const values = [
+//     project_unique_id,
+//     project_name,
+//     lob,
+//     formattedStartDate,
+//     formattedEndDate,
+//     formattedExpectedDate,
+//     budget,
+//     created_by,
+//     modified_by,
+//     formattedCreatedDate,
+//     formattedModifiedDate,
+//     is_active,
+//     department,
+//     JSON.stringify(allocated_executives),
+//   ];
+
+//   try {
+
+//     const [result] = await db.execute(query, values);
+//     res.status(201).json({ message: 'Project added successfully', projectId: result.insertId });
+//   } catch (err) {
+//     console.error('Error inserting project:', err);
+//     res.status(500).json({ message: 'Failed to add project' });
+//   }
+// });
+
+app.post('/api/projects', async (req, res) => {
   const {
     project_unique_id,
     project_name,
@@ -306,24 +381,28 @@ app.post('/api/projects', async (req, res) => {
     budget,
     created_by,
     modified_by,
-    created_date,
-    modified_date,
     is_active,
     department,
     allocated_executives,
   } = req.body;
 
+  // Format date to 'YYYY-MM-DD'
   const formatDate = (date) => {
     if (!date) return null;
     const newDate = new Date(date);
     return newDate.toISOString().split('T')[0];
   };
 
+  // Get current IST datetime in 'YYYY-MM-DD HH:MM:SS' format
+  const getCurrentISTDateTime = () => {
+    const istDate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+    return new Date(istDate).toISOString().slice(0, 19).replace('T', ' ');
+  };
+
   const formattedStartDate = formatDate(start_date);
   const formattedEndDate = formatDate(end_date);
   const formattedExpectedDate = formatDate(expected_date);
-  const formattedCreatedDate = formatDate(created_date);
-  const formattedModifiedDate = formatDate(modified_date);
+  const currentDateTime = getCurrentISTDateTime(); // IST date-time string
 
   const query = `
     INSERT INTO main_project (
@@ -353,15 +432,14 @@ app.post('/api/projects', async (req, res) => {
     budget,
     created_by,
     modified_by,
-    formattedCreatedDate,
-    formattedModifiedDate,
+    currentDateTime, // created_date in IST
+    currentDateTime, // modified_date in IST
     is_active,
     department,
     JSON.stringify(allocated_executives),
   ];
 
   try {
-
     const [result] = await db.execute(query, values);
     res.status(201).json({ message: 'Project added successfully', projectId: result.insertId });
   } catch (err) {

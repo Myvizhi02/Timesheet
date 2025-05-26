@@ -85,8 +85,6 @@ const SpenttimeHeader = () => {
           alt="Home Icon"
           width={isMobile ? 20 : 24}
           height={isMobile ? 20 : 24}
-          style={{ cursor: 'pointer' }}
-          onClick={handleHomeClick}
         />
         <img src={arrowIcon} alt="Arrow Icon" width={isMobile ? 22 : 26} height={isMobile ? 22 : 26} />
         <Typography sx={{ fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: 500 }}>
