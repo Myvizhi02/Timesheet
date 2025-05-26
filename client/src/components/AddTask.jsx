@@ -44,18 +44,6 @@ const [createdTask, setCreatedTask] = useState(null);
   const [executiveProjects, setExecutiveProjects] = useState([]);
 const [lastCreatedTaskName, setLastCreatedTaskName] = useState('');
 const [taskList, setTaskList] = useState([]);
-useEffect(() => {
-  if (!project) {
-    setTaskList([]);
-    return;
-  }
-  
-  fetch(`http://localhost:3030/api/tasks/by-project/${project}`)
-    .then(res => res.json())
-    .then(data => setTaskList(data))
-    .catch(() => setTaskList([]));
-}, [project]);
-
 
   useEffect(() => {
     if (!crmLogId) return;
@@ -115,15 +103,11 @@ useEffect(() => {
 
       if (res.ok) {
         showSnackbar('✅ Task added successfully!', 'success');
-        setShowSubTaskModal({
-          open: true,
-          taskId: result.task_id,
-          projectId: project,
-        });
+       
 
         setTimeout(() => {
           if (onSubmit) onSubmit();
-        }, 500);
+        }, 200);
       } else {
         showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
       }
@@ -431,7 +415,7 @@ const handleAddTask = async () => {
   taskId={showSubTaskModal.taskId}
   taskName={showSubTaskModal.taskName}
   taskList={taskList}
-  //onAddTaskWithoutClose={handleRefreshTasks}
+  onAddTaskWithoutClose={onAddTaskWithoutClose}
 />
       )}
 

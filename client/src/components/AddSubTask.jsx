@@ -38,8 +38,6 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
     showSnackbar("⚠ Please fill all the required fields.", "warning");
     return;
   }
- 
-
   const crm_log_id = localStorage.getItem('crm_log_id');
   const statusValue = status ? 1 : 2;
 
@@ -54,8 +52,6 @@ const subTaskData = {
   created_by: crm_log_id,
   modified_by: crm_log_id,
 };
-
-
   try {
     const res = await fetch('http://localhost:3030/api/subtasks', {
       method: 'POST',
