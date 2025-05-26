@@ -55,7 +55,8 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
 
   const subTaskData = {
     project_id: projectId,
-    task_id: taskId,
+    task_id: selectedTaskId,
+
     sub_task_name: subtask,
     description,
     status: statusValue,
@@ -202,11 +203,8 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
           label="Task Name"
           fullWidth
           value={selectedTaskId}
-          onChange={(e) => {
-            setSelectedTaskId(e.target.value);
-            // Reset subtask or other related states if needed
-            // setSubtask('');
-          }}
+         onChange={(e) => setSelectedTaskId(Number(e.target.value))}
+
           sx={{ '& .MuiOutlinedInput-root': { height: '40px' } }}
         >
           {taskList.map((task) => (
@@ -294,12 +292,7 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
             <Button
               variant="contained"
               // onClick={handleSubmit}
-              onClick={async () => {
-    await handleAddSubTask();           // add task logic
-    if (onAddTaskWithoutClose) {
-      onAddTaskWithoutClose();       // refresh parent WITHOUT closing popup
-    }
-  }}
+              onClick={ handleAddSubTask()}
               sx={{
                 backgroundColor: '#3758f9',
                 paddingX: 5,

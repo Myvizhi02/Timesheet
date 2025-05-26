@@ -133,57 +133,6 @@ useEffect(() => {
     }
   };
 
-// const handleAddTask = async () => {
-//   if (!project || !taskName || !description) {
-//     showSnackbar('⚠️ Please fill in all the required fields.', 'warning');
-//     return;
-//   }
-
-//   try {
-//     const res = await fetch('http://localhost:3030/api/tasks', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(taskPayload()),
-//     });
-
-   
-//     const result = await res.json();
-
-//     if (res.ok) {
-//   showSnackbar('✅ Task added successfully!', 'success');
-//   setLastCreatedTaskName(taskName);
-
-//   // Add the new task to the current taskList immediately
-//   setTaskList((prevList) => {
-//   const newList = [
-//     ...prevList,
-//     {
-//       task_id: result.task_id,
-//       task_name: taskName,
-//       description,
-//       status: status ? 1 : 2,
-//     },
-//   ];
-//   console.log('Updated taskList:', newList);
-//   return newList;
-// });
-
-
-//   // Clear form fields
-//   setTaskName('');
-//   setDescription('');
-//   setTaskCounter((prev) => prev + 1);
-
-//   if (onAddTaskWithoutClose) onAddTaskWithoutClose(); // refresh parent list or something
-// }
-// else {
-//       showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
-//     }
-//   } catch (error) {
-//     showSnackbar('❌ Failed to add task: Network error or server is down', 'error');
-//     console.error(error);
-//   }
-// };
 const handleAddTask = async () => {
   if (!project || !taskName || !description) {
     showSnackbar('⚠️ Please fill in all the required fields.', 'warning');
