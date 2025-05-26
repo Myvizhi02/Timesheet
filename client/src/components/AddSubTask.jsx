@@ -9,28 +9,94 @@ import {
   InputAdornment,
   TextField,
   Typography,
-  Snackbar,
+  Snackbar,MenuItem,
   Alert
 } from '@mui/material';
 import React, { useState } from 'react';
 
-const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId }) => {
+const AddSubTask = ({ onClose, onSubmit, projectId, project, taskList = [], taskName, taskId,onAddTaskWithoutClose, existingSubtasks = []}) => {
+  
+const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
+
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(true);
   const [subtask, setSubtask] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [subtaskCounter, setSubtaskCounter] = useState(1);
+
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
+  const doesSubtaskExist = () => {
+    if (!selectedTaskId) return false;
+    return existingSubtasks.some(
+      (subtaskItem) =>
+        subtaskItem.task_id === parseInt(selectedTaskId) &&
+        subtaskItem.sub_task_name.trim().toLowerCase() === subtask.trim().toLowerCase()
+    );
+  };
+ const handleAddSubTask = async () => {
+  if (!subtask || !description) {
+    showSnackbar("⚠ Please fill all the required fields.", "warning");
+    return;
+  }
+   if (doesSubtaskExist()) {
+      showSnackbar("❌ SubTask name already exists for this task.", "error");
+      return;
+    }
+
+  const crm_log_id = localStorage.getItem('crm_log_id');
+  const statusValue = status ? 1 : 2;
+
+  const subTaskData = {
+    project_id: projectId,
+    task_id: taskId,
+    sub_task_name: subtask,
+    description,
+    status: statusValue,
+    created_by: crm_log_id,
+    modified_by: crm_log_id,
+  };
+
+  try {
+    const res = await fetch('http://localhost:3030/api/subtasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subTaskData),
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      showSnackbar('✅ SubTask added successfully!', 'success');
+      // ✅ Clear inputs
+      setSubtask('');
+      setDescription('');
+      setSubtaskCounter(prev => prev + 1); // 🔥 Increase counter
+
+      // 🔄 Refresh parent if needed
+      if (onAddTaskWithoutClose) onAddTaskWithoutClose();
+    } else {
+      showSnackbar(`❌ Failed to add subtask: ${result.error || 'Unknown error'}`, 'error');
+    }
+  } catch (error) {
+    showSnackbar('❌ Failed to add subtask: Network error or server is down', 'error');
+    console.error(error);
+  }
+};
 
   const handleSubmit = async () => {
     if (!subtask || !description) {
       showSnackbar("⚠ Please fill all the required fields.", "warning");
+      return;
+    }
+      if (doesSubtaskExist()) {
+      showSnackbar("❌ SubTask name already exists for this task.", "error");
       return;
     }
 
@@ -83,8 +149,8 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
         onClose={onClose}
         PaperProps={{
           sx: {
-            width: { xs: '90%', sm: '500px', md: '602px' },
-            height: { xs: 'auto', sm: 'auto', md: '597px' },
+           width: { xs: '90%', sm: '500px', md: '602px' },
+            height: { xs: '90%', sm: '50%', md: '597px' },
             maxWidth: '95vw',
             maxHeight: '95vh',
             borderRadius: '12px',
@@ -130,20 +196,41 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
               InputProps={{ readOnly: true }}
               sx={{ '& .MuiOutlinedInput-root': { height: '40px' } }}
             />
-            <TextField
-              label="Task Name"
-              fullWidth
-              value={taskName}
-              disabled
-              InputProps={{ readOnly: true }}
-              sx={{ '& .MuiOutlinedInput-root': { height: '40px' } }}
-            />
+ {taskList && taskList.length > 0 ? (
+        <TextField
+          select
+          label="Task Name"
+          fullWidth
+          value={selectedTaskId}
+          onChange={(e) => {
+            setSelectedTaskId(e.target.value);
+            // Reset subtask or other related states if needed
+            // setSubtask('');
+          }}
+          sx={{ '& .MuiOutlinedInput-root': { height: '40px' } }}
+        >
+          {taskList.map((task) => (
+            <MenuItem key={task.task_id} value={task.task_id}>
+              {task.task_name}
+            </MenuItem>
+          ))}
+        </TextField>
+      ) : (
+        <TextField
+          label="Task Name"
+          fullWidth
+          value=""
+          disabled
+          InputProps={{ readOnly: true }}
+          placeholder="Add a task first"
+          sx={{ '& .MuiOutlinedInput-root': { height: '40px' } }}
+        />
+      )}
           </Box>
 
           <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
             <TextField
-              label="Enter SubTask"
-             
+              label={`Enter SubTask ${subtaskCounter}`}
               value={subtask}
               onChange={(e) => setSubtask(e.target.value)}
               sx={{  width:{ xs: '100%', sm: '260px' }, '& .MuiOutlinedInput-root': { height: '40px',  } }}
@@ -203,7 +290,27 @@ const AddSubTask = ({ onClose, onSubmit, projectId, project, taskName, taskId })
                 width: { xs: '100%', sm: '100%' },}}
           />
 
-          <Box display="flex" justifyContent="center" mt="auto">
+          <Box display="flex" justifyContent="center" mt="auto" gap={3}>
+            <Button
+              variant="contained"
+              // onClick={handleSubmit}
+              onClick={async () => {
+    await handleAddSubTask();           // add task logic
+    if (onAddTaskWithoutClose) {
+      onAddTaskWithoutClose();       // refresh parent WITHOUT closing popup
+    }
+  }}
+              sx={{
+                backgroundColor: '#3758f9',
+                paddingX: 5,
+                paddingY: 1,
+                textTransform: 'none',
+                width: { xs: '90%', sm: 'auto' },
+                '&:hover': { backgroundColor: '#2c47c5' },
+              }}
+            >
+              Add SubTask
+            </Button>
             <Button
               variant="contained"
               onClick={handleSubmit}

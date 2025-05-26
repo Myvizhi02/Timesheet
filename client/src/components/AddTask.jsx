@@ -24,11 +24,14 @@ const AddTask = ({ onClose, onSubmit, onAddTaskWithoutClose }) => {
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState(true);
 const [taskCounter, setTaskCounter] = useState(2); // starts at 2
+const [createdTask, setCreatedTask] = useState(null);
 
   const [showSubTaskModal, setShowSubTaskModal] = useState({
     open: false,
     taskId: null,
     projectId: null,
+    taskName,
+  newList: [],
   });
 
   const [projectsList, setProjectsList] = useState([]);
@@ -38,6 +41,20 @@ const [taskCounter, setTaskCounter] = useState(2); // starts at 2
   const [selectedProject, setSelectedProject] = useState(null);
   const crmLogId = localStorage.getItem('crm_log_id');
   const [executiveProjects, setExecutiveProjects] = useState([]);
+const [lastCreatedTaskName, setLastCreatedTaskName] = useState('');
+const [taskList, setTaskList] = useState([]);
+useEffect(() => {
+  if (!project) {
+    setTaskList([]);
+    return;
+  }
+  
+  fetch(`http://localhost:3030/api/tasks/by-project/${project}`)
+    .then(res => res.json())
+    .then(data => setTaskList(data))
+    .catch(() => setTaskList([]));
+}, [project]);
+
 
   useEffect(() => {
     if (!crmLogId) return;
@@ -115,6 +132,57 @@ const [taskCounter, setTaskCounter] = useState(2); // starts at 2
     }
   };
 
+// const handleAddTask = async () => {
+//   if (!project || !taskName || !description) {
+//     showSnackbar('⚠️ Please fill in all the required fields.', 'warning');
+//     return;
+//   }
+
+//   try {
+//     const res = await fetch('http://localhost:3030/api/tasks', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(taskPayload()),
+//     });
+
+   
+//     const result = await res.json();
+
+//     if (res.ok) {
+//   showSnackbar('✅ Task added successfully!', 'success');
+//   setLastCreatedTaskName(taskName);
+
+//   // Add the new task to the current taskList immediately
+//   setTaskList((prevList) => {
+//   const newList = [
+//     ...prevList,
+//     {
+//       task_id: result.task_id,
+//       task_name: taskName,
+//       description,
+//       status: status ? 1 : 2,
+//     },
+//   ];
+//   console.log('Updated taskList:', newList);
+//   return newList;
+// });
+
+
+//   // Clear form fields
+//   setTaskName('');
+//   setDescription('');
+//   setTaskCounter((prev) => prev + 1);
+
+//   if (onAddTaskWithoutClose) onAddTaskWithoutClose(); // refresh parent list or something
+// }
+// else {
+//       showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
+//     }
+//   } catch (error) {
+//     showSnackbar('❌ Failed to add task: Network error or server is down', 'error');
+//     console.error(error);
+//   }
+// };
 const handleAddTask = async () => {
   if (!project || !taskName || !description) {
     showSnackbar('⚠️ Please fill in all the required fields.', 'warning');
@@ -133,13 +201,21 @@ const handleAddTask = async () => {
     if (res.ok) {
       showSnackbar('✅ Task added successfully!', 'success');
 
-      // Refresh the page to reload the tasks
-      if (onAddTaskWithoutClose) onAddTaskWithoutClose(); // Assuming this refreshes the parent list or table
+      const newTask = {
+        task_id: result.task_id,
+        task_name: taskName,
+        description,
+        status: status ? 1 : 2,
+      };
 
-      // Clear form fields
+      setCreatedTask(newTask); // ✅ Save task info
+      setTaskList((prev) => [...prev, newTask]);
+
+      // Reset fields
       setTaskName('');
       setDescription('');
-      setTaskCounter((prev) => prev + 1); // Update placeholder (Enter Task 2, etc.)
+      setTaskCounter((prev) => prev + 1);
+      if (onAddTaskWithoutClose) onAddTaskWithoutClose();
     } else {
       showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
     }
@@ -149,8 +225,24 @@ const handleAddTask = async () => {
   }
 };
 
-
   const handleAddSubTask = async () => {
+     // If the task is already created, just open the subtask modal
+  if (createdTask && createdTask.task_id) {
+    setShowSubTaskModal({
+      open: true,
+      taskId: createdTask.task_id,
+      projectId: project,
+      taskName: createdTask.task_name,
+    });
+    return;
+  }
+
+  // If task fields are not filled
+  if (!project || !taskName || !description) {
+    showSnackbar('⚠️ Please fill in all main task fields before adding a subtask.', 'warning');
+    return;
+  }
+
     if (!project || !taskName || !description) {
       showSnackbar('⚠️ Please fill in all main task fields before adding a subtask.', 'warning');
       return;
@@ -171,7 +263,9 @@ const handleAddTask = async () => {
           open: true,
           taskId: result.task_id,
           projectId: project,
+           taskName: lastCreatedTaskName || taskName,
         });
+        if (onSubmit) onSubmit();
       } else {
         showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
       }
@@ -315,12 +409,7 @@ const handleAddTask = async () => {
             />
             <Button
                variant="contained"
-  onClick={async () => {
-    await handleAddTask();           // add task logic
-    if (onAddTaskWithoutClose) {
-      onAddTaskWithoutClose();       // refresh parent WITHOUT closing popup
-    }
-  }}
+ onClick={handleAddTask} 
               sx={{
                 backgroundColor: '#3758f9',
                 padding: 4,
@@ -378,15 +467,18 @@ const handleAddTask = async () => {
         </DialogContent>
       </Dialog>
 
+      
+
       {showSubTaskModal.open && (
         <AddSubTask
           onClose={() => setShowSubTaskModal({ open: false, taskId: null, projectId: null })}
           onSubmit={onSubmit}
-          project={selectedProject?.project_name || ''}
-          projectId={showSubTaskModal.projectId}
-          taskName={taskName}
-          taskId={showSubTaskModal.taskId}
-        />
+            projectId={showSubTaskModal.projectId}
+  project={selectedProject?.project_name || ''}
+  taskId={showSubTaskModal.taskId}
+  taskName={showSubTaskModal.taskName}
+  taskList={taskList}
+/>
       )}
 
       <Snackbar
@@ -403,6 +495,8 @@ const handleAddTask = async () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
+      
     </>
   );
 };

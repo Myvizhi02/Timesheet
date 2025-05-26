@@ -17,6 +17,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import addIcon from '../assets/add.png';
 import ActionView from './ActionView';
 import AddTask from './AddTask';
+import AddSubTask from './AddSubTask';
 
 const Task = () => {
    const [showPopup, setShowPopup] = useState(false);
@@ -24,6 +25,7 @@ const Task = () => {
   const [openActionView, setOpenActionView] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [refreshFlag, setRefreshFlag] = useState(false);  // <-- refresh trigger
+   const [showSubtaskPopup, setShowSubtaskPopup] = useState(false);
 
   const fetchTasks = async () => {
     
@@ -40,6 +42,8 @@ const Task = () => {
     }
   };
   
+  const openPopup = () => setShowSubtaskPopup(true);
+  const closePopup = () => setShowSubtaskPopup(false);
 
 
   // Fetch tasks initially and on every refreshFlag change
@@ -154,10 +158,15 @@ const handleUpdateDone = () => {
   onClose={() => setShowPopup(false)}        // For close icon or cancel button
   onSubmit={handleCreateTask}                 // For Submit button (close + refresh)
   onAddTaskWithoutClose={handleRefreshTasks} // For Add Task button (refresh only)
-/>
+/>  )}
+{showSubtaskPopup && (
+<AddSubTask
+  onClose={() => setShowSubtaskPopup(false)}
+   onSubmit={handleCreateTask}   
+  onAddTaskWithoutClose={handleRefreshTasks}
+  // other props like taskId, taskName, etc.
+/>)}
 
-        
-      )}
       
     </>
   );
