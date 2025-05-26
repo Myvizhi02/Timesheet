@@ -215,7 +215,7 @@ const handleAddTask = async () => {
           projectId: project,
            taskName: lastCreatedTaskName || taskName,
         });
-        if (onSubmit) onSubmit();
+        if (onAddTaskWithoutClose) onAddTaskWithoutClose();
       } else {
         showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');
       }
@@ -378,8 +378,6 @@ const handleAddTask = async () => {
             </Button>
 
           </Box>
-          
-          
 
           <Box
             display="flex"
@@ -389,11 +387,6 @@ const handleAddTask = async () => {
             gap={3}
             mt="auto"
           >
-            
-
-           
-
-
             <Button
               variant="contained"
               onClick={handleAddSubTask}
@@ -438,6 +431,7 @@ const handleAddTask = async () => {
   taskId={showSubTaskModal.taskId}
   taskName={showSubTaskModal.taskName}
   taskList={taskList}
+  //onAddTaskWithoutClose={handleRefreshTasks}
 />
       )}
 

@@ -32,37 +32,29 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
-  const doesSubtaskExist = () => {
-    if (!selectedTaskId) return false;
-    return existingSubtasks.some(
-      (subtaskItem) =>
-        subtaskItem.task_id === parseInt(selectedTaskId) &&
-        subtaskItem.sub_task_name.trim().toLowerCase() === subtask.trim().toLowerCase()
-    );
-  };
+ 
  const handleAddSubTask = async () => {
   if (!subtask || !description) {
     showSnackbar("⚠ Please fill all the required fields.", "warning");
     return;
   }
-   if (doesSubtaskExist()) {
-      showSnackbar("❌ SubTask name already exists for this task.", "error");
-      return;
-    }
+ 
 
   const crm_log_id = localStorage.getItem('crm_log_id');
   const statusValue = status ? 1 : 2;
 
-  const subTaskData = {
-    project_id: projectId,
-    task_id: selectedTaskId,
+ const selectedIdToUse = selectedTaskId || taskId; // ✅ Use selected if available, else fallback
 
-    sub_task_name: subtask,
-    description,
-    status: statusValue,
-    created_by: crm_log_id,
-    modified_by: crm_log_id,
-  };
+const subTaskData = {
+  project_id: projectId,
+  task_id: selectedIdToUse,
+  sub_task_name: subtask,
+  description,
+  status: statusValue,
+  created_by: crm_log_id,
+  modified_by: crm_log_id,
+};
+
 
   try {
     const res = await fetch('http://localhost:3030/api/subtasks', {
@@ -79,10 +71,10 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
       setSubtask('');
       setDescription('');
       setSubtaskCounter(prev => prev + 1); // 🔥 Increase counter
-
       // 🔄 Refresh parent if needed
       if (onAddTaskWithoutClose) onAddTaskWithoutClose();
-    } else {
+    } 
+    else {
       showSnackbar(`❌ Failed to add subtask: ${result.error || 'Unknown error'}`, 'error');
     }
   } catch (error) {
@@ -96,24 +88,21 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
       showSnackbar("⚠ Please fill all the required fields.", "warning");
       return;
     }
-      if (doesSubtaskExist()) {
-      showSnackbar("❌ SubTask name already exists for this task.", "error");
-      return;
-    }
-
+    
     const crm_log_id = localStorage.getItem('crm_log_id');
     const statusValue = status ? 1 : 2;
 
-   const subTaskData = {
+ const selectedIdToUse = selectedTaskId || taskId;
+
+const subTaskData = {
   project_id: projectId,
-  task_id: taskId,
+  task_id: selectedIdToUse,
   sub_task_name: subtask,
   description,
   status: statusValue,
   created_by: crm_log_id,
   modified_by: crm_log_id,
 };
-
 
     try {
       const res = await fetch('http://localhost:3030/api/subtasks', {
@@ -217,7 +206,7 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
         <TextField
           label="Task Name"
           fullWidth
-          value=""
+          value={taskName}
           disabled
           InputProps={{ readOnly: true }}
           placeholder="Add a task first"
@@ -292,7 +281,7 @@ const [selectedTaskId, setSelectedTaskId] = useState(taskId || '');
             <Button
               variant="contained"
               // onClick={handleSubmit}
-              onClick={ handleAddSubTask()}
+              onClick={ handleAddSubTask}
               sx={{
                 backgroundColor: '#3758f9',
                 paddingX: 5,
