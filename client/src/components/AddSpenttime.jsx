@@ -153,8 +153,6 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
           modified_by: crmLogId,
           is_active: 1,
         });
-        console.log('tskdmsdmk');
-        console.log(subtaskRes.data.insertId);
         payload.sub_task_id = subtaskRes.data.insertId;
       } catch (error) {
         console.error('Error creating custom subtask:', error);
@@ -162,8 +160,6 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
         return;
       }
     }
-
-    console.log(payload);
     try {
       await axios.post('http://localhost:3030/api/spenttime', payload);
       setSnackbar({ open: true, message: 'Time saved successfully!', severity: 'success' });
@@ -192,15 +188,7 @@ const AddSpenttime = ({ open, onClose, onSaved }) => {
       setSnackbar({ open: true, message: 'Please select or enter a subtask.', severity: 'warning' });
     }
   };
-//  const commonFieldStyle = {
-//    width: { xs: '100%', sm: '260px' },
-//     '& .MuiInputBase-root': {
-//       height: '40px',
-//     },
-//     '& input': {
-//       padding: '0 1em',
-//     },
-//   };
+
   return (
     <>
       <Dialog

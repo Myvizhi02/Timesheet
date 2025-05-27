@@ -206,7 +206,7 @@ useEffect(() => {
           <DialogTitle
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 0 }}
           >
-            <Typography variant="h6" fontWeight="600">
+            <Typography fontSize="20px" fontWeight="bold">
               Edit Project
             </Typography>
             <IconButton onClick={onClose}>

@@ -263,7 +263,7 @@ const Dashboard = () => {
 
 
         <Grid container spacing={3} alignItems="center">
-  <Grid item xs={12} md={3}>
+  <Grid  xs={12} md={3}>
     <DatePicker
       selectsRange
       startDate={dateRange[0]}
@@ -277,7 +277,7 @@ const Dashboard = () => {
     />
   </Grid>
 
-  <Grid item xs={12} md={4}>
+  <Grid  xs={12} md={4}>
     <Select
       value={project}
       onChange={(e) => setProject(e.target.value)}
@@ -306,7 +306,7 @@ const Dashboard = () => {
 
 
 
-         <Grid item xs={12} md={5}>
+         <Grid  xs={12} md={5}>
   <Box
     sx={{
       display: 'flex',

@@ -72,6 +72,7 @@ const [taskList, setTaskList] = useState([]);
   };
 
   const taskPayload = () => {
+    
     const selectedProject = projectsList.find(
       (proj) => proj.id === project
     );
@@ -199,6 +200,7 @@ const handleAddTask = async () => {
           projectId: project,
            taskName: lastCreatedTaskName || taskName,
         });
+        
         if (onAddTaskWithoutClose) onAddTaskWithoutClose();
       } else {
         showSnackbar(`❌ Failed to add task: ${result.error || 'Unknown error'}`, 'error');

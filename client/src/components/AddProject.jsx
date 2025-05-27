@@ -272,7 +272,7 @@ const AddProject = ({ onClose, onSubmit }) => {
             py: 0,
           }}
         >
-          <Typography variant="h6" component="span" fontWeight={600}>
+           <Typography fontSize="20px" fontWeight="bold">
             Add Project
           </Typography>
           <IconButton onClick={onClose}>

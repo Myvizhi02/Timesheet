@@ -369,6 +369,20 @@ app.put('/api/projects/:id', checkDbConnection, async (req, res) => {
 //     res.status(500).json({ message: 'Failed to add project' });
 //   }
 // });
+// Node.js + Express
+app.get('/api/tasks/by-project/:projectId', async (req, res) => {
+  const { projectId } = req.params;
+  try {
+    const [tasks] = await db.execute(
+      'SELECT * FROM main_task WHERE project_id = ?',
+      [projectId]
+    );
+    res.json(tasks);
+  } catch (err) {
+    console.error('Error fetching tasks:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 app.post('/api/projects', async (req, res) => {
   const {
@@ -738,20 +752,12 @@ app.post('/api/subtasks', async (req, res) => {
   }
 
   try {
-    const [result] = await db.query(
+   const [result] = await db.query(
   'INSERT INTO main_sub_task (project_id, task_id, subtask_name, description, status, created_by, modified_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
-  [project_id, task_id, sub_task_name, description, status, created_by, modified_by],
-  (err, result) => {
-    if (err) {
-      console.error('Error inserting subtask:', err);
-      res.status(500).json({ message: 'Internal server error' });
-      return;
-    }
-    res.status(200).json({ message: 'Subtask added successfully' });
-  }
+  [project_id, task_id, sub_task_name, description, status, created_by, modified_by]
 );
 
-    res.status(200).json({ message: 'Subtask added successfully' });
+res.status(200).json({ message: 'Subtask added successfully' });
   } 
     catch (error) {
   console.error('Error inserting subtask:', error);
